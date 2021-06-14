@@ -41,6 +41,7 @@ class auto:
 
         return clean_data_address     
     
+<<<<<<< HEAD
     def top_models_auto(self,n=3):
 
         """
@@ -62,3 +63,16 @@ class auto:
 
     def model_save(self,model):
         
+=======
+    def auto_model_select():
+        best = compare_models()
+        top3 = compare_models(n_select = 3)
+        blender = blend_models(top3)
+
+    
+    def model_tune():
+        pass
+    
+    def model_train():
+        pass
+>>>>>>> 2e5dd86b87947261bbe4a1f0d3314a1d6bb41919
