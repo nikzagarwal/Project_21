@@ -1,0 +1,6 @@
+__pycache__
+.db
+venv
+newevn
+#Backend testing file
+Backend/test.py
