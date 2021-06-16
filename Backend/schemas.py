@@ -1,55 +1,57 @@
-from typing import Optional
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from bson import ObjectId
 from pydantic.fields import Field
 from pydantic.networks import EmailStr
-from pydantic.utils import Obj
-
-class PyObjectID(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls,v):
-        if not ObjectId.is_valid(v):
-            raise ValueError('Invalid Object')
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(tyep='string')
-   
+from typing import Optional
+from bson.json_util import ObjectId
 
 class User(BaseModel):
-    id: Optional[PyObjectID]=Field(alias='_id')
-    name: str
-    email: EmailStr
-    username: str
+    userID: int = Field(...)
+    name: Optional[str]
+    email: EmailStr=Field(...)
+    username: str=Field(...)
+    password: str=Field(...)
+
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+
+
+class Project(BaseModel):
+    projectID:int=Field(...)
+    projectName:Optional[str]
+    rawDataPath: Optional[str]
+    cleanDataPath: Optional[str]
+    belongToUserID: Optional[str]
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+
+class Data(BaseModel):
+    dataPath: Optional[str]
+    picklePath: Optional[str]
+    belongsToUserID: int=Field(...)
+    belongsToProjectID: int=Field(...)
+
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+
+class Model(BaseModel):
+    modelName: Optional[str]='Default Model'
+    modelType: Optional[str]
+    wightsPath: Optional[str]
+    belongsToUserID: int
+    belongsToProjectID: int
 
     class Config:
         allow_population_by_field_name=True
-        arbitraty_types_allowed=True
-        json_encoders={
-            ObjectId:str
-        }
-        schema_extra={
-            "id":1,
-            "name": "John Doe",
-            "email": "johndoe@gmail.com",
-            "username": "JohnDoe"
-        }
-
-class Show(BaseModel):
-    name:Optional[str]
-    email:Optional[str]
-    class Config:
-        orm_mode=True
         arbitrary_types_allowed=True
-        json_encoders={ ObjectId: str}
-        schema_extra={
-            "name":"Jane Doe",
-            "email":"janedoe@gmail.com"
-        }
 
+class Metrics(BaseModel):
+    belongsToUserID: int
+    belongsToProjectID: int
+    belongsToModelID: int
+
+    class Config:
+        allow_population_by_field_name=True
+        arbitrary_types_allowed=True
