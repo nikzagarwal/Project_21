@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import $ from 'jquery';
+// import $ from 'jquery';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -37,24 +37,27 @@ reportWebVitals();
       document.body.scrollTop = 0;
       document.documentElement.scrollTop = 0;
   }
-
+  // *************************************************************************************************
 
 // Create page start engine forms
-var startengine = document.getElementById('startengine');
-startengine.onclick = function() {
-  var theFormItself = document.getElementById('form1');
-  $( theFormItself ).fadeOut( 2000 );
-  var theFormItself2 = document.getElementById('form2');
-  $( theFormItself2).fadeIn( 5000 );
-}
+
+// var startengine = document.getElementById('startengine');
+// startengine.onclick = function() {
+//   var theFormItself = document.getElementById('form1');
+//   $( theFormItself ).fadeOut( 2000 );
+//   var theFormItself2 = document.getElementById('form2');
+//   $( theFormItself2).fadeIn( 5000 );
+// }
+
 // display 3rd form and hide 2nd
-var auto = document.getElementById('form2button');
-auto.onclick = function() {
-  var theFormItself = document.getElementById('form2');
-  $( theFormItself ).fadeOut( 2000 );
-  var theFormItself2 = document.getElementById('form3');
-  $( theFormItself2).fadeIn( 5000 );
-}
+// var auto = document.getElementById('form2autobutton');
+// auto.onclick = function() {
+//   var theFormItself = document.getElementById('form2');
+//   $( theFormItself ).fadeOut( 2000 );
+//   var theFormItself2 = document.getElementById('form3');
+//   $( theFormItself2).fadeIn( 5000 );
+
+// }
 //*********************************************************************************************************** 
 // Typing text
 const typedTextSpan = document.querySelector(".typed-text");
@@ -66,6 +69,12 @@ const erasingDelay = 100;
 const newTextDelay = 2000; // Delay between current and next text
 let textArrayIndex = 0;
 let charIndex = 0;
+
+
+window.addEventListener("DOMContentLoaded", function() { // On DOM Load initiate the effect
+  if(textArray.length) setTimeout(type, newTextDelay + 250);
+});
+
 
 function type() {
   if (charIndex < textArray[textArrayIndex].length) {
@@ -95,9 +104,4 @@ function erase() {
     setTimeout(type, typingDelay + 1100);
   }
 }
-
-document.addEventListener("DOMContentLoaded", function() { // On DOM Load initiate the effect
-  if(textArray.length) setTimeout(type, newTextDelay + 250);
-});
-
 
