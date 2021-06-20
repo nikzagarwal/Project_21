@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import aivideo from "../assets/videos/AI.mp4";
 import $ from 'jquery';
-import axios from 'axios'
+import axios from 'axios';
+import { HashLink as Link } from 'react-router-hash-link';
+import Result from './Result.js';
+import Section1 from './section1.js';
+import Section6 from './section6.js';
+
 class Home extends Component {
     constructor(props) {
         super(props)
@@ -62,7 +67,7 @@ class Home extends Component {
         var theFormItself = document.getElementById('form2');
         $(theFormItself).fadeOut(1000);
         var theFormItself2 = document.getElementById('form3');
-        $(theFormItself2).fadeIn(3000);
+        $(theFormItself2).fadeIn(1000);
     }
     handleManual() {
         this.setState({
@@ -71,7 +76,7 @@ class Home extends Component {
         var theFormItself = document.getElementById('form2');
         $(theFormItself).fadeOut(1000);
         var theFormItself2 = document.getElementById('form3');
-        $(theFormItself2).fadeIn(3000);
+        $(theFormItself2).fadeIn(1000);
     }
     handleTargetChange = event => {
         this.setState({
@@ -93,7 +98,7 @@ class Home extends Component {
         var theFormItself = document.getElementById('form3');
         $(theFormItself).fadeOut(2000);
         var theFormItself2 = document.getElementById('loader');
-        $(theFormItself2).fadeIn(5000);
+        $(theFormItself2).fadeIn(2000);
         let isauto = this.state.auto
         let target = this.state.target
         let modelnumber = this.state.modelnum
@@ -101,7 +106,7 @@ class Home extends Component {
         let data = { isauto, target, modelnumber, nulltype }
         console.log(data)
         axios({
-            url: `https://localhost:8800/create`,
+            url: `https://localhost:8800/auto`,
             method: "POST",
             headers:
             {
@@ -115,29 +120,37 @@ class Home extends Component {
             })
         })
     }
-
+    handleModelResult = event => {
+        event.preventDefault();
+        var theFormItself = document.getElementById('section6');
+        $(theFormItself).fadeOut(300);
+        var theFormItself2 = document.getElementById('section5');
+        $(theFormItself2).fadeIn(300);
+    }
+    handleGoBack = event => {
+        event.preventDefault();
+        var theFormItself = document.getElementById('section5');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('section6');
+        $(theFormItself2).show();
+    }
     render() {
         return (
             <div>
-                {/* Section1 */}
-                <div className="section1">
-                    <div className="container typing-text">
-                        <p>Curl Brings <span className="typed-text"></span><span className="cursor">&nbsp;</span></p>
-                        <p>Together under one Umbrella</p>
-                        <div className="section1text1">The Easy to go auto-ml engine for all your data, it creates end to end experiencce of machine and deep elarning without a single line of code</div>
-                        <a href='#section2'> <button className=" col-30 section1button">Start Expereince &dArr;</button></a>
-                        <a href='#section3'> <button className="col-30 section1button ">View Demo &dArr;</button></a>
+                    {/* ************************************************************************************************************************ */}
+                    
+                    {/* Section1 */}
+                        <Section1/>
 
-                    </div>
-                    {/* <Link to="#section2"><button className="section1button">Start Experience &dArr;</button></Link> */}
-                </div>
-
+                    {/* ************************************************************************************************************************ */}
+                    {/* Section2  */}
                 <div className="section2" id="section2">
                     <div className="createpagebox ">
                         <h1>Start With Your Project</h1>
                         <p>" Just fill relevant feeds and select few choices and you are good to go"</p>
                     </div>
-                    {/* Section2  */}
+                       
+                    {/* form1 */}
                     <div className="container " id="form1">
                         <form onSubmit={this.handleSubmit}>
                             <div className="createform">
@@ -179,7 +192,7 @@ class Home extends Component {
                             </div>
                         </form>
                     </div>
-
+                {/* form2 */}
                     <div className="container" id="form2">
                         <div className="centered ">
 
@@ -210,6 +223,7 @@ class Home extends Component {
                             </section>
                         </div>
                     </div>
+                    {/* form3 */}
                     <div className="container" id="form3">
                         <form onSubmit={this.handleSubmit2}>
                             <div className="createform">
@@ -247,17 +261,10 @@ class Home extends Component {
                             </div>
                         </form>
                     </div>
-                    <div className="container loader" id="loader">
-                        <p>" Your models are been created... Can we take a quick Tea Break ?? "</p>
-                        <div className="centered spinner-location">
-                            <div class="spinner-border text-dark spinner-border-lg" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-
-                    </div>
+                    {/* loader */}
+                      <Result/>  
                     {/* </div> */}
-
+    {/* ************************************************************************************************************************ */}
                 </div>
                 {/* Section3  */}
                 <div className="section3" id="section3">
@@ -270,25 +277,128 @@ class Home extends Component {
                         <a href='#section2' > <button className=" col-30 section3button">Start Expereince Now &uArr;</button></a>
                     </div>
                 </div>
+                {/* ************************************************************************************************************************ */}
                 {/* Section 4 */}
                 <div className="section4" id="section4">
                     <div className="col-50 section4col1">
                         <h1>Curl AutoMl Engine lets you make excellent machine and deep learning models for all your needs with few clicks</h1>
+                        <Link to='/#section3' > <button className=" section4button">See Demo</button></Link>
                     </div>
                     <div className="col-50 section4col2">
                         <h3>"The best Part is its Open Source"</h3>
                         <a href='https://github.com/nikzagarwal/Project_21' > <button className=" section4button">Github Repo</button></a>
                     </div>
                 </div>
-                {/* Section 4 */}
-                <div className="section5" id="section5">
-                    <div className="col-50 section4col1">
+    {/* ************************************************************************************************************************ */}
+                {/* Section 5 */}
+                <div className="section5 " id="section5">
+                    <div className="goback">
+                        <button className="sec5btn" onClick={this.handleGoBack}  >&lArr; Go Back to Models </button>
+                        
+                    </div>
+                    <div className="sec5heading">
                         <h1>Results</h1>
                     </div>
-                   
-                </div>
+                    <div className="container">
+                        {/* <!-- Nav tabs --> */}
+                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            <li className="nav-item" role="presentation">
+                                <button className="nav-link tabbtn active" id="Metrics-tab" data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">Metrics</button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button className="nav-link tabbtn " id="plot-tab" data-bs-toggle="tab" data-bs-target="#plot" type="button" role="tab" aria-controls="Plot" aria-selected="false">Plots</button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button className="nav-link tabbtn" id="download-tab" data-bs-toggle="tab" data-bs-target="#download" type="button" role="tab" aria-controls="Download" aria-selected="false">Download</button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button className="nav-link tabbtn" id="Inference-tab" data-bs-toggle="tab" data-bs-target="#inference" type="button" role="tab" aria-controls="Inference" aria-selected="false">Inference</button>
+                            </li>
+                        </ul>
 
-            </div>
+                        {/* <!-- Tab panes --> */}
+                        <div className="tab-content">
+                            <div className="tab-pane active" id="metrics" role="tabpanel" aria-labelledby="metrics-tab">Metrics will be displayed here</div>
+                            <div className="tab-pane" id="plot" role="tabpanel" aria-labelledby="plot-tab">
+                                Plots will be displayed here
+                                <div className="container">
+                                    <div className="d-flex flex-row justify-content-center flex-wrap">
+                                        <div className="d-flex flex-column plot" >
+                                            <img src="1" className="img-fluid" alt=" Plot1 not for this model " />
+                                            <img src="2" className="img-fluid" alt=" Plot2 not for this model " />
+                                            <img src="3" className="img-fluid" alt=" Plot3 not for this model " />
+
+                                        </div>
+                                        <div className="d-flex flex-column plot" >
+                                            <img src="4" className="img-fluid" alt=" Plot4 not for this model " />
+                                            <img src="5" className="img-fluid" alt=" Plot5 not for this model " />
+                                            <img src="6" className="img-fluid" alt=" Plot6 not for this model " />
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tab-pane" id="download" role="tabpanel" aria-labelledby="download-tab">
+
+                                <section className=" cards2 ">
+                                    <div className="flip-card col-50">
+                                        <div className="flip-card-inner ">
+                                            <div className="flip-card-front2">
+                                                <h1>Clean Data</h1>
+                                            </div>
+                                            <div className="flip-card-back2 ">
+                                                <p>"Download clean Data"</p>
+                                                <button className="btn2" id="form2autobutton">Download</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flip-card col-50">
+                                        <div className="flip-card-inner">
+                                            <div className="flip-card-front2">
+                                                <h1>Pickle File</h1>
+                                            </div>
+                                            <div className="flip-card-back2 ">
+                                                <p>"Download pickle file"</p>
+                                                <button className="btn2" >Download</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </section>
+                            </div>
+                            <div className="tab-pane" id="inference" role="tabpanel" aria-labelledby="Inference-tab">
+                                <div className="container " id="form1">
+                                    <form >
+                                        <div className="createform">
+
+
+                                            <div className="row">
+                                                <div className="col-30">
+                                                    <label htmlFor="Inference">Enter data to get Prediction</label>
+                                                </div>
+                                                <div className="col-70">
+                                                    <input type="file" className="form-control" id="inference" onChange={this.handleInferenceChange} accept=".csv" name="inference"
+                                                        placeholder="enter training data in csv format" required />
+                                                </div>
+                                            </div>
+
+
+                                            <div>
+                                                <button type="submit" className="formbutton" id="getresults" >Get Results</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div >
+                </div >
+    {/* ************************************************************************************************************************ */}
+                {/* Section 6 */}
+                <Section6/>
+
+            </div >
         );
     }
 }
