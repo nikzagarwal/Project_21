@@ -1,16 +1,4 @@
-def userEntity(item) -> dict:
-    return {
-        "_id":str(item["_id"]),
-        "userid":item["userid"],
-        "name":item["name"],
-        "email":item["email"],
-        "username":item["username"],
-        "password":item["password"]
-    }
-
-def usersEntity(entity) -> list:
-    return [userEntity(item) for item in entity]
-
+from pydantic import BaseModel
 
 def ResponseModel(data,message):
     return {
@@ -26,12 +14,24 @@ def ErrorResponseModel(error, code, message):
         "message": message
     }
 
+def reqEntity(item) -> dict:
+    return {
+        "isauto":item["isauto"],
+        "target":item["target"],
+        "modelnumber":item["modelnumber"],
+        "nulltype":item["nulltype"]
+    }
+
+def reqsEntity(entity) -> list:
+    return [reqEntity(item) for item in entity]
+
 """
 yaml format - 
 
-config.py - type? -> str            #regression, clasi
+config.py - problem_type -> str            #regression, clasi
 config.raw_data_address - > str     #path/to/file.csv
-config.target_column_name -> str    #name of column        
+config.target_column_name -> str    #name of column  
+
 config.na_valies - >                #frontend will give  
 config.experiment_name ->           #frontend
 config.id ->                    #project created -> will change the id for each run
@@ -40,7 +40,6 @@ config.n ->                     #from frontend - number of models that the user 
 config.isAuto -> bool          #from frontend
 
 frontend - json format it will be sent ^
-
 
 
 path
