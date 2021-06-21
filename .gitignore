@@ -6,3 +6,6 @@ newevn
 
 #Backend testing file
 Backend/test.py
+
+#Database Folders Generated during Testing
+Database/
