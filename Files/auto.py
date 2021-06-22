@@ -30,13 +30,8 @@ class auto:
             target_col_name (string):     (The user will select the target cloumn/variable and that target variable name have to be passed to the setup() in pycaret as patameter.)
             
         """
-<<<<<<< HEAD
         with open(config) as f:
             config = yaml.load(f, Loader=SafeLoader)
-=======
-        df = pd.read_csv(config.raw_data_address)
-        
->>>>>>> 7922206cfa46a76e31bcc561d015da41e75a7a6b
         if config.problem_type == "classification":
             clf1 = setup(data = df, target = config.target_col_name,silent=True, profile= True)
         elif config.problem_type== "regression":
