@@ -51,7 +51,15 @@ class auto:
         The array containing classifiers is returned at the end of the function 
         """
         best = compare_models(n_select=n)
-        return best
+        metrics_df = pull()
+        metrics_df = metrics_df.rename({'Prec.': 'Precision'}, axis='columns')
+        metrics_df.reset_index(drop=True, inplace=True)
+        metrics_df.to_csv('metrics.csv', index=True, index_label="Sno")
+        metrics_address = os.getcwd()+"/metrics.csv"
+
+        return best,metrics_address
+    
+    
 
 
     
@@ -60,7 +68,8 @@ class auto:
         for i in model_array:
             tuned_best.append(tune_model(i))
 
-        return tuned_best
+        return tuned_best 
+    
 
 
     def model_save(self,model_array,config):
