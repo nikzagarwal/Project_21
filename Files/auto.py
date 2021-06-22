@@ -44,14 +44,27 @@ class auto:
         return clean_data_address     
 
 
-    def top_models_auto(self,n=3):
+    def top_models_auto(self,config,n=3):
 
         """
         This funtion takes the user input n in integer format and feeds it to the pycaret function and pycaret in turn returns the top n funtion in an array format 
         The array containing classifiers is returned at the end of the function 
         """
+        with open (config) as f:
+            config=yaml.load(f,Loader=SafeLoader)
         best = compare_models(n_select=n)
+        request = pull()
+        request = request.rename({'Prec.': 'Precision'}, axis='columns')
+        request.reset_index(drop=True, inplace=True)
+        # request.to_csv('metrics.csv', index=True, index_label="Sno")
+        # metrics_address = os.getcwd()+"/metrics.csv"
+        with open (os.path.join(config.location,"metrics.csv"),'w+') as f:
+            f.write(request.to_csv('metrics.csv', index=True, index_label="Sno"))
+            f.close()
+        
         return best
+    
+    
 
 
     
@@ -60,7 +73,8 @@ class auto:
         for i in model_array:
             tuned_best.append(tune_model(i))
 
-        return tuned_best
+        return tuned_best 
+    
 
 
     def model_save(self,model_array,config):
