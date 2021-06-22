@@ -13,6 +13,7 @@ class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            userID:101,
             projectname: '',
             train: undefined,
             mtype: 'classification',
@@ -60,6 +61,11 @@ class Home extends Component {
             header: true
         });
         const formdata = new FormData();
+        formdata.append(
+            "userID",
+            this.state.userID
+
+        );
         formdata.append(
             "projectName",
             this.state.projectname
@@ -117,11 +123,12 @@ class Home extends Component {
         $(theFormItself).hide();
         var theFormItself2 = document.getElementById('loader');
         $(theFormItself2).show();
+        let userID = this.state.userID
         let isauto = this.state.auto
         let target = this.state.target
         let modelnumber = this.state.modelnum
         let nulltype = this.state.nulltype
-        let data = { isauto, target, modelnumber, nulltype }
+        let data = { userID, isauto, target, modelnumber, nulltype }
         console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))

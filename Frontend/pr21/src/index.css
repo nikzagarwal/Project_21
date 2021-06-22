@@ -259,7 +259,8 @@ background-image: url(./assets/img/bg6.png);
   /* box-shadow: 5px 5px 5px grey; */
   /* color: rgba(0,0,0,0.9); */
   color:rgb(37, 8, 105);
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+  /* font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+  font-family: 'Staatliches', Verdana, Geneva, Tahoma, sans-serif;
 }
 .createpagebox h1{
   text-shadow:1px 1px #111;
@@ -518,7 +519,7 @@ margin-left: 5%;
   margin-left: 10%;
   padding-right: 1em;
   color: rgb(255, 255, 255);
-  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-family:'Staatliches', Verdana, Geneva, Tahoma, sans-serif;
 
 }
 .section3button
@@ -811,7 +812,12 @@ th {
 td :hover{
 			background-color: rgba(221, 222, 224, 0.877);		
 }
-			
+				
+/* ************************************************************************************************************************ */
+/* plots */
+.plot{
+  padding: 2em;
+}
 				
 /* ************************************************************************************************************************ */
 
