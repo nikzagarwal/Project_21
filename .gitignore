@@ -9,3 +9,5 @@ Backend/test.py
 
 #Database Folders Generated during Testing
 Database/
+
+output.html
