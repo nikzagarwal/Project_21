@@ -1,6 +1,7 @@
 __pycache__
 .db
 venv
+.vscode/*
 
 newevn
 
@@ -11,3 +12,8 @@ Backend/test.py
 Database/
 
 output.html
+#Files Generated from Pycaret
+logs.log
+#Testing files generated
+clean_data.csv
+metrics.csv
