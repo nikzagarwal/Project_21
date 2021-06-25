@@ -7,6 +7,8 @@ import Plots from './plots.js';
 import Download from './download.js';
 import Metrics from './metrics.js';
 import Papa from 'papaparse';
+import axios from 'axios';
+
 class Section5 extends Component {
 
     handleGoBack = event => {
@@ -21,7 +23,8 @@ class Section5 extends Component {
         super();
         this.state = {
             csvfile: undefined,
-            data:""
+            data: "",
+            inferencefile: undefined
         };
         this.updateData = this.updateData.bind(this);
     }
@@ -47,19 +50,45 @@ class Section5 extends Component {
         var data = result.data;
         console.log(data);
     }
+    handleInferenceChange = event => {
+        this.setState({
+            inferencefile: event.target.files[0]
+        })
+        // console.log(event.target.files[0]);
+    }
+    handleGetPrediction = event => {
+        event.preventDefault();
+        const formdata = new FormData();
+        formdata.append(
+            "InferenceData",
+            this.state.inferencefile
+
+        );
+        axios.post('http://localhost:8000/inference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            .then((res) => { console.log("Successful", res) },
+                (error) => { console.log(error) });
+        axios.get('http://localhost:8000/inference')
+            .then((response) => {
+                console.log(response.data);
+                console.log(response.status);
+                console.log(response.statusText);
+                console.log(response.headers);
+                console.log(response.config);
+            });
+    }
     render() {
         return (
 
             <div className="section5 " id="section5">
                 <div className="goback">
-                    <button className="sec5btn" onClick={this.handleGoBack}  >&lArr; Go Back to Models </button>
+                    <button className="backbtn" onClick={this.handleGoBack}  >&lArr; Go Back to Models </button>
 
                 </div>
                 <div className="sec5heading">
                     <h1>Results (Model Number:  {this.props.currentmodel})</h1>
                 </div>
-               
-               
+
+
                 <div className="container">
                     {/* <!-- Nav tabs --> */}
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
@@ -80,31 +109,24 @@ class Section5 extends Component {
                     {/* <!-- Tab panes --> */}
                     <div className="tab-content">
                         <div className="tab-pane active" id="metrics" role="tabpanel" aria-labelledby="metrics-tab">
-                            Metrics will be displayed here 
+                            Metrics will be displayed here
                             <input type="file" className="form-control" id="metric" onChange={this.handleChange} accept=".csv" name="metric"
-                    placeholder="enter data in csv" required />
-                <button onClick={this.importCSV} className="sec5btn">Import</button>
-                                <Metrics data={this.state.data}/>
+                                placeholder="enter data in csv" required />
+                            <button onClick={this.importCSV} className="sec5btn">Import</button>
+                            <Metrics data={this.state.data} />
                         </div>
 
 
 
                         <div className="tab-pane" id="plot" role="tabpanel" aria-labelledby="plot-tab">
-                           
-                                <div className="container">
+
+                            <div className="container">
                                 <div className="d-flex flex-row justify-content-center flex-wrap">
                                     <Plots />
                                     {/* <div className="d-flex flex-column plot" >
                                         <img src="1" className="img-fluid" alt=" Plot1 not for this model " />
                                         <img src="2" className="img-fluid" alt=" Plot2 not for this model " />
-                                        <img src="3" className="img-fluid" alt=" Plot3 not for this model " />
-
-                                    </div>
-                                    <div className="d-flex flex-column plot" >
-                                        <img src="4" className="img-fluid" alt=" Plot4 not for this model " />
-                                        <img src="5" className="img-fluid" alt=" Plot5 not for this model " />
-                                        <img src="6" className="img-fluid" alt=" Plot6 not for this model " />
-                                    </div> */}
+                                        <img src="3" className="img-fluid" alt=" Plot3 not for this model " />*/}
 
                                 </div>
                             </div>
@@ -119,14 +141,9 @@ class Section5 extends Component {
                                         </div>
                                         <div className="flip-card-back2 ">
                                             <p>"Download clean Data"</p>
-                                            <Download />
-                                            {/* <CSVLink
-                                                    data={car}
-                                                    filename="cardata.csv"
-                                                    className="btn btn-primary"
-                                                    target="_blank"
-                                                >Download Now</CSVLink> */}
-                                            <button className="sec5btn" id="form2autobutton">Download</button>
+                                            <Download type="clean" />
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -137,7 +154,8 @@ class Section5 extends Component {
                                         </div>
                                         <div className="flip-card-back2 ">
                                             <p>"Download pickle file"</p>
-                                            <button className="sec5btn" >Download</button>
+                                            <Download type="pickle" />
+
                                         </div>
                                     </div>
                                 </div>
@@ -162,7 +180,7 @@ class Section5 extends Component {
 
 
                                         <div>
-                                            <button type="submit" className="formbutton" id="getresults" >Get Results</button>
+                                            <button type="submit" className="formbutton" onClick={this.handleGetPrediction} id="getresults" >Get Results</button>
                                         </div>
                                     </div>
                                 </form>

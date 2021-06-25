@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import aivideo from "../assets/videos/AI.mp4";
 import $ from 'jquery';
 import axios from 'axios';
 // import { HashLink as Link } from 'react-router-hash-link';
 import Result from './Result.js';
+import Preprocess from './Preprocess.js';
+import ManualModel from './manualmodel.js';
 import Section1 from './section1.js';
+import Section3 from './section3.js';
+import Section4 from './section4.js';
 import Section6 from './section6.js';
 import Section5 from './section5.js';
 import Papa from 'papaparse';
@@ -13,7 +16,7 @@ class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            userID:101,
+            userID: 101,
             projectname: '',
             train: undefined,
             mtype: 'classification',
@@ -22,7 +25,8 @@ class Home extends Component {
             modelnum: 3,
             nulltype: 'NA',
             currentmodel: 1,
-            inputdata: ""
+            data: "{0:0}"
+
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -42,7 +46,7 @@ class Home extends Component {
             data: result.data
         });
         var data = result.data;
-        // console.log(data);
+        console.log(data);
     }
     handleMtypeChange = event => {
         this.setState({
@@ -93,13 +97,13 @@ class Home extends Component {
         var theFormItself2 = document.getElementById('form3');
         $(theFormItself2).show();
     }
-    handleManual() {
+    handleManual = event => {
         this.setState({
             auto: false
         })
         var theFormItself = document.getElementById('form2');
         $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('form3');
+        var theFormItself2 = document.getElementById('form4');
         $(theFormItself2).show();
     }
     handleTargetChange = event => {
@@ -148,7 +152,16 @@ class Home extends Component {
             currentmodel: val
         })
     }
+    handleAutoPreprocess() {
+        var theFormItself = document.getElementById('preprocesstable');
+        $(theFormItself).toggle();
 
+    }
+    handleAutoModelSelect() {
+        var theFormItself = document.getElementById('modellist');
+        $(theFormItself).toggle();
+
+    }
 
     render() {
         return (
@@ -251,8 +264,12 @@ class Home extends Component {
                                         <label htmlFor="target">Target Variable</label>
                                     </div>
                                     <div className="col-60">
-
-                                        <input type="text" id="target" name="target" onChange={this.handleTargetChange} placeholder="Enter target variable" required />
+                                        <select name="target" id="target" onChange={this.handleTargetChange}>
+                                            {Object.keys(this.state.data[0]).map((key, i) =>
+                                                <option value={i}>{key}</option>
+                                            )}
+                                        </select>
+                                        {/* <input type="text" id="target" name="target" onChange={this.handleTargetChange} placeholder="Enter target variable" required /> */}
                                     </div>
                                 </div>
 
@@ -281,44 +298,49 @@ class Home extends Component {
                     </div>
                     {/* loader */}
                     <Result />
-                    {/* </div> */}
+                    {/* ************************************************************************************************************************ */}
+
+                    {/* form 4 for manual preprocessing */}
+                    <div className="container" id="form4">
+                        <div className="PreprocessForm">
+                            <div className="autocheckbox">
+                                <input type="checkbox" id="autopreprocess" onClick={this.handleAutoPreprocess} name="autopreprocess" />
+                                <label htmlFor="autopreprocess"> Auto Preprocess</label>
+                            </div>
+                            <h1>Preprocess</h1>
+                            <p>Go to each column and decide how would you like to preprocess it</p>
+                            <Preprocess rawdata={this.state.data} />
+                        </div>
+                    </div>
+                    {/* form 5 for model and hypeparameters selection*/}
+                    <div className="container" id="form5">
+                        <div className="Modelselection">
+                            <div className="autocheckbox">
+                                <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
+                                <label htmlFor="automodel"> Auto Models</label>
+                            </div>
+                            <h1>Models</h1>
+                            <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
+                            <ManualModel mtype={this.state.mtype}/>
+                        </div>
+                    </div>
+
                     {/* ************************************************************************************************************************ */}
                 </div>
                 {/* Section3  */}
-                <div className="section3" id="section3">
-                    <div className="section3box">
-                        <h1>Yes, Its that Easy</h1>
-                        <video className="section3video" width="640" height="360" controls>
-                            <source src={aivideo} type="video/mp4" />
-                            <p>Your browser does not support the video tag.</p>
-                        </video>
-
-                    </div>
-                    <a href='#section2' > <button className=" col-40 section3button">Start Expereince Now &uArr;</button></a>
-
-                </div>
+                {/* This section is for showing demo video */}
+                <Section3 />
                 {/* ************************************************************************************************************************ */}
                 {/* Section 4 */}
-                <div className="section4" id="section4">
-
-                    <div className="col-50 section4col1">
-
-                        {/* <Link to='/#section3' > <button className=" section4button">See Demo</button></Link> */}
-
-                    </div>
-                    <div className="col-50 section4col2">
-                        <h1>Curl AutoMl Engine lets you make excellent machine and deep learning models for all your needs with few clicks</h1>
-
-                        <h3>"The best Part is its Open Source"</h3>
-                        <a href='https://github.com/nikzagarwal/Project_21' target="_blank" rel="noopener noreferrer"> <button className=" section4button">Github Repo</button></a>
-                    </div>
-
-                </div>
+                {/* This Section id for About */}
+                <Section4 />
                 {/* ************************************************************************************************************************ */}
                 {/* Section 5 */}
+                {/* This section is to show detail of every trained model */}
                 <Section5 currentmodel={this.state.currentmodel} />
                 {/* ************************************************************************************************************************ */}
                 {/* Section 6 */}
+                {/* This section is to show all models trained */}
                 <Section6 modelnum={this.state.modelnum} handler={this.handleCurrentModel} projectname={this.state.projectname} />
 
             </div >
