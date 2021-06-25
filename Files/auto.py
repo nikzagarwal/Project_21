@@ -6,6 +6,8 @@ import os
 import pandas as pd
 import joblib
 import shutil
+import yaml
+from yaml.loader import SafeLoader
 class auto:
     #df = raw_data_address
     #target_col_name = target_col_name
