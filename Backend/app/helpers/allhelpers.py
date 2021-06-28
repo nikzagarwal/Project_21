@@ -1,3 +1,5 @@
+import os
+
 def ResponseModel(data,message):
     return {
         "data": [data],
@@ -65,6 +67,54 @@ class CurrentIDs:
         print("projectID: ",self.projectID)
         print("dataID: ",self.dataID)
         print("modelID: ",self.modelID)
+
+class ResultsCache:
+    def __init__(self):
+        path=os.getcwd()
+        self.cleanDataPath=path
+        self.metricsPath=path
+        self.pickleFilePath=path
+        self.pickleFolderPath=path
+        self.status=False
+
+    def set_auto_mode_status(self,status):
+        self.status=False
+    
+    def get_auto_mode_status(self):
+        return self.status
+
+    def set_clean_data_path(self,cleanDataPath):
+        self.cleanDataPath=cleanDataPath
+
+    def set_metrics_path(self,metricsPath):
+        self.metricsPath=metricsPath
+
+    def set_pickle_file_path(self,pickleFilePath):
+        self.pickleFilePath=pickleFilePath
+
+    def set_pickle_folder_path(self,pickleFolderPath):
+        self.pickleFolderPath=pickleFolderPath
+
+    def get_clean_data_path(self):
+        return self.cleanDataPath
+
+    def get_metrics_path(self):
+        return self.metricsPath
+
+    def get_pickle_file_path(self):
+        return self.pickleFilePath
+
+    def get_pickle_folder_path(self):
+        return self.pickleFolderPath
+
+    def print_all_paths(self):
+        print("cleanDataPath", self.cleanDataPath)
+        print("metricsPath", self.metricsPath)
+        print("pickleFilePath", self.pickleFilePath)
+        print("pickleFolderPath", self.pickleFolderPath)
+    
+
+
 """
 yaml format - 
 

@@ -1,11 +1,9 @@
 import os
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, WebSocket
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
-import yaml
-from yaml.loader import SafeLoader
 from Backend.app.dbclass import Database
 from Backend.app.config import settings
 from Backend.app.routers.user import user_router
@@ -14,11 +12,13 @@ from Backend.app.routers.data import data_router
 from Backend.app.routers.model import model_router
 from Backend.app.routers.metrics import metrics_router
 from Backend.app.routers.inference import inference_router
-from Backend.app.helpers.allhelpers import reqsEntity, reqEntity, CurrentIDs, serialiseDict, serialiseList
-from Backend.app.helpers.project_helper import create_project_id, get_project_id, get_raw_data_path
-from Backend.app.helpers.model_helper import create_model_id
+from Backend.app.helpers.allhelpers import CurrentIDs, ResultsCache, serialiseDict, serialiseList
+from Backend.app.helpers.project_helper import create_project_id
+from Backend.app.helpers.data_helper import get_clean_data_path
+from Backend.app.helpers.metrics_helper import get_metrics_from_modelID, get_metrics_from_projectID
+from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
 from Backend.app.schemas import FormData
-from Backend.utils import generate_project_folder, generate_random_id
+from Backend.utils import generate_project_folder, generate_project_auto_config_file
 from Files.auto import auto
 
 origins=settings.CORS_ORIGIN
@@ -42,6 +42,7 @@ app.add_middleware(
 
 Project21Database=Database()
 currentIDs=CurrentIDs()
+resultsCache=ResultsCache()
 currentIDs.set_current_user_id(101)
 
 
@@ -62,7 +63,10 @@ def startup_mongodb_client():
                 "password": "password@Super@Secure",
                 "listOfProjects": []
             })
-    except:
+        resultsCache.set_auto_mode_status(False)
+    except Exception as e:
+        print("An Error Occured: ",e)
+        print("Duplicate Key Error can be ignored safely")
         pass
 
 @app.on_event("shutdown")
@@ -71,8 +75,8 @@ def shutdown_mongodb_client():
 
 @app.post('/create')
 def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFile=File(...)):
-    operation=generate_project_folder(projectName,train)
-    if operation["Success"]:
+    Operation=generate_project_folder(projectName,train)
+    if Operation["Success"]:
         try:
             inserted_projectID=create_project_id()
             inserted_modelID=create_model_id()
@@ -81,9 +85,10 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
             Project21Database.insert_one(settings.DB_COLLECTION_PROJECT,{
                 "projectID":inserted_projectID,
                 "projectName":projectName,
-                "rawDataPath":operation["RawDataPath"],
-                "projectFolderPath":operation["ProjectFolderPath"],
-                "belongsToUserID": currentIDs.get_current_user_id()
+                "rawDataPath":Operation["RawDataPath"],
+                "projectFolderPath":Operation["ProjectFolderPath"],
+                "belongsToUserID": currentIDs.get_current_user_id(),
+                "listOfDataIDs":[]
                 })
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
                 "modelID": inserted_modelID,
@@ -94,83 +99,130 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
             })
             try:
                 result=Project21Database.find_one(settings.DB_COLLECTION_USER,{"userID":currentIDs.get_current_user_id()})
-                print(serialiseDict(result),"hihihihi")
-                result=serialiseDict(result)
-                Project21Database.update_one(settings.DB_COLLECTION_USER,{"userID":result["userID"]},{ "$set":{"listOfProjects":result["listOfProjects"].append(inserted_projectID)}})
-            except:
-                print(currentIDs.print_all_ids())
-            print({"File Received": "Success", "Project Folder":"Success", "Database Update":"Partially Successful"})
-        except:
-            print({"File Received": "Success","Project Folder":"Success","Database Update":"Failure"})
-            return {"File Received": "Success","Project Folder":"Success","Database Update":"Failure"}
-        return {"File Received": "Success", "Project Folder":"Success", "Database Update":"Success"}
+                if result is not None:
+                    result=serialiseDict(result)
+                    if result["listOfProjects"] is not None:
+                        newListOfProjects=result["listOfProjects"]
+                        newListOfProjects.append(inserted_projectID)
+                        Project21Database.update_one(settings.DB_COLLECTION_USER,{"userID":result["userID"]},{"$set":{"listOfProjects":newListOfProjects}})
+                    else:
+                        Project21Database.update_one(settings.DB_COLLECTION_USER,{"userID":result["userID"]},{"$set":{"listOfProjects":[inserted_projectID]}})
+            except Exception as e:
+                print("An Error occured: ",e)
+                return JSONResponse({"File Received": "Success", "Project Folder":"Success", "Database Update":"Partially Successful"})
+        except Exception as e:
+            print("An Error occured: ",e)
+            return JSONResponse({"File Received": "Success","Project Folder":"Success","Database Update":"Failure"})
+        return JSONResponse({"File Received": "Success", "Project Folder":"Success", "Database Update":"Success"})
     else:
-        print(operation["Error"])
-        return operation["Error"]
-
-# @app.get('/file')
-# def file():           #For Streaming files
-#     path=get_raw_data_path(45586)       #Have to put projectID here
-#     myfile=open(path,mode='rb')
-#     return StreamingResponse(myfile,media_type="text/csv")
-
-@app.get('/downloadClean')
-def download_clean_data():
-    print("current user id: ",currentIDs.get_current_user_id())
-    path=get_raw_data_path(68677)       #Have to put dataID here
-    if(os.path.exists(path)):
-        return FileResponse(path,media_type="text/csv")     #for this we need aiofiles to be installed. Use pip install aiofiles
-    return {"Error":"File not found at path"}
-
-@app.get('/downloadPickle')
-def file_download():
-    path=get_raw_data_path(68677)       #Have to put modelID here
-    if(os.path.exists(path)):
-        return FileResponse(path,media_type="text/csv")     #for this we need aiofiles to be installed. Use pip install aiofiles
-    return {"Error":"File not found at path"}
+        return JSONResponse(Operation["Error"])
 
 @app.post('/auto')
 def start_auto_preprocessing(formData:FormData):
     formData=dict(formData)
-    print(formData)
-    user_yaml=yaml.load(open(settings.CONFIG_AUTO_YAML_FILE),Loader=SafeLoader)
-    user_yaml["id"]=generate_random_id()
-    print(currentIDs.print_all_ids())
-    user_yaml["raw_data_address"]=get_raw_data_path(currentIDs.get_current_project_id())
-    user_yaml["target_col_name"]=formData["target"]
-    result_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":currentIDs.get_current_model_id()})
-    if result_model:
-        user_yaml["problem_type"]=result_model["modelType"]
-    else:
-        user_yaml["problem_type"]='default'
-    user_yaml["na_value"]=formData["nulltype"]
-    result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":currentIDs.get_current_project_id()})
-    if result_project:
-        user_yaml["location"]=result_project["projectFolderPath"]
-    else:
-        user_yaml["location"]='/'
-    
-        user_yaml["n"]=formData["modelnumber"]
-    if result_project:
-        user_yaml["experimentname"]=result_project["projectName"]
-    else:
-        user_yaml["experimentname"]='default'
-    with open(os.path.join(user_yaml["location"],"autoConfig.yaml"), "w") as f:
-        yaml.dump(user_yaml,f)
-        f.close()
-    print(user_yaml)
+    projectAutoConfigFileLocation, dataID = generate_project_auto_config_file(currentIDs,formData)
+    resultsCache.set_auto_mode_status(False)
     automatic_model_training=auto()
-    automatic_model_training.auto(os.path.join(user_yaml["location"],'autoConfig.yaml'))
-    return {"Successful":"True"}
+    Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
+    if Operation["Successful"]:
+        try:
+            Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+                "dataID": dataID,
+                "cleanDataPath": Operation["cleanDataPath"],
+                "target": formData["target"],
+                "belongsToUserID": currentIDs.get_current_user_id(),
+                "belongsToProjectID": currentIDs.get_current_project_id()
+            })
+            currentIDs.set_current_data_id(dataID)
+            Project21Database.update_one(settings.DB_COLLECTION_MODEL,{"modelID":currentIDs.get_current_model_id()},{
+                "$set": {
+                    "belongsToDataID": dataID,
+                    "pickleFolderPath": Operation["pickleFolderPath"],
+                    "pickleFilePath": Operation["pickleFilePath"],
+                }
+            })
+            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                "belongsToUserID": currentIDs.get_current_user_id(),
+                "belongsToProjectID": currentIDs.get_current_project_id(),
+                "belongsToModelID": currentIDs.get_current_model_id(),
+                "addressOfMetricsFile": Operation["metricsLocation"]
+            })
+            try:
+                result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":currentIDs.get_current_project_id()})
+                result=serialiseDict(result)
+                if result is not None:
+                    if result["listOfDataIDs"] is not None:
+                        newListOfDataIDs=result["listOfDataIDs"]
+                        newListOfDataIDs.append(currentIDs.get_current_data_id())
+                        Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{"$set":{"listOfDataIDs":newListOfDataIDs}})
+                    else:
+                        Project21Database.update_one(settings.DB_COLLECTION_USER,{"projectID":result["projectID"]},{"$set":{"listOfProjects":[currentIDs.get_current_data_id()]}})
+            except Exception as e:
+                print("An Error occured: ",e)
+                return JSONResponse({"Auto": "Success", "Database Insertion":"Success", "Project Collection Updation": "Unsuccessful"})
+        except Exception as e:
+            print("An Error occured: ",e)
+            return JSONResponse({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
+        
+        resultsCache.set_clean_data_path(Operation["cleanDataPath"])
+        resultsCache.set_metrics_path(Operation["metricsLocation"])
+        resultsCache.set_pickle_file_path(Operation["pickleFilePath"])
+        resultsCache.set_pickle_folder_path(Operation["pickleFolderPath"])
+        resultsCache.set_auto_mode_status(True)
+        return JSONResponse({"Successful":"True", "projectID": currentIDs.get_current_project_id(), "dataID":currentIDs.get_current_data_id(), "modelID": currentIDs.get_current_model_id()})
+    else:
+        return JSONResponse({"Successful":"False"})
 
+@app.get('/auto/{projectID}')
+def return_auto_generated_metrics(projectID:int):
+    metricsFilePath=get_metrics_from_projectID(projectID)
+    if (os.path.exists(str(metricsFilePath))):
+        return FileResponse(metricsFilePath,media_type="text/csv")
+    return {"Error": "Mertics File not found at path"}
 
-@app.get('/paths')
-def return_auto_preprocesseing_metrics():
-    print(settings.CONFIG_AUTO_YAML_FILE)
-    print(os.path.abspath(os.path.join(settings.CONFIG_AUTO_YAML_FILE,'.yaml')))
-    return {"auto-config-path":settings.CONFIG_AUTO_YAML_FILE,"data-database-folder-path":settings.DATA_DATABASE_FOLDER,"config-yaml-folder":settings.CONFIG_YAML_FOLDER}
-#/auto -> make config file -> isauto, target, number of models
-#make a subfolder -> address of this location send to him
-#auto()
-#config_id -> 
-#metrics, plot files location, pickle file location, clean data location
+@app.get('/downloadClean/{dataID}')
+def download_clean_data(dataID:int):
+    path=get_clean_data_path(dataID)       #Have to put dataID here
+    if(os.path.exists(path)):
+        return FileResponse(path,media_type="text/csv",filename="clean_data.csv")     #for this we need aiofiles to be installed. Use pip install aiofiles
+    return {"Error":"Clean Data File not found at path"}
+
+@app.get('/downloadPickle/{modelID}')
+def download_pickle_file(modelID:int):
+    path=get_pickle_file_path(modelID)       #Have to put modelID here
+    if(os.path.exists(path)):
+        print("Path: ",path)
+        return FileResponse(path,media_type="application/octet-stream",filename="model.pkl")   #for this we need aiofiles to be installed. Use pip install aiofiles
+    return {"Error":"File not found at path"}
+#     myfile=open(path,mode='rb')
+#     return StreamingResponse(myfile,media_type="text/csv")    #for streaming files instead of uploading them
+
+@app.websocket("/ws")
+async def training_status(websocket: WebSocket):
+    print("Connecting to the Frontend...")
+    await websocket.accept()
+    # while (not resultsCache.get_auto_mode_status()):
+    try:
+        data={
+            "Successful":"False",
+            "Status": "Model Running"
+        }
+        if (resultsCache.get_auto_mode_status()):
+            data={
+            "Successful":"True",
+            "Status": "Model Successfully Created",
+            "userID": currentIDs.get_current_user_id(),
+            "projectID": currentIDs.get_current_project_id(),
+            "dataID":currentIDs.get_current_data_id(),
+            "modelID": currentIDs.get_current_model_id()
+            }
+            await websocket.send_json(data)
+            
+
+        data2= await websocket.receive_text()  #Can be used to receive data from frontend
+        print(data2)
+        await websocket.send_json(data) #Can be used to return data to the frontend
+    except Exception as e:
+        print("Error: ",e)
+        # break
+    print("Websocket connection closing...")

@@ -22,10 +22,11 @@ class Home extends Component {
             mtype: 'classification',
             auto: true,
             target: '',
-            modelnum: 3,
+            modelnum: 1,
             nulltype: 'NA',
             currentmodel: 1,
-            data: "{0:0}"
+            data: "{0:0}",
+            metricData: "{0:0}"
 
         }
         this.updateData = this.updateData.bind(this);
@@ -39,14 +40,13 @@ class Home extends Component {
         this.setState({
             train: event.target.files[0]
         })
-        console.log(event.target.files[0]);
+        // console.log(event.target.files[0]);
     }
     updateData(result) {
         this.setState({
             data: result.data
         });
-        var data = result.data;
-        console.log(data);
+        // console.log(data);
     }
     handleMtypeChange = event => {
         this.setState({
@@ -85,10 +85,10 @@ class Home extends Component {
             this.state.train
         );
 
-        console.log(formdata.getAll('train'))
+        // console.log(formdata.getAll('train'))
 
         axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-            .then((res) => { console.log("Successful", res) },
+            .then((res) => { console.log("Successful1", res) },
                 (error) => { console.log(error) });
     }
     handleAuto() {
@@ -133,19 +133,47 @@ class Home extends Component {
         let modelnumber = this.state.modelnum
         let nulltype = this.state.nulltype
         let data = { userID, isauto, target, modelnumber, nulltype }
-        console.log(JSON.stringify(data))
+        // console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))
-            .then(res => { console.log("Successful", res) },
+            .then(res => { console.log("Successful2", res) },
                 (error) => { console.log(error) });
-        axios.get('http://localhost:8000/auto')
-            .then((response) => {
-                console.log(response.data);
-                console.log(response.status);
-                console.log(response.statusText);
-                console.log(response.headers);
-                console.log(response.config);
-            });
+        // axios.get('http://localhost:8000/auto')
+        //     .then((response) => {
+        //         console.log(response.data);
+        //         console.log(response.status);
+        //         console.log(response.statusText);
+        //         console.log(response.headers);
+        //         console.log(response.config);
+        //     });
+        const ws = new WebSocket('ws://localhost:8000/ws')
+        ws.onopen = () => {
+            // on connecting, do nothing but log it to the console
+            console.log('connected')
+            ws.send("Connected to React");
+        }
+
+        ws.onmessage = evt => {
+            // while (true) {
+                // listen to data sent from the websocket server
+                console.log("getting message")
+                const message = JSON.parse(evt.data)
+                if (message["Successful"] === "False") {
+                    //
+                    // this.setState({ metricData: message })
+                    console.log(message)
+                }
+                if (message["Successful"] === "True") {
+                    console.log(message)
+                   
+                }
+            // }
+        }
+        ws.onclose = () => {
+            console.log('disconnected')
+            // automatically try to reconnect on connection loss
+
+        }
     }
     handleCurrentModel = (val) => {
         this.setState({
@@ -185,7 +213,7 @@ class Home extends Component {
                             <div className="createform">
                                 <div className="row">
                                     <div className="col-40">
-                                        <label htmlFor="projectname">Name of your project?</label>
+                                        <label htmlFor="projectname">Name of your project? <span className="ibtn">i <span id="idesc">Enter any relevant name for your project</span></span></label>
                                     </div>
                                     <div className="col-60">
 
@@ -195,7 +223,7 @@ class Home extends Component {
 
                                 <div className="row">
                                     <div className="col-40">
-                                        <label htmlFor="train">Enter training data</label>
+                                        <label htmlFor="train">Enter training data <span className="ibtn">i <span id="idesc">Enter the data on which you want to train your model</span></span></label>
                                     </div>
                                     <div className="col-60">
                                         <input type="file" className="form-control" id="train" onChange={this.handleTrainChange} accept=".csv" name="train"
@@ -204,7 +232,7 @@ class Home extends Component {
                                 </div>
                                 <div className="row">
                                     <div className="col-40">
-                                        <label htmlFor="type">Which type of data is it?</label>
+                                        <label htmlFor="type">Which type of data is it? <span className="ibtn">i <span id="idesc">Genrally if no. of classes less than 10 for target its Classification</span></span></label>
                                     </div>
                                     <div className="col-60 ">
                                         <select name="mtype" id="modeltype" value={this.state.mtype} onChange={this.handleMtypeChange}>
@@ -273,22 +301,22 @@ class Home extends Component {
                                     </div>
                                 </div>
 
-                                <div className="row">
+                                {/* <div className="row">
                                     <div className="col-40">
                                         <label htmlFor="modelno">How many top models you want?</label>
                                     </div>
                                     <div className="col-60" >
                                         <input type="number" id="modelno" name="modelno" onChange={this.handleModelNumChange} placeholder="Enter number of models" required />
                                     </div>
-                                </div>
-                                <div className="row">
+                                </div> */}
+                                {/* <div className="row">
                                     <div className="col-40">
                                         <label htmlFor="nulltype">How are null values specified in dataset?</label>
                                     </div>
                                     <div className="col-60" >
-                                        <input type="text" id="nulltype" name="nulltype" onChange={this.handleNullTypeChange} placeholder="Is it NULL, NA , ? , 0 or other (specify)" required />
+                                        <input type="text" id="nulltype" name="nulltype" onChange={this.handleNullTypeChange} placeholder="Is it NULL, NA , ? , 0 or other (specify)"  />
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div>
                                     <button type="submit" className="formbutton" id="trainnow" >Train Now</button>
@@ -297,7 +325,7 @@ class Home extends Component {
                         </form>
                     </div>
                     {/* loader */}
-                    <Result />
+                    <Result modelnum={this.state.modelnum} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} />
                     {/* ************************************************************************************************************************ */}
 
                     {/* form 4 for manual preprocessing */}
@@ -321,7 +349,7 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
-                            <ManualModel mtype={this.state.mtype}/>
+                            <ManualModel mtype={this.state.mtype} />
                         </div>
                     </div>
 
@@ -341,7 +369,7 @@ class Home extends Component {
                 {/* ************************************************************************************************************************ */}
                 {/* Section 6 */}
                 {/* This section is to show all models trained */}
-                <Section6 modelnum={this.state.modelnum} handler={this.handleCurrentModel} projectname={this.state.projectname} />
+                <Section6 modelnum={this.state.modelnum} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} />
 
             </div >
         );
