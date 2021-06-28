@@ -1,4 +1,3 @@
-from pycaret.classification import *
 from pycaret.regression import *
 # from pycaret.clustering import *
 # from pycaret.nlp import *
@@ -32,14 +31,7 @@ class auto:
         config=yaml.load(open(config),Loader=SafeLoader)
         df = pd.read_csv(config["raw_data_address"])
         
-        if config["problem_type"] == "classification":
-            clf1 = setup(data = df, target = config["target_col_name"],silent=True)
-        elif config["problem_type"]== "regression":
-            reg1 = setup(data = df, target = config["target_col_name"],silent=True)
-        elif config["problem_type"] == "clustering":
-            clu1 = setup(data = df,silent=True)
-        elif config["problem_type"] == "nlp":
-            nlp1 = setup(data = df, target = config["target_col_name"],silent=True)
+        nlp1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train')    
         X_train.to_csv('clean_data.csv', index=False)
         clean_data_address = os.path.join(os.getcwd(),"clean_data.csv")
