@@ -8,6 +8,7 @@ from .libraries import *
 import yaml
 from yaml.loader import FullLoader
 from Files.hyperparameter import hyperparameter as hp
+import os
 
 
     #pred=clf.predict(data)
@@ -16,21 +17,33 @@ from Files.hyperparameter import hyperparameter as hp
 
 class training:
 
-    def train(userinputconfig,modelconfig,xdata,ydata):
+    def train(userinputconfig,dataconfig,preprocessconfig):
 
+        with open(preprocessconfig) as f:
+            preprocessconfig= yaml.load(f,Loader=FullLoader) #for split ratio
+        
 
-        #b={"modeltype ":"classification", "modelname":"Logistic Regression","parameter":[{, "lr":73,"ishyper":True},{"modeltype":"classification", "modelname":"knn", "n_neighbours":3,"ishyper":"True"},{"modeltype ":"classification", "modelname":"decision trees", "ishyper":False}]}
-
-
-        with open(modelconfig) as f:
-            modelconfig= yaml.load(f,Loader=FullLoader)
+        with open(dataconfig) as f:
+            dataconfig= yaml.load(f,Loader=FullLoader) #has info about where the data is stored and where the model must be stored
 
         with open(userinputconfig) as file:
-            userinputconfig=yaml.load(file,Loader=FullLoader)
+            userinputconfig=yaml.load(file,Loader=FullLoader) #modified version of model universe for each run
         models=[]
         ans=[]
+
+        test_ratio=preprocessconfig["split_ratio_test"] / 100
+        xdata=dataconfig["Xdata"]
+        ydata=dataconfig["Ydata"]
+        
         for model in userinputconfig:
             if model["isSelected"]:
+                if model["type"]=='Classification':
+                    metrics=pd.DataFrame(columns = ['modelname','accuracy_score','recall_score','precision_score','f1_score','cohen_kappa_score','matthews_corrcoef'])
+                
+                elif model["type"]=='Regression':
+                    metrics=pd.DataFrame(columns=['modelname','mean_absolute_error','mean_squared_error','r2_score','mean_squared_log_error'])
+                
+
                 hypers=[]
                 keylist=[]
                 for feature in model["hyper"]:
@@ -39,4 +52,7 @@ class training:
                         hypers.append(feature["name"]+"="+ str(feature["value"]))
                 model_str=model["modelname"] + "(" + ", ".join(hypers) + ")"
     
-                hp.optimize(model_str,model["modelname"],userinputconfig)
+                metrics=hp.optimize(model_str,model["modelname"],userinputconfig,xdata,ydata,metrics,dataconfig)
+                
+        metricsLocation=os.path.join(dataconfig["location"],"metrics.csv")
+        metrics.to_csv(metricsLocation, index=True, index_label="modelname")
