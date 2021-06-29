@@ -6,11 +6,23 @@ import Plots from './plots.js';
 // import car from '../assets/testDataset/cardata.csv';
 import Download from './download.js';
 import Metrics from './metrics.js';
-import Papa from 'papaparse';
+// import Papa from 'papaparse';
 import axios from 'axios';
 
 class Section5 extends Component {
 
+   
+
+    constructor() {
+        super();
+        this.state = {
+            // csvfile: undefined,
+            data: "",
+            inferencefile: undefined,
+            plot:""
+        };
+        // this.updateData = this.updateData.bind(this);
+    }
     handleGoBack = event => {
         event.preventDefault();
         var theFormItself = document.getElementById('section5');
@@ -19,58 +31,55 @@ class Section5 extends Component {
         $(theFormItself2).show();
     }
 
-    constructor() {
-        super();
-        this.state = {
-            csvfile: undefined,
-            data: "",
-            inferencefile: undefined
-        };
-        this.updateData = this.updateData.bind(this);
-    }
-
-    handleChange = event => {
-        this.setState({
-            csvfile: event.target.files[0]
-        });
-    };
+    // handleChange = event => {
+    //     this.setState({
+    //         csvfile: event.target.files[0]
+    //     });
+    // };
 
     handlemetric = event => {
-        axios.get('http://localhost:8000/getMetrics')
+        var thebtnItself = document.getElementById('show');
+        $(thebtnItself).hide();
+        this.setState({data: "a"});
+        const projectid=this.props.projectdetails["projectID"];
+        const FileDownload = require('js-file-download');
+        axios.get('http://localhost:8000/getMetrics/'+projectid)
             .then((response) => {
+                console.log(response)
                 console.log(response.data);
-                console.log(response.status);
-                console.log(response.statusText);
-                console.log(response.headers);
-                console.log(response.config);
+                FileDownload(response.data, 'metrics.csv');
+                this.setState({data: response.data});
+                console.log(this.state.data);
             });
+       
     }
     handlePlot = event => {
-        axios.get('http://localhost:8000/getPlot')
+        const FileDownload = require('js-file-download');
+        const projectid=this.props.projectdetails["projectID"];
+        axios.get('http://localhost:8000/getPlots/'+projectid)
             .then((response) => {
-                console.log(response.data);
-                console.log(response.status);
-                console.log(response.statusText);
-                console.log(response.headers);
-                console.log(response.config);
+                // console.log(response);
+                FileDownload(response.data, 'plot.html');
+                this.setState({plot: response.data});
+                // console.log (this.state.plot)
             });
     }
 
-    importCSV = () => {
-        const { csvfile } = this.state;
-        Papa.parse(csvfile, {
-            complete: this.updateData,
-            header: true
-        });
-    };
+    // importCSV = () => {
+    //     const { csvfile } = this.state;
+    //     Papa.parse(csvfile, {
+    //         complete: this.updateData,
+    //         header: true
+    //     });
+    // };
 
-    updateData(result) {
-        this.setState({
-            data: result.data
-        });
-        var data = result.data;
-        console.log(data);
-    }
+    // updateData(result) {
+    //     this.setState({
+    //         data: result.data
+    //     });
+    //     var data = result.data;
+    //     console.log(data);
+    // }
     handleInferenceChange = event => {
         this.setState({
             inferencefile: event.target.files[0]
@@ -112,7 +121,7 @@ class Section5 extends Component {
                     {/* <!-- Nav tabs --> */}
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                         <li className="nav-item" role="presentation">
-                            <button className="nav-link tabbtn active" id="Metrics-tab" onClick={this.handlemetric} data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">Metrics</button>
+                            <button className="nav-link tabbtn active" id="Metrics-tab"  data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">Metrics</button>
                         </li>
                         <li className="nav-item" role="presentation">
                             <button className="nav-link tabbtn " id="plot-tab" onClick={this.handlePlot} data-bs-toggle="tab" data-bs-target="#plot" type="button" role="tab" aria-controls="Plot" aria-selected="false">Plots</button>
@@ -128,10 +137,11 @@ class Section5 extends Component {
                     {/* <!-- Tab panes --> */}
                     <div className="tab-content">
                         <div className="tab-pane active" id="metrics" role="tabpanel" aria-labelledby="metrics-tab">
-                            Metrics will be displayed here
-                            <input type="file" className="form-control" id="metric" onChange={this.handleChange} accept=".csv" name="metric"
+                            {/* Metrics will be displayed here */}
+                            {/* <input type="file" className="form-control" id="metric" onChange={this.handleChange} accept=".csv" name="metric"
                                 placeholder="enter data in csv" required />
-                            <button onClick={this.importCSV} className="sec5btn">Import</button>
+                            <button onClick={this.importCSV} className="sec5btn">Import</button> */}
+                            <button onClick={this.handlemetric} className="sec5btn" id="show">Show</button>
                             <Metrics data={this.state.data} />
                         </div>
 
@@ -141,7 +151,7 @@ class Section5 extends Component {
 
                             <div className="container">
                                 <div className="d-flex flex-row justify-content-center flex-wrap">
-                                    <Plots />
+                                    <Plots plot={this.state.plot}/>
                                     {/* <div className="d-flex flex-column plot" >
                                          <img src="3" className="img-fluid" alt=" Plot3 not for this model " />*/}
 
