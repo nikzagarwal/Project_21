@@ -1,4 +1,4 @@
-from pycaret.classification import *
+from pycaret.regression import *
 # from pycaret.clustering import *
 # from pycaret.nlp import *
 import os
@@ -7,7 +7,7 @@ import joblib
 import shutil
 import yaml
 from yaml.loader import SafeLoader
-class Auto:
+class AutoReg:
     #df = raw_data_address
     #target_col_name = target_col_name
     #problem_type = problem_type
@@ -31,7 +31,7 @@ class Auto:
         config=yaml.load(open(config),Loader=SafeLoader)
         df = pd.read_csv(config["raw_data_address"])
         
-        clf1 = setup(data = df, target = config["target_col_name"],silent=True)
+        reg1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train')    
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
         clean_data_address = os.path.join(config["location"],"clean_data.csv")
@@ -98,7 +98,7 @@ class Auto:
         if config["problem_type"]=="classification":
             feature_list=["feature","auc","pr","confusion_matrix","error","learning"]
             for i in range(len(model_array)):
-                location=os.path.join(config["location"],str(config["id"])+"_model"+str(i))
+                location=os.path.join(config["location"],str(config["id"]),"_model",str(i))
                 os.makedirs(location) ## creates a folder by the name configid_model(number) at the specified location
                 os.makedirs(os.path.join(location,"plots")) ## creates a subfolder named plots to store all the plots inside it
                 plot_list=list(plot_model(model_array[i],feature,save=True) for feature in feature_list)
@@ -122,13 +122,13 @@ class Auto:
         try:
             config2=yaml.load(open(config),Loader=SafeLoader)
             cleanDataPath=self.auto_setup(config)
-            model,metricsLocation=self.top_models_auto(config,config2["n"])
+            model, metricsLocation=self.top_models_auto(config,config2["n"])
             tunedmodel=self.model_tune(model)
 
             print("Model List:",model)
             print("Tuned List: ",tunedmodel)
             # self.model_plot(tunedmodel,config)
-            pickleFolderPath,pickleFilePath=self.model_save(tunedmodel,config)
+            pickleFolderPath, pickleFilePath=self.model_save(tunedmodel,config)
             return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
         except Exception as e:
             print("An Error Occured: ",e)

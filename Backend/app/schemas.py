@@ -48,6 +48,7 @@ class Project(BaseModel):
     projectFolderPath: Optional[str]
     belongsToUserID: int=Field(...)
     listOfDataIDs: Optional[List[int]]
+    autoConfigFileLocation: Optional[str]
 
     class Config:
         arbitrary_types_allowed=True
@@ -59,7 +60,8 @@ class Project(BaseModel):
                 "rawDataPath": "/path/to/data/rawfile.csv",
                 "projectFolderPath": "/path/to/data",
                 "belongsToUserID": 101,
-                "listOfDataIDs": [2,4]
+                "listOfDataIDs": [2,4],
+                "autoConfigFileLocation": "path/to/auto/config/file.yaml"
             }
         }
 
@@ -120,7 +122,8 @@ class Model(BaseModel):
     modelID: int=Field(...)
     modelName: Optional[str]='Default Model'
     modelType: Optional[str]
-    picklePath: Optional[str]
+    pickleFolderPath: Optional[str]
+    pickleFilePath: Optional[str]
     belongsToUserID: int=Field(...)
     belongsToProjectID: int=Field(...)
     belongsToDataID: Optional[int]
@@ -132,8 +135,9 @@ class Model(BaseModel):
             "example":{
                 "modelID": 13,
                 "modelName": "Linear Regression",
-                "modelType": "Regression",
-                "picklePath": "/path/to/pickle/data/model.pkl",
+                "modelType": "Default Model",
+                "pickleFolderPath": "/path/to/pickel/data/",
+                "pickleFilePath": "/path/to/pickle/data/model.pkl",
                 "belongsToUserID": 101,
                 "belongsToProjectID": 45,
                 "belongsToDataID": 2
@@ -160,7 +164,7 @@ class Metrics(BaseModel):
     belongsToUserID: int=Field(...)
     belongsToProjectID: int=Field(...)
     belongsToModelID: int=Field(...)
-    addressOfYamlFile: str=Field(...)
+    addressOfMetricsFile: str=Field(...)
 
     class Config:
         allow_population_by_field_name=True
@@ -170,7 +174,7 @@ class Metrics(BaseModel):
                 "belongsToUserID": 101,
                 "belongsToProjectID": 45,
                 "belongsToModelID": 13,
-                "addressOfYamlFile": "/path/to/file.yaml"
+                "addressOfMetricsFile": "/path/to/file/metrics.csv"
             }
         }
 

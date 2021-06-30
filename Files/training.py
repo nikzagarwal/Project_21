@@ -7,7 +7,8 @@ import pandas as pd
 from .libraries import *
 import yaml
 from yaml.loader import FullLoader
-from .hyperparameter import *
+from Files.hyperparameter import hyperparameter as hp
+import os
 
 
     #pred=clf.predict(data)
@@ -16,26 +17,42 @@ from .hyperparameter import *
 
 class training:
 
-    def train(userconfig,config,xdata,ydata):
+    def train(userinputconfig,dataconfig,preprocessconfig):
 
-        b={"models":[{"modeltype":"regression","modelname":"DecisionTreeClassifier","ishyper":True,"hyper":{"criterion":"'gini'"}},{"modeltype":"classification","modelname":"KNeighborsClassifier","ishyper":True,"hyper":{"n_neighbors":5,"leaf_size":30}}]}
-        x=json.dumps(b)
-        parameters=json.loads(x)
-        #b={"modeltype ":"classification", "modelname":"Logistic Regression","parameter":[{, "lr":73,"ishyper":True},{"modeltype":"classification", "modelname":"knn", "n_neighbours":3,"ishyper":"True"},{"modeltype ":"classification", "modelname":"decision trees", "ishyper":False}]}
+        with open(preprocessconfig) as f:
+            preprocessconfig= yaml.load(f,Loader=FullLoader) #for split ratio
+        
 
+        with open(dataconfig) as f:
+            dataconfig= yaml.load(f,Loader=FullLoader) #has info about where the data is stored and where the model must be stored
 
-        with open("config/model.yaml") as f:
-            model_uni= yaml.load(f,Loader=FullLoader)
-
+        with open(userinputconfig) as file:
+            userinputconfig=yaml.load(file,Loader=FullLoader) #modified version of model universe for each run
         models=[]
         ans=[]
-        for i in parameters['models']:
-            hypers=[]
-            keylist=[]
-            if i["ishyper"]:
-                for key,val in i["hyper"].items():
-                    keylist.append(key)
-                    hypers.append(key+"="+str(val))
-                model_str=i["modelname"] + "(" + ", ".join(hypers) + ")"
-                print(model_str)
-                optimize(model_str,keylist,i["modelname"],config)
+
+        test_ratio=preprocessconfig["split_ratio_test"] / 100
+        xdata=dataconfig["Xdata"]
+        ydata=dataconfig["Ydata"]
+        
+        for model in userinputconfig:
+            if model["isSelected"]:
+                if model["type"]=='Classification':
+                    metrics=pd.DataFrame(columns = ['modelname','accuracy_score','recall_score','precision_score','f1_score','cohen_kappa_score','matthews_corrcoef'])
+                
+                elif model["type"]=='Regression':
+                    metrics=pd.DataFrame(columns=['modelname','mean_absolute_error','mean_squared_error','r2_score','mean_squared_log_error'])
+                
+
+                hypers=[]
+                keylist=[]
+                for feature in model["hyper"]:
+                    if feature["ischanged"]:
+                        keylist.append(feature["name"])
+                        hypers.append(feature["name"]+"="+ str(feature["value"]))
+                model_str=model["modelname"] + "(" + ", ".join(hypers) + ")"
+    
+                metrics=hp.optimize(model_str,model["modelname"],userinputconfig,xdata,ydata,metrics,dataconfig)
+                
+        metricsLocation=os.path.join(dataconfig["location"],"metrics.csv")
+        metrics.to_csv(metricsLocation, index=True, index_label="modelname")

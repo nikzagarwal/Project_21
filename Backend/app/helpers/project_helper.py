@@ -1,3 +1,5 @@
+import re
+from Backend.app.helpers.allhelpers import serialiseDict
 import random
 from Backend.app.dbclass import Database
 from Backend.app.config import settings
@@ -11,8 +13,10 @@ def projectEntity(item) -> dict:
         "projectID":item["projectID"],
         "projectName":item["projectName"],
         "rawDataPath":item["rawDataPath"],
+        "projectFolderPath": item["projectFolderPath"],
         "belongsToUserID":item["belongsToUserID"],
-        "listOfDataIDs":item["listOfDataIDs"]
+        "listOfDataIDs":item["listOfDataIDs"],
+        "autoConfigFileLocation": item["autoConfigFileLocation"]
     }
 
 def projectsEntity(entity) -> list:
@@ -29,15 +33,27 @@ def edit_project():
     pass
 
 def get_raw_data_path(projectID):
-    result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
-    if result:
-        return result["rawDataPath"]   #path string returned
-    else:
+    try:  
+        result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        result=serialiseDict(result)
+        if result is not None:
+            return result["rawDataPath"]   #path string returned
+        else:
+            return '/'
+    except:
+        print("An Error Occured While Retreiving rawDataPath from the Project Collection")
         return '/'
 
 def get_project_id(userID):
-    result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
-    return result["projectID"]
+    try:
+        result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
+        result=serialiseDict(result)
+        if result is not None:
+            return result["projectID"]
+        else:
+            return 0
+    except:
+        print("An Error Occured While Retreiving projectID from the Project Collection")
 
 def merge_project_path(projectName):
     projectPath = projectName+"_"+"%0.16d"%random.randint(0,9999999999999999)
