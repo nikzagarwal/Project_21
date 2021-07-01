@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 
-class Section6 extends Component {
+class ProjectsSection6 extends Component {
     handleModelResult = event => {
         event.preventDefault();
-        var theFormItself = document.getElementById('section6');
+        var theFormItself = document.getElementById('projectsection6');
         $(theFormItself).hide();
 
-        var theFormItself2 = document.getElementById('section5');
+        var theFormItself2 = document.getElementById('projectsection5');
         $(theFormItself2).show();
         this.props.handler(event.target.value);
 
@@ -43,7 +43,7 @@ class Section6 extends Component {
         }
         if (this.props.isauto === false) {
             return (
-                <div className="section6" id="section6">
+                <div className="section6" id="projectsection6">
 
                     
                     <div className=" sec6heading">
@@ -59,7 +59,7 @@ class Section6 extends Component {
         }
         else {
             return (
-                <div className="section6 " id="section6">
+                <div className="section6 " id="projectsection6">
 
                     {/* <div className=" sec6heading">
                         <h1>Results</h1>
@@ -92,4 +92,4 @@ class Section6 extends Component {
     }
 }
 
-export default Section6;
+export default ProjectsSection6;
