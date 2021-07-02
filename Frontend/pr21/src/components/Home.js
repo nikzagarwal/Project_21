@@ -8,6 +8,7 @@ import ManualModel from './manualmodel.js';
 import Section1 from './section1.js';
 import Section3 from './section3.js';
 import Section4 from './section4.js';
+import Section7 from './section7.js';
 // import Section5 from './section5.js';
 // import Section6 from './section6.js';
 import Papa from 'papaparse';
@@ -16,7 +17,7 @@ class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            userID: 101,
+            // userID: 101,
             projectname: '',
             train: undefined,
             mtype: 'classification',
@@ -26,10 +27,14 @@ class Home extends Component {
             nulltype: 'NA',
             currentmodel: 1,
             traindata: "{0:0}",
-            projectdetail: {
+            modeldetail: {
                 "Successful": "False",
                 "dataID": 0,
                 "modelID": 0,
+                "projectID": 0,
+                "userID": 0
+            },
+            projectdetail: {
                 "projectID": 0,
                 "userID": 0
             }
@@ -93,7 +98,13 @@ class Home extends Component {
         // console.log(formdata.getAll('train'))
 
         axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-            .then((res) => { console.log("Successful1", res) },
+            .then((res) => {
+                console.log("Successful1", res);
+                this.setState({
+                    projectdetail: res.data
+                })
+                console.log(this.state.projectdetail)
+            },
                 (error) => { console.log(error) });
     }
     handleAuto() {
@@ -136,21 +147,31 @@ class Home extends Component {
         $(theFormItself3).show();
         var theFormItself4 = document.getElementById('loader');
         $(theFormItself4).show();
-        let userID = this.state.userID
+        this.setState({
+            modeldetail: {
+                "Successful": "False",
+                "dataID": 0,
+                "modelID": 0,
+                "projectID": 0,
+                "userID": 0
+            },
+        })
+        let userID = this.state.projectdetail["userID"]
+        let projectID = this.state.projectdetail["projectID"]
         let isauto = this.state.auto
         let target = this.state.target
         let modelnumber = this.state.modelnum
         let nulltype = this.state.nulltype
-        let data = { userID, isauto, target, modelnumber, nulltype }
+        let data = { userID, projectID, isauto, target, modelnumber, nulltype }
         // console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))
             .then(res => {
                 console.log("Successful2", res)
                 this.setState({
-                    projectdetail: res.data
+                    modeldetail: res.data
                 })
-                console.log(this.state.projectdetail)
+                console.log(this.state.modeldetail)
             },
                 (error) => { console.log(error) });
 
@@ -171,6 +192,36 @@ class Home extends Component {
         $(theFormItself).toggle();
 
     }
+    handleGoForm2() {
+        var theFormItself = document.getElementById('form3');
+        $(theFormItself).hide();
+        var theFormItself3 = document.getElementById('form4');
+        $(theFormItself3).hide();
+        var theFormItself4 = document.getElementById('form5');
+        $(theFormItself4).hide();
+        var theFormItself2 = document.getElementById('form2');
+        $(theFormItself2).show();
+
+    }
+    handleNewProject() {
+        var theFormItself = document.getElementById('form2');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('form3');
+        $(theFormItself2).hide();
+        var theFormItself3 = document.getElementById('form4');
+        $(theFormItself3).hide();
+        var theFormItself4 = document.getElementById('form5');
+        $(theFormItself4).hide();
+        var theFormItself5 = document.getElementById('loader');
+        $(theFormItself5).hide();
+        var theFormItself6 = document.getElementById('section6');
+        $(theFormItself6).hide();
+        var theFormItself7 = document.getElementById('section5');
+        $(theFormItself7).hide();
+        var theFormItself8 = document.getElementById('form1');
+        $(theFormItself8).show();
+
+    }
 
     render() {
         return (
@@ -183,7 +234,12 @@ class Home extends Component {
                 {/* ************************************************************************************************************************ */}
                 {/* Section2  */}
                 <div className="section2" id="section2">
+                    <div className="newproject" >
+                        <button className="newprojectbtn" onClick={this.handleNewProject}  >Start New Project </button>
+
+                    </div>
                     <div className="createpagebox " id="sec1heading">
+
                         <h1>Start With Your Project</h1>
                         {/* <p>" Just fill relevant feeds and select few choices and you are good to go"</p> */}
                     </div>
@@ -269,17 +325,22 @@ class Home extends Component {
                     </div>
                     {/* form3 */}
                     <div className="container" id="form3">
+                        <div className="goback">
+                            <button className="backbtn" onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+                        </div>
                         <form onSubmit={this.handleSubmit2}>
                             <div className="createform">
 
+
                                 <div className="row">
                                     <div className="col-40">
-                                        <label htmlFor="target">Target Variable</label>
+
+                                        <label htmlFor="target">Target Variable  <span className="ibtn">i <span id="idesc">Select column which you want model to predict</span></span></label>
                                     </div>
                                     <div className="col-60">
                                         <select name="target" id="target" onChange={this.handleTargetChange}>
                                             {Object.keys(this.state.traindata[0]).map((key, i) =>
-                                                <option value={key}>{key}</option>
+                                                <option key={i} value={key} >{key}</option>
                                             )}
                                         </select>
                                         {/* <input type="text" id="target" name="target" onChange={this.handleTargetChange} placeholder="Enter target variable" required /> */}
@@ -310,11 +371,15 @@ class Home extends Component {
                         </form>
                     </div>
                     {/* loader */}
-                    <Result modelnum={this.state.modelnum} currentmodel={this.state.currentmodel} projectdetail={this.state.projectdetail} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} />
+                    <Result modelnum={this.state.modelnum} currentmodel={this.state.currentmodel} projectdetail={this.state.modeldetail} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} />
                     {/* ************************************************************************************************************************ */}
 
                     {/* form 4 for manual preprocessing */}
                     <div className="container" id="form4">
+                        <div className="goback">
+                            <button className="backbtn" onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+
+                        </div>
                         <div className="PreprocessForm">
                             <div className="autocheckbox">
                                 <input type="checkbox" id="autopreprocess" onClick={this.handleAutoPreprocess} name="autopreprocess" />
@@ -327,6 +392,9 @@ class Home extends Component {
                     </div>
                     {/* form 5 for model and hypeparameters selection*/}
                     <div className="container" id="form5">
+                    <div className="goback">
+                            <button className="backbtn" onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+                        </div>
                         <div className="Modelselection">
                             <div className="autocheckbox">
                                 <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
@@ -355,6 +423,10 @@ class Home extends Component {
                 {/* Section 6 */}
                 {/* This section is to show all models trained */}
                 {/* <Section6 modelnum={this.state.modelnum} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} /> */}
+                {/* ************************************************************************************************************************ */}
+                {/* Section 7 */}
+                {/* This section is to show detail of every Project  */}
+                <Section7 handler={this.handleCurrentModel} currentmodel={this.state.currentmodel} />
 
             </div >
         );
