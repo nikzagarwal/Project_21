@@ -49,6 +49,10 @@ class Project(BaseModel):
     belongsToUserID: int=Field(...)
     listOfDataIDs: Optional[List[int]]
     autoConfigFileLocation: Optional[str]
+    plotsPath: Optional[str]
+    projectType: Optional[str]
+    isAuto: Optional[bool]
+    target: Optional[str]
 
     class Config:
         arbitrary_types_allowed=True
@@ -61,7 +65,11 @@ class Project(BaseModel):
                 "projectFolderPath": "/path/to/data",
                 "belongsToUserID": 101,
                 "listOfDataIDs": [2,4],
-                "autoConfigFileLocation": "path/to/auto/config/file.yaml"
+                "autoConfigFileLocation": "path/to/auto/config/file.yaml",
+                "plotsPath": "path/to/plot/file.html",
+                "projectType":"regression",
+                "isAuto": "true",
+                "target": "target"
             }
         }
 
@@ -203,6 +211,8 @@ class FormData(BaseModel):
     target:Optional[str]
     modelnumber:Optional[int]
     nulltype:Optional[str]
+    projectID: Optional[int]
+    userID: Optional[int]
 
     class Config:
         arbitrary_types_allowed=True
@@ -212,6 +222,8 @@ class FormData(BaseModel):
                 "isauto":True,
                 "target":"TargetColumn",
                 "modelnumber":2,
-                "nulltype":"NA"
+                "nulltype":"NA",
+                "projectID": 45,
+                "userID": 101
             }
         }

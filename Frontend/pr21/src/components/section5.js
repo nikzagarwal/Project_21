@@ -8,16 +8,10 @@ import Download from './download.js';
 import Metrics from './metrics.js';
 // import Papa from 'papaparse';
 import axios from 'axios';
-
+import Papa from 'papaparse';
 class Section5 extends Component {
 
-    handleGoBack = event => {
-        event.preventDefault();
-        var theFormItself = document.getElementById('section5');
-        $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('section6');
-        $(theFormItself2).show();
-    }
+
 
     constructor() {
         super();
@@ -25,9 +19,35 @@ class Section5 extends Component {
             // csvfile: undefined,
             data: "",
             inferencefile: undefined,
-            plot:""
+            plot: "",
+            countplot: 0
         };
-        // this.updateData = this.updateData.bind(this);
+        this.updateData = this.updateData.bind(this);
+    }
+    // componentDidMount(){
+    //     this.setState({data:""})
+    // }
+    handleGoBack = event => {
+        event.preventDefault();
+        var theFormItself = document.getElementById('section5');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('section6');
+        $(theFormItself2).show();
+        var thebtnItself = document.getElementById('show');
+        $(thebtnItself).show();
+        this.setState({ data: "" });
+
+    }
+    handleRetrain = event => {
+        event.preventDefault();
+        var theFormItself = document.getElementById('section5');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('form2');
+        $(theFormItself2).show();
+        // var theFormItself3 = document.getElementById('section6');
+        // $(theFormItself3).show();
+        
+        
     }
 
     // handleChange = event => {
@@ -35,29 +55,46 @@ class Section5 extends Component {
     //         csvfile: event.target.files[0]
     //     });
     // };
-
+    updateData(result) {
+        this.setState({
+            data: result.data
+        });
+        // console.log(this.state.traindata);
+    }
     handlemetric = event => {
-        const projectid=this.props.projectdetails["projectID"];
-        const FileDownload = require('js-file-download');
-        axios.get('http://localhost:8000/getMetrics/'+projectid)
+        var thebtnItself = document.getElementById('show');
+        $(thebtnItself).hide();
+        this.setState({ data: "a" });
+        const projectid = this.props.projectdetails["projectID"];
+        const modelid = this.props.projectdetails["modelID"];   
+        axios.get('http://localhost:8000/getMetrics/'+projectid+"/"+modelid)
             .then((response) => {
                 console.log(response)
                 console.log(response.data);
-                FileDownload(response.data, 'metrics.csv');
-                this.setState({data: response.data});
-                console.log(this.state.data);
+                Papa.parse(response.data, {
+                    complete: this.updateData,
+                    header: true
+                });
+                // FileDownload(response.data, 'metrics.csv');
+                // this.setState({data: response.data});
+                // console.log(this.state.data);
             });
+
+
     }
     handlePlot = event => {
         const FileDownload = require('js-file-download');
-        const projectid=this.props.projectdetails["projectID"];
-        axios.get('http://localhost:8000/getPlots/'+projectid)
-            .then((response) => {
-                // console.log(response);
-                FileDownload(response.data, 'plot.html');
-                this.setState({plot: response.data});
-                // console.log (this.state.plot)
-            });
+        const projectid = this.props.projectdetails["projectID"];
+        if (this.state.countplot === 0) {
+            axios.get('http://localhost:8000/getPlots/' + projectid)
+                .then((response) => {
+                    // console.log(response);
+                    FileDownload(response.data, 'plot.html');
+                    this.setState({ plot: response.data });
+                    // console.log (this.state.plot)
+                });
+            this.setState({ countplot: 1 })
+        }
     }
 
     // importCSV = () => {
@@ -85,12 +122,22 @@ class Section5 extends Component {
         event.preventDefault();
         const formdata = new FormData();
         formdata.append(
-            "InferenceData",
+            "projectID",
+            this.props.projectdetails["projectID"]
+
+        );
+        formdata.append(
+            "modelID",
+            this.props.projectdetails["modelID"]
+
+        );
+        formdata.append(
+            "inferenceDataFile",
             this.state.inferencefile
 
         );
         const FileDownload = require('js-file-download');
-        axios.post('http://localhost:8000/inference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful", res)
                 FileDownload(res.data, 'prediction.csv');
@@ -107,6 +154,13 @@ class Section5 extends Component {
                     <button className="backbtn" onClick={this.handleGoBack}  >&lArr; Go Back to Models </button>
 
                 </div>
+                {this.props.showRetrain === false ? null :
+                    <div className="goback">
+                        <button className="backbtn" onClick={this.handleRetrain}  >&lArr;Retrain</button>
+
+                    </div>
+                }
+
                 <div className="sec5heading">
                     <h1>Results (Model Number:  {this.props.currentmodel})</h1>
                 </div>
@@ -116,7 +170,7 @@ class Section5 extends Component {
                     {/* <!-- Nav tabs --> */}
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                         <li className="nav-item" role="presentation">
-                            <button className="nav-link tabbtn active" id="Metrics-tab"  data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">Metrics</button>
+                            <button className="nav-link tabbtn active" id="Metrics-tab" data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">Metrics</button>
                         </li>
                         <li className="nav-item" role="presentation">
                             <button className="nav-link tabbtn " id="plot-tab" onClick={this.handlePlot} data-bs-toggle="tab" data-bs-target="#plot" type="button" role="tab" aria-controls="Plot" aria-selected="false">Plots</button>
@@ -136,7 +190,7 @@ class Section5 extends Component {
                             {/* <input type="file" className="form-control" id="metric" onChange={this.handleChange} accept=".csv" name="metric"
                                 placeholder="enter data in csv" required />
                             <button onClick={this.importCSV} className="sec5btn">Import</button> */}
-                            <button onClick={this.handlemetric} className="sec5btn">Show</button>
+                            <button onClick={this.handlemetric} className="sec5btn" id="show">Show</button>
                             <Metrics data={this.state.data} />
                         </div>
 
@@ -146,7 +200,7 @@ class Section5 extends Component {
 
                             <div className="container">
                                 <div className="d-flex flex-row justify-content-center flex-wrap">
-                                    <Plots plot={this.state.plot}/>
+                                    <Plots plot={this.state.plot} />
                                     {/* <div className="d-flex flex-column plot" >
                                          <img src="3" className="img-fluid" alt=" Plot3 not for this model " />*/}
 
