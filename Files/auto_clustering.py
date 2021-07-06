@@ -28,11 +28,6 @@ class Autoclu:
 
         return clean_data_address     
 
-
-    ####### Following function needs to be chanced as in we need to "create_model('kmeans')" instade of "compare_model()".
-    
-   
-    
     def model_create(self,config,type="kmeans"):
         config=yaml.load(open(config),Loader=SafeLoader)
         model=create_model(type)
@@ -81,7 +76,11 @@ class Autoclu:
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(model,config)
             pickleFolderPath=self.model_plot(model,pickleFolderPath)
+<<<<<<< HEAD
             return {"Successful": True, "cleanDataPath": cleanDataPath, "resultPath":resultLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath,}
+=======
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":resultLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
+>>>>>>> 0f882a5d88aed74200d2dd96437933219b5add6a
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}

@@ -1,10 +1,12 @@
 import os
 import shutil
+import yaml
 from fastapi import FastAPI, Form
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
 from fastapi.responses import JSONResponse, FileResponse
+from yaml.loader import SafeLoader
 from Backend.app.dbclass import Database
 from Backend.app.config import settings
 from Backend.app.routers.user import user_router
@@ -18,10 +20,11 @@ from Backend.app.helpers.project_helper import create_project_id
 from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
-from Backend.app.schemas import FormData, Inference
+from Backend.app.schemas import FormData, Inference, PreprocessJSONData
 from Backend.utils import generate_project_folder, generate_project_auto_config_file
 from Files.auto import Auto
 from Files.autoreg import AutoReg
+from Files.auto_clustering import Autoclu
 from Files.plot import plot
 from Files.inference import Inference
 
@@ -127,16 +130,20 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
         return JSONResponse(Operation["Error"])
 
 @app.post('/auto',tags=["Auto Mode"])
-def start_auto_preprocessing(formData:FormData):
+def start_auto_preprocessing_and_training(formData:FormData):
     formData=dict(formData)
     projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(formData["projectID"],currentIDs,formData,Project21Database)
     resultsCache.set_auto_mode_status(False)
     if(problem_type=='regression'):
         automatic_model_training=AutoReg()
         Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
-    else:
+    elif (problem_type=='classification'):
         automatic_model_training=Auto()
         Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
+    elif (problem_type=='clustering'):
+        automatic_model_training=Autoclu()
+        Operation=automatic_model_training.auto()
+
         
     if Operation["Successful"]:
         try:
@@ -326,6 +333,18 @@ def get_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenc
         return JSONResponse({"Metrics Generation":"Failed"})
     
 
+@app.get('/getPreprocessParam',tags=["Manual Mode"])
+def get_preprocessing_parameters():
+    yaml_json=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
+    return JSONResponse(yaml_json)
+
+@app.post('/getHyperparams',tags=["Manual Mode"])
+def get_hyper_parameters(preprocessJSONData:PreprocessJSONData):
+    return preprocessJSONData
+
+@app.post('/manual',tags=["Manual Mode"])
+def start_manual_training():
+    return JSONResponse({"Working":"True"})
 
 
 # @app.websocket("/ws")
