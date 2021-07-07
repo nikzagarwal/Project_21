@@ -75,13 +75,11 @@ class Autoclu:
             model, resultLocation=self.models_create(config,config2["type"])
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(model,config)
-<<<<<<< HEAD
+
             plotFolderPath=self.model_plot(model,pickleFolderPath)
             return {"Successful": True, "cleanDataPath": cleanDataPath, "resultPath":resultLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
-=======
-            pickleFolderPath=self.model_plot(model,pickleFolderPath)
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":resultLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
->>>>>>> c615d9b62de13be52a1d1015bb41b841d796066f
+
+            
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}
