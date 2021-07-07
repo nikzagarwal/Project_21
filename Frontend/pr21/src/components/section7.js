@@ -15,6 +15,7 @@ class Section7 extends Component {
                 "dataID": 0,
                 "modelID": 0,
                 "projectID": 0,
+                "modelType":"regression"
             },
             projectList: {
                 0:{
@@ -51,7 +52,7 @@ class Section7 extends Component {
         axios.get('http://localhost:8000/getAllProjects?userID=101')
             .then((response) => {
                 console.log(response.data)
-                if(response.data!=="")
+                if(response.data.length!==0)
                 this.setState({projectList: response.data});
             });
 
@@ -76,7 +77,8 @@ class Section7 extends Component {
             currentProjectDetails: {
                 "dataID": this.state.projectList[event].listOfDataIDs[modelnumber],
                 "modelID": this.state.projectList[event].listOfDataIDs[modelnumber],
-                "projectID": this.state.projectList[event].projectID
+                "projectID": this.state.projectList[event].projectID,
+                "modelType":this.state.projectList[event].modelType
             }
         })
     }

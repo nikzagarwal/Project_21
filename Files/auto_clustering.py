@@ -21,8 +21,9 @@ class Autoclu:
         config=yaml.load(open(config),Loader=SafeLoader)
         df = pd.read_csv(config["raw_data_address"])
         
-        clu = setup(data = df, normalize = True, target = config ,silent=True)
-        X_train = get_config('X_train')    
+        clu = setup(data = df, normalize = True ,silent=True)
+        # X_train = get_config()    
+        X_train=df
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
         clean_data_address = os.path.join(config["location"],"clean_data.csv")
 
@@ -66,20 +67,25 @@ class Autoclu:
     
     def model_plot(self,model,location):
         shutil.move(plot_model(model,save=True),location)
-        return location
+        return os.path.join(location,'Cluster PCA Plot (2d).html')
 
     def auto(self,config):
         try:
             config2=yaml.load(open(config),Loader=SafeLoader)
             cleanDataPath=self.auto_setup(config)
-            model, resultLocation=self.models_create(config,config2["type"])
+            model, resultLocation=self.model_create(config,config2["clusteringType"])
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(model,config)
+<<<<<<< HEAD
 
             plotFolderPath=self.model_plot(model,pickleFolderPath)
             return {"Successful": True, "cleanDataPath": cleanDataPath, "resultPath":resultLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
 
             
+=======
+            clusterPlotLocation=self.model_plot(model,os.path.join(pickleFolderPath,os.pardir))
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":resultLocation, "clusterPlotLocation":clusterPlotLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
+>>>>>>> 9ec01fa6d83a4c177333a7e4d27e2ae808854b82
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}
