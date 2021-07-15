@@ -2,21 +2,13 @@ import numpy as np
 import pandas as pd
 
 # Handling missing data using-
-from sklearn.impute import SimpleImputer
 from sklearn.impute import KNNImputer
 
-# Scaling and Teansforming using- 
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import StandardScaler
- 
 # Handling non-numeric data using-
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder 
 
-from pycaret.classification import *
-from pycaret.regression import *
-# from pycaret.clustering import *
-# from pycaret.nlp import *
+
 import os
 import yaml
 from scipy import stats
@@ -65,8 +57,6 @@ class Preprocess:
                 else:
                     df.replace(to_replace =[config_data["na_notation"]],value =0)
             
-        
-
         #feature scaling
         if config_data['scaling_column_name'][0] != None:
             for index, column in enumerate(config_data["scaling_column_name"]):
@@ -74,22 +64,32 @@ class Preprocess:
                 df_value = df[[column]].values
 
                 if type == "normalization":
-                    scaler = MinMaxScaler()
-            
+                    min = config_data['scaling_values'][index]['min']
+                    max = config_data['scaling_values'][index]['max']
+
+                    df_std = (df_value - min / max - min)
+                    scaled_value = df_std * (1 - 0)
+                    
+                    
                 elif type == 'standarization':
-                    scaler = StandardScaler()
-                        
-                scaled_value =scaler.fit_transform(df_value)
+                    std = config_data['scaling_values'][index]['std']
+                    mean = config_data['scaling_values'][index]['mean']
+                    
+                    df_std = (df_value - df_value.min(axis=0)) / (df_value.max(axis=0) - df_value.min(axis=0))
+                    scaled_value = (df_value - mean) / std 
+                                    
+                    
                 df[[column]] = scaled_value
                 
-                
+   
         #### handling catogarical data
         # encoding
         # Under the following if block only the columns selected by the used will be encoded as choosed by the used. 
         if config_data['encode_column_name'][0] != None:
             for index, column in enumerate(config_data["encode_column_name"]):
                 type = config_data["encoding_type"][index]
-                    
+                
+                                    
                 if type == "Label Encodeing":
                     encoder = LabelEncoder()
                     df[column] = encoder.fit_transform(df[column])
