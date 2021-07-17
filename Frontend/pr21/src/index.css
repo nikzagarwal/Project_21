@@ -19,7 +19,7 @@ code {
 }
 
 .ibtn{
-  background-color: #160641;
+  background-color: #04080F;
   border-radius: 5em;
   font-size: small;
   /* font-family: 'Times New Roman', Times, serif; */
@@ -78,6 +78,8 @@ code {
   /* background-color: rgba(10, 0, 2, 0.815); */
   /* background-color: #DAE3E5; */
   height:6em;
+  /* background-color: #dae3e51e; */
+  box-shadow: 1px 5px 20px 5px rgb(224, 232, 248);
 }
 .navbar-brand
 {
@@ -91,7 +93,7 @@ code {
 }
 .navbar-brand:hover
 {
-  color: rgba(109, 160, 231, 0.836);
+  color: #2a62af;
 }
 .nav-link
 {
@@ -165,7 +167,7 @@ code {
 
 /* background-image: url(./assets/img/bg1.jpg); */
 /* background:linear-gradient(rgba(22, 1, 32, 0.384),rgba(142, 129, 153,0.8 )), url(./assets/img/bg1.jpg); */
-background-image: url(./assets/img/bg27.png);
+background-image: url(./assets/img/bg29.png);
  background-size: cover;
  width: 100%;
  /* opacity: 0.9; */
@@ -273,7 +275,7 @@ background-image: url(./assets/img/bg27.png);
 .section2
 {
   /* padding: 5em; */
-  padding-top: 2em;
+  /* padding-top: 2em; */
   min-height: 100vh;
   background-color: #DAE3E5;
   /* background-image:linear-gradient(to left bottom,rgba(228, 222, 235, 0.76),rgba(32, 12, 70, 0.904)); */
@@ -283,16 +285,16 @@ background-image: url(./assets/img/bg27.png);
 } 
 .createpagebox
 {
-  padding: 1em 5em 1em 5em;
-  margin: 1em;
-  /* background-color: #D4C2FC; */
+  padding: 3em 5em 3em 5em;
+  background-color: #A1C6EA;
+}
+.createpagebox h1{
+  font-weight: 600;
+  font-family: 'Roboto', sans-serif;
   text-align: left;
   color:#04080f;
-  font-family: 'Roboto', sans-serif;
 }
-.d-inline-block{
-  font-weight: 600;
-}
+
 
 #sec1heading2{
  display: none;
@@ -595,7 +597,7 @@ input[type=text],input[type=number] ,select, textarea {
 }
 .autocheckbox{
   position: absolute;
-  padding-left: 60%;
+  /* padding-left: 60%; */
   font-size: x-large;
 }
 .autocheckbox input[type=checkbox]{
@@ -621,6 +623,9 @@ input[type=text],input[type=number] ,select, textarea {
 .dropdown:hover .dropdown-content {
   display: block;
 }
+.dropdown{
+  position:initial;
+}
 .dropdown-content2 {
   display: none;
   position: absolute;
@@ -644,9 +649,9 @@ input[type=text],input[type=number] ,select, textarea {
   border-radius: 1.2em;
   margin-left:7em;
   width:80%;
-  background-color: #04080F;
+  background-color: #507DBC;
   height: 20em;
-  box-shadow: 10px 10px 10px 10px grey;
+  box-shadow: 5px 5px 5px 5px grey;
   /* background-color: #000; */
 }
 .loader p{
@@ -733,6 +738,11 @@ input[type=text],input[type=number] ,select, textarea {
 .manualmodelheading{
   color: #fff;
 }
+
+/* form6 */
+#form6{
+  display: none;
+}
 /* ********************************************************************************************* */
 /* Section3 */
 .section3
@@ -760,10 +770,13 @@ margin-left: 5%;
 }
 .section3 h1{
   /* text-align: center; */
-  padding: 1em;
+  padding: 0.5em;
+  border-radius: 4px;
   color: #04080F;
   font-weight: 700;
- 
+ background-color: #A1C6EA;
+ width: 500px;
+ margin-left: 33%;
   text-align: center;
   /* font-family:'Staatliches', Verdana, Geneva, Tahoma, sans-serif; */
   font-family: 'Roboto', sans-serif;
@@ -779,7 +792,7 @@ margin: 0 auto;
   font-family: 'Roboto', sans-serif;
   float: none;
   position: relative;
-margin: 12em 20em 1em 25em;
+margin: 15em 20em 1em 25em;
 }
 @media screen and (max-width: 600px) 
 {
@@ -1033,7 +1046,7 @@ color: #fff;
   color: #04080F;
 }
 .sec6autocard{
-  background-image:linear-gradient(to left bottom , #180c42e1,rgba(68, 7, 12, 0.959));
+  /* background-image:linear-gradient(to left bottom , #180c42e1,rgba(68, 7, 12, 0.959)); */
   width: 50%;
   margin-left: 25%;
   margin-right: 25%;
@@ -1077,8 +1090,8 @@ color: #fff;
   font-family: 'Roboto', sans-serif;
   border-radius: 4px;
   padding: 0.8em;
-  margin-left: 44%;
-  margin-right: 36%;
+  /* margin-left: 44%;
+  margin-right: 36%; */
 }
 
 /* ************************************************************************************************************************ */
@@ -1103,21 +1116,25 @@ table {
 
 .metricstable td {
 	padding: 15px;
-	background-color: #BBD1EA;
+	/* background-color: #BBD1EA; */
 	color: #000;
 }
 
 .metricstable th {
 	text-align: left;
   padding: 1em;
-  color: #fff;
+  color: #04080F;
   background-color: #507DBC;
 }
 
 .metricstable td :hover{
-			background-color: #A1C6EA;		
+			background-color: #BBD1EA;		
 }
-				
+.metricValue{
+  background-color: #A1C6EA;
+  text-align: center;
+  font-size: large;
+}	
 /* ************************************************************************************************************************ */
 /* plots */
 .plot{
@@ -1195,7 +1212,7 @@ table {
 }
 .metricsNote{
   text-align: center;
-  color: red;
+  color: rgb(3, 53, 99);
 }
 /* ************************************************************************************************************************ */
 
@@ -1205,7 +1222,7 @@ table {
   /* background-color: rgb(5, 3, 70); */
   /* background-image:linear-gradient(to top left,rgb(219, 219, 223),rgba(143, 143, 145, 0.96)); */
   height: 5em;
-  background-color: #BBD1EA;
+  background-color: #DAE3E5;
 }
 .text-center{
   /* padding: 1em; */
