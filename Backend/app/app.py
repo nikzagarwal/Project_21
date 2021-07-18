@@ -20,13 +20,15 @@ from Backend.app.helpers.project_helper import create_project_id
 from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
-from Backend.app.schemas import FormData, Inference, PreprocessJSONFormData
-from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file
+from Backend.app.schemas import AutoFormData, TimeseriesFormData, PreprocessJSONFormData
+from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file
 from Files.auto import Auto
 from Files.autoreg import AutoReg
 from Files.auto_clustering import Autoclu
 from Files.plot import plot
 from Files.inference import Inference
+from Files.preprocess import Preprocess
+from Files.timeseries_preprocess import TimeseriesPreprocess
 
 origins=settings.CORS_ORIGIN
 
@@ -98,7 +100,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
                 "projectFolderPath":Operation["ProjectFolderPath"],
                 "belongsToUserID": currentIDs.get_current_user_id(),
                 "listOfDataIDs":[],
-                "autoConfigFileLocation": None,
+                "configFileLocation": None,
                 "plotsPath": None,
                 "projectType": mtype,
                 "target":None
@@ -131,9 +133,9 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
         return JSONResponse(Operation["Error"])
 
 @app.post('/auto',tags=["Auto Mode"])
-def start_auto_preprocessing_and_training(formData:FormData):
-    formData=dict(formData)
-    projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(formData["projectID"],currentIDs,formData,Project21Database)
+def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
+    autoFormData=dict(autoFormData)
+    projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(autoFormData["projectID"],currentIDs,autoFormData,Project21Database)
     resultsCache.set_auto_mode_status(False)
     if(problem_type=='regression'):
         automatic_model_training=AutoReg()
@@ -150,9 +152,9 @@ def start_auto_preprocessing_and_training(formData:FormData):
             Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
                 "dataID": dataID,
                 "cleanDataPath": Operation["cleanDataPath"],
-                "target": formData["target"],
+                "target": autoFormData["target"],
                 "belongsToUserID": currentIDs.get_current_user_id(),
-                "belongsToProjectID": formData["projectID"]
+                "belongsToProjectID": autoFormData["projectID"]
             })
             currentIDs.set_current_data_id(dataID)
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
@@ -161,17 +163,17 @@ def start_auto_preprocessing_and_training(formData:FormData):
                 "modelType": problem_type,
                 "pickleFolderPath": Operation["pickleFolderPath"],
                 "pickleFilePath": Operation["pickleFilePath"],
-                "belongsToUserID": formData["userID"],
-                "belongsToProjectID": formData["projectID"],
+                "belongsToUserID": autoFormData["userID"],
+                "belongsToProjectID": autoFormData["projectID"],
                 "belongsToDataID": dataID
             })
             Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-                "belongsToUserID": formData["userID"],
-                "belongsToProjectID": formData["projectID"],
+                "belongsToUserID": autoFormData["userID"],
+                "belongsToProjectID": autoFormData["projectID"],
                 "belongsToModelID": dataID,
                 "addressOfMetricsFile": Operation["metricsLocation"]
             })
-            result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":formData["projectID"]})
+            result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":autoFormData["projectID"]})
             result=serialiseDict(result)
             if result is not None:
                 if result["listOfDataIDs"] is not None:
@@ -180,18 +182,18 @@ def start_auto_preprocessing_and_training(formData:FormData):
                     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
                         "$set":{
                             "listOfDataIDs":newListOfDataIDs,
-                            "autoConfigFileLocation": projectAutoConfigFileLocation,
-                            "isAuto": formData["isauto"],
-                            "target": formData["target"]
+                            "configFileLocation": projectAutoConfigFileLocation,
+                            "isAuto": autoFormData["isauto"],
+                            "target": autoFormData["target"]
                             }
                         })
                 else:
                     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
                         "$set":{
                             "listOfDataIDs":[dataID],
-                            "autoConfigFileLocation": projectAutoConfigFileLocation,
-                            "isAuto": formData["isauto"],
-                            "target": formData["target"]
+                            "configFileLocation": projectAutoConfigFileLocation,
+                            "isAuto": autoFormData["isauto"],
+                            "target": autoFormData["target"]
                             }
                         })
                 if (problem_type=='clustering'):
@@ -209,7 +211,7 @@ def start_auto_preprocessing_and_training(formData:FormData):
         resultsCache.set_pickle_file_path(Operation["pickleFilePath"])
         resultsCache.set_pickle_folder_path(Operation["pickleFolderPath"])
         resultsCache.set_auto_mode_status(True)
-        return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": formData["projectID"], "dataID":dataID, "modelID": dataID})
+        return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": autoFormData["projectID"], "dataID":dataID, "modelID": dataID})
     else:
         return JSONResponse({"Successful":"False"})
 
@@ -249,11 +251,11 @@ def get_plots(projectID:int):       #check if it already exists - change locatio
             result=serialiseDict(result)
             if (result["projectType"]=='clustering'):
                 return FileResponse(result["clusterPlotLocation"],media_type="text/html",filename="plot.html")
-            if result["autoConfigFileLocation"] is not None:
+            if result["configFileLocation"] is not None:
                 if result["projectType"]=='clustering':
                     print("projecttype")
                 else:
-                    plotFilePath=plot(result["autoConfigFileLocation"]) #plot function requires the auto config file
+                    plotFilePath=plot(result["configFileLocation"]) #plot function requires the auto config file
                     try:
                         Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                             "$set": {
@@ -349,8 +351,11 @@ def get_preprocessing_parameters():
 @app.post('/getHyperparams',tags=["Manual Mode"])
 def get_hyper_parameters(preprocessJSONFormData:PreprocessJSONFormData):
     preprocessJSONFormData=dict(preprocessJSONFormData)
-    projectManualConfigFileLocation, dataID, problem_type = generate_project_manual_config_file(preprocessJSONFormData["projectID"],preprocessJSONFormData,Project21Database)
+    projectManualConfigFileLocation, dataID, problem_type, folderLocation = generate_project_manual_config_file(preprocessJSONFormData["projectID"],preprocessJSONFormData,Project21Database)
     # TODO: Call function manual preprocess generate the clean data and save it in DB
+    inferenceObj=Preprocess()
+    cleanDataPath=inferenceObj.manual_preprocess(projectManualConfigFileLocation, folderLocation)
+    print(cleanDataPath)
     # if(problem_type=='regression'):
     #     automatic_model_training=AutoReg()
     #     Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
@@ -396,7 +401,7 @@ def get_hyper_parameters(preprocessJSONFormData:PreprocessJSONFormData):
     #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
     #                     "$set":{
     #                         "listOfDataIDs":newListOfDataIDs,
-    #                         "autoConfigFileLocation": projectAutoConfigFileLocation,
+    #                         "configFileLocation": projectAutoConfigFileLocation,
     #                         "isAuto": formData["isauto"],
     #                         "target": formData["target"]
     #                         }
@@ -405,7 +410,7 @@ def get_hyper_parameters(preprocessJSONFormData:PreprocessJSONFormData):
     #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
     #                     "$set":{
     #                         "listOfDataIDs":[dataID],
-    #                         "autoConfigFileLocation": projectAutoConfigFileLocation,
+    #                         "configFileLocation": projectAutoConfigFileLocation,
     #                         "isAuto": formData["isauto"],
     #                         "target": formData["target"]
     #                         }
@@ -429,6 +434,95 @@ def get_hyper_parameters(preprocessJSONFormData:PreprocessJSONFormData):
 def start_manual_training():
     return JSONResponse({"Working":"True"})
 
+@app.post('/timeseries',tags=["Timeseries"])
+def timeseries_training(timeseriesFormData: TimeseriesFormData):
+    print(timeseriesFormData)
+    timeseriesFormData=dict(timeseriesFormData)
+    projectConfigFileLocation, projectFolderPath, dataID = generate_project_timeseries_config_file(timeseriesFormData["projectID"],currentIDs,timeseriesFormData,Project21Database)
+    timeseriesPreprocessObj=TimeseriesPreprocess()
+    cleanDataPath=timeseriesPreprocessObj.preprocess(projectConfigFileLocation,projectFolderPath)
+    try:
+        Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+            "dataID": dataID,
+            "cleanDataPath": cleanDataPath,
+            "target": timeseriesFormData["target"],
+            "belongsToUserID": timeseriesFormData["userID"],
+            "belongsToProjectID": timeseriesFormData["projectID"]
+        })
+    except Exception as e:
+        print("An Error Occured: ",e)
+    ########################################
+    # if Operation["Successful"]:
+    #     try:
+    #         Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+    #             "dataID": dataID,
+    #             "cleanDataPath": Operation["cleanDataPath"],
+    #             "target": autoFormData["target"],
+    #             "belongsToUserID": currentIDs.get_current_user_id(),
+    #             "belongsToProjectID": autoFormData["projectID"]
+    #         })
+    #         currentIDs.set_current_data_id(dataID)
+    #         Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
+    #             "modelID": dataID,
+    #             "modelName": "Default Name",
+    #             "modelType": problem_type,
+    #             "pickleFolderPath": Operation["pickleFolderPath"],
+    #             "pickleFilePath": Operation["pickleFilePath"],
+    #             "belongsToUserID": autoFormData["userID"],
+    #             "belongsToProjectID": autoFormData["projectID"],
+    #             "belongsToDataID": dataID
+    #         })
+    #         Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+    #             "belongsToUserID": autoFormData["userID"],
+    #             "belongsToProjectID": autoFormData["projectID"],
+    #             "belongsToModelID": dataID,
+    #             "addressOfMetricsFile": Operation["metricsLocation"]
+    #         })
+    #         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":autoFormData["projectID"]})
+    #         result=serialiseDict(result)
+    #         if result is not None:
+    #             if result["listOfDataIDs"] is not None:
+    #                 newListOfDataIDs=result["listOfDataIDs"]
+    #                 newListOfDataIDs.append(dataID)
+    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+    #                     "$set":{
+    #                         "listOfDataIDs":newListOfDataIDs,
+    #                         "configFileLocation": projectAutoConfigFileLocation,
+    #                         "isAuto": autoFormData["isauto"],
+    #                         "target": autoFormData["target"]
+    #                         }
+    #                     })
+    #             else:
+    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+    #                     "$set":{
+    #                         "listOfDataIDs":[dataID],
+    #                         "configFileLocation": projectAutoConfigFileLocation,
+    #                         "isAuto": autoFormData["isauto"],
+    #                         "target": autoFormData["target"]
+    #                         }
+    #                     })
+    #             if (problem_type=='clustering'):
+    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+    #                     "$set":{
+    #                         "clusterPlotLocation":Operation["clusterPlotLocation"]
+    #                     }
+    #                 })
+    #     except Exception as e:
+    #         print("An Error occured: ",e)
+    #         return JSONResponse({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
+        
+    #     resultsCache.set_clean_data_path(Operation["cleanDataPath"])
+    #     resultsCache.set_metrics_path(Operation["metricsLocation"])
+    #     resultsCache.set_pickle_file_path(Operation["pickleFilePath"])
+    #     resultsCache.set_pickle_folder_path(Operation["pickleFolderPath"])
+    #     resultsCache.set_auto_mode_status(True)
+    #     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": autoFormData["projectID"], "dataID":dataID, "modelID": dataID})
+    # else:
+    #     return JSONResponse({"Successful":"False"})
+
+
+    ########################################
+    return JSONResponse({"working":"true"})
 
 # @app.websocket("/ws")
 # async def training_status(websocket: WebSocket):

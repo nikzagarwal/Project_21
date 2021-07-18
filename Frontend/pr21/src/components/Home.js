@@ -39,7 +39,10 @@ class Home extends Component {
                 "projectID": 0,
                 "userID": 0
             },
-            preprocessForm: ""
+            preprocessForm: "",
+            frequency: "D",
+            dateColumn: '',
+            automanualpreprocess:false,
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -69,8 +72,14 @@ class Home extends Component {
         event.preventDefault();
         var theFormItself = document.getElementById('form1');
         $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('form2');
-        $(theFormItself2).show();
+        if (this.state.mtype !== "timeseries") {
+            var theFormItself2 = document.getElementById('form2');
+            $(theFormItself2).show();
+        }
+        else {
+            var theFormItself6 = document.getElementById('form6');
+            $(theFormItself6).show();
+        }
         const { train } = this.state;
         Papa.parse(train, {
             complete: this.updateData,
@@ -122,22 +131,34 @@ class Home extends Component {
         this.setState({
             auto: false
         })
-        var theFormItself = document.getElementById('form2');
-        $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('form4');
-        $(theFormItself2).show();
 
         axios.get('http://localhost:8000/getPreprocessParam')
             .then((response) => {
                 console.log(response);
                 this.setState({
-                    preprocessForm: response
+                    preprocessForm: response.data
+
                 })
             });
+        var theFormItself = document.getElementById('form2');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('form4');
+        $(theFormItself2).show();
     }
     handleTargetChange = event => {
         this.setState({
             target: event.target.value
+        })
+    }
+    handleDateColumnChange = event => {
+        this.setState({
+            dateColumn: event.target.value
+        })
+        console.log(this.state.dateColumn)
+    }
+    handleFrequencyChange = event => {
+        this.setState({
+            frequency: event.target.value
         })
     }
     handleModelNumChange = event => {
@@ -178,11 +199,17 @@ class Home extends Component {
         let projectID = this.state.projectdetail["projectID"]
         let isauto = this.state.auto
         let target = this.state.target
+        if (target === '') {
+            this.setState({
+                target: Object.keys(this.state.traindata[0])[0]
+            })
+            target = Object.keys(this.state.traindata[0])[0]
+        }
         let modelnumber = this.state.modelnum
         let nulltype = this.state.nulltype
         let clusteringType = this.state.clusteringType
         let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType }
-        // console.log(JSON.stringify(data))
+        console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))
             .then(res => {
@@ -196,6 +223,59 @@ class Home extends Component {
 
 
     }
+    handleSubmitTime = event => {
+        event.preventDefault();
+        var theFormItself = document.getElementById('form6');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('sec1heading');
+        $(theFormItself2).hide();
+        var theFormItself3 = document.getElementById('sec1heading2');
+        $(theFormItself3).show();
+        var theFormItself4 = document.getElementById('loader');
+        $(theFormItself4).show();
+        this.setState({
+            modeldetail: {
+                "Successful": "False",
+                "dataID": 0,
+                "modelID": 0,
+                "projectID": 0,
+                "userID": 0
+            },
+        })
+        let userID = this.state.projectdetail["userID"]
+        let projectID = this.state.projectdetail["projectID"]
+        let target = this.state.target
+        let dateColumn = this.state.dateColumn
+        let frequency = this.state.frequency
+        if (target === '') {
+            this.setState({
+                target: Object.keys(this.state.traindata[0])[0]
+            })
+            target = Object.keys(this.state.traindata[0])[0]
+        }
+        console.log(dateColumn)
+        if (dateColumn === '') {
+            this.setState({
+                dateColumn: Object.keys(this.state.traindata[0])[0]
+            })
+            dateColumn = Object.keys(this.state.traindata[0])[0]
+        }
+        let data = { userID, projectID, target, dateColumn, frequency }
+        console.log(JSON.stringify(data))
+
+        axios.post('http://localhost:8000/timeseries', JSON.stringify(data))
+            .then(res => {
+                console.log("SuccessfulTime", res)
+                this.setState({
+                    modeldetail: res.data
+                })
+                console.log(this.state.modeldetail)
+            },
+                (error) => { console.log(error) });
+
+
+
+    }
     handleCurrentModel = (val) => {
         this.setState({
             currentmodel: val
@@ -204,6 +284,9 @@ class Home extends Component {
     handleAutoPreprocess() {
         var theFormItself = document.getElementById('preprocesstable');
         $(theFormItself).toggle();
+        this.setState({
+            automanualpreprocess:true
+        })
 
     }
     handleAutoModelSelect() {
@@ -236,7 +319,9 @@ class Home extends Component {
         var theFormItself6 = document.getElementById('section6');
         $(theFormItself6).hide();
         var theFormItself7 = document.getElementById('section5');
-        $(theFormItself7).hide();
+        $(theFormItself7).hide()
+        var theFormItself9 = document.getElementById('form6');
+        $(theFormItself9).hide();
         var theFormItself8 = document.getElementById('form1');
         $(theFormItself8).show();
 
@@ -257,9 +342,9 @@ class Home extends Component {
 
                     </div>
                     <div className="createpagebox " id="sec1heading">
-                        <h1 className="d-inline-block">Start With Your Project</h1>
-                        <button className="btn btn-primary" onClick={this.handleNewProject}  >Start New Project </button>
-
+                        <h1 className="">Start your project
+                            <button className="btn btn-primary" onClick={this.handleNewProject}  >Start New Project </button>
+                        </h1>
                     </div>
                     <div className="createpagebox " id="sec1heading2">
                         <h1>TwentyOne Results</h1>
@@ -298,6 +383,7 @@ class Home extends Component {
                                             <option value="classification">Classification</option>
                                             <option value="regression">Regression</option>
                                             <option value="clustering">Clustering</option>
+                                            <option value="timeseries">Time Series</option>
                                         </select>
 
                                     </div>
@@ -345,7 +431,7 @@ class Home extends Component {
                     {/* form3 */}
                     <div className="container" id="form3">
                         <div className="goback">
-                            <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+                            <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > Go Back </button>
                         </div>
                         <form onSubmit={this.handleSubmit2}>
                             <div className="createform">
@@ -413,7 +499,7 @@ class Home extends Component {
                     {/* form 4 for manual preprocessing */}
                     <div className="container" id="form4">
                         <div className="goback">
-                            <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+                            <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  > Go Back </button>
 
                         </div>
                         <div className="PreprocessForm">
@@ -423,13 +509,13 @@ class Home extends Component {
                             </div>
                             <h1>Preprocess</h1>
                             <p>Go to each column and decide how would you like to preprocess it</p>
-                            <Preprocess rawdata={this.state.traindata} proprocessForm={this.state.preprocessForm} />
+                            <Preprocess rawdata={this.state.traindata} proprocessForm={this.state.preprocessForm} automanualpreprocess={this.state.automanualpreprocess}/>
                         </div>
                     </div>
                     {/* form 5 for model and hypeparameters selection*/}
                     <div className="container" id="form5">
                         <div className="goback">
-                            <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  >&lArr; Go Back </button>
+                            <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  > Go Back </button>
                         </div>
                         <div className="Modelselection">
                             <div className="autocheckbox">
@@ -441,7 +527,71 @@ class Home extends Component {
                             <ManualModel mtype={this.state.mtype} />
                         </div>
                     </div>
+                    {/* form6 for time series */}
+                    <div className="container" id="form6">
 
+                        <form onSubmit={this.handleSubmitTime}>
+                            <div className="createform">
+
+
+                                <div className="row">
+                                    <div className="col-40">
+
+                                        <label htmlFor="target">Target Variable  <span className="ibtn">i <span id="idesc">Select column which you want model to predict</span></span></label>
+                                    </div>
+                                    <div className="col-60">
+                                        <select name="target" id="target" onChange={this.handleTargetChange}>
+                                            {Object.keys(this.state.traindata[0]).map((key, i) =>
+                                                <option key={i} value={key} >{key}</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-40">
+
+                                        <label htmlFor="date">Date Column  <span className="ibtn">i <span id="idesc">Select column which says about Date</span></span></label>
+                                    </div>
+                                    <div className="col-60">
+                                        <select name="date" id="date" onChange={this.handleDateColumnChange}>
+                                            {Object.keys(this.state.traindata[0]).map((key, i) =>
+                                                <option key={i} value={key} >{key}</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="row">
+                                        <div className="col-40">
+                                            <label htmlFor="Frequency">What is frequency of time series? <span className="ibtn">i <span id="idesc">Is your data daily or monthly and so on</span></span></label>
+                                        </div>
+                                        <div className="col-60 ">
+                                            <select name="Frequency" id="Frequency" value={this.state.frequency} onChange={this.handleFrequencyChange}>
+                                                <option value="D">Calendar days</option>
+                                                <option value="S">Secondly</option>
+                                                <option value="T">Minutely</option>
+                                                <option value="H">Hourly</option>
+                                                <option value="B">Business days</option>
+                                                <option value="W">Weekly</option>
+                                                <option value="M">Monthly</option>
+                                                <option value="Q">Quaterly</option>
+                                                <option value="Y">Yearly</option>
+
+                                            </select>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div>
+                                    <button type="submit" className="btn btn-secondary" id="trainnow" >Train Now</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     {/* ************************************************************************************************************************ */}
                 </div>
                 {/* Section3  */}
