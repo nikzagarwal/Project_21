@@ -14,11 +14,11 @@ terminationFunction () {
 trap "terminationFunction" INT
 
 echo 'Project21 Setting up Python Virtual Environment...'
-python3 -m venv env
+python3 -m venv venv
 echo 'Project21 Python Virtual Environment Created...'
 
 #To Activate the Virtual Environment
-. env/bin/activate
+. venv/bin/activate
 
 #install requirements
 echo 'Installing Requirements in the virtual environment... This may take a while... (15-20 mins) Please be patient...'
