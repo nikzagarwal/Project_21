@@ -12,10 +12,15 @@ import shutil
 #import kaleido
 import plotly.express as px
 import plotly.graph_objects as go
+<<<<<<< HEAD
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from pmdarima.arima import StepwiseContext
 from statsmodels.tsa.arima_model import ARIMAResults
 import random
+=======
+import pickle
+
+>>>>>>> 7ca29f85c5bc16b6d767146540966ea498a22325
 from Files.metrics import Metrics as met
 
 class timeseries:
@@ -65,6 +70,7 @@ class timeseries:
         
         data=pd.read_csv(dataconfigfile["clean_data_address"])
         location=dataconfigfile["location"]
+<<<<<<< HEAD
         choice=dataconfigfile['frequency']
         diction={"D":1,"W":7,"M":30,"Q":90,"Y":365,}
         freq=12  ##hard coded as of now
@@ -73,6 +79,14 @@ class timeseries:
         #metrics=met.calculate_metrics("fbprophet","Regression",testpred,testactual)
         order=model.get_params(deep=False)['order']
         seasonal=model.get_params(deep=False)['seasonal_order']
+=======
+        testsize=int(len(data)*0.2)
+        train=data.iloc[:-testsize]
+        test=data.iloc[-testsize:]
+        model = auto_arima(train['y'],trace=True, seasonal=True) 
+        testpred=model.predict(testsize)
+        testactual=test.y
+>>>>>>> 7ca29f85c5bc16b6d767146540966ea498a22325
 
         modelfinal=SARIMAX(data,order=order,seasonal_order=seasonal).fit()
         start=1
@@ -93,16 +107,21 @@ class timeseries:
  
         plotlocation=dataconfigfile['location']
         fig.write_html(os.path.join(plotlocation,"plot.html"))
+        plotlocation=os.path.join(plotlocation,"plot.html")
 
-        modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True)
+        modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True, seasonal=True)
         location=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
         os.makedirs(location)
         name=str(dataconfigfile["experimentname"])+str(dataconfigfile["id"])+"_model"
-        modelfinal.save(name)
-        shutil.move(name+'.pkl',location)
+        # modelfinal.save(name)
+        with open(name, 'wb') as pkl:
+            pickle.dump(modelfinal, pkl)
+
+        shutil.move(name,location)
 
         pickleFilePath =os.path.join(location,name)
         
+<<<<<<< HEAD
         return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
@@ -120,3 +139,7 @@ class timeseries:
         inference.close()
 
         return inferenceDataResultsPath,os.path.join(storeLocation,"inference.html")
+=======
+        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath, "plotLocation":plotlocation}
+        
+>>>>>>> 7ca29f85c5bc16b6d767146540966ea498a22325
