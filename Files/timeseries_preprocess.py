@@ -8,6 +8,7 @@ import os
 import yaml
 from scipy import stats
 
+
 class TimeseriesPreprocess:     
     def preprocess(self,config,folderLocation):
 
@@ -31,27 +32,27 @@ class TimeseriesPreprocess:
         
         df = df.fillna(method='bfill')
     
-        df.rename(columns = {config_data['date_index']:'ds', config_data['target_column_name']:'y'}, inplace = True)
+        df.rename(columns = {config_data['target_column_name']:'y'}, inplace = True)
 
-        df['Date'] = df.index
+        # df['Date'] = df.index
 
-        object_type_column_name = []
-        for col_name in df.columns:
-            if df[col_name].dtype == 'object':
-                object_type_column_name.append(col_name)
-                config_data['encoding_type'].extend(['One-Hot Encoding'])
+        # object_type_column_name = []
+        # for col_name in df.columns:
+        #     if df[col_name].dtype == 'object':
+        #         object_type_column_name.append(col_name)
+        #         config_data['encoding_type'].extend(['One-Hot Encoding'])
 
-        print("object type column name: ",object_type_column_name)
-        if object_type_column_name != [] :
-            config_data['encode_column_name'] = object_type_column_name
+        # print("object type column name: ",object_type_column_name)
+        # if object_type_column_name != [] :
+        #     config_data['encode_column_name'] = object_type_column_name
 
-            encoder = OneHotEncoder(drop = 'first', sparse=False)
-            df_encoded = pd.DataFrame (encoder.fit_transform(df[object_type_column_name]))
-            df_encoded.columns = encoder.get_feature_names([object_type_column_name])
-            df.drop([object_type_column_name] ,axis=1, inplace=True)
-            df= pd.concat([df, df_encoded ], axis=1)                 
+        #     encoder = OneHotEncoder(drop = 'first', sparse=False)
+        #     df_encoded = pd.DataFrame (encoder.fit_transform(df[object_type_column_name]))
+        #     df_encoded.columns = encoder.get_feature_names([object_type_column_name])
+        #     df.drop([object_type_column_name] ,axis=1, inplace=True)
+        #     df= pd.concat([df, df_encoded ], axis=1)                 
             
-        df.to_csv('clean_data.csv')
+        df.to_csv('clean_data.csv', index_label=False)
         shutil.move("clean_data.csv",folderLocation)
         clean_data_address = os.path.abspath(os.path.join(folderLocation,"clean_data.csv"))
         config_data['clean_data_address'] = clean_data_address

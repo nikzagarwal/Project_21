@@ -44,6 +44,7 @@ class Home extends Component {
             dateColumn: '',
             automanualpreprocess: false,
             modelForm: "",
+            numClusters: 4,
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -183,6 +184,11 @@ class Home extends Component {
             clusteringType: event.target.value
         })
     }
+    handleCLusterNumberChange = event => {
+        this.setState({
+            numClusters: event.target.value
+        })
+    }
     handleNullTypeChange = event => {
         this.setState({
             nulltype: event.target.value
@@ -220,7 +226,8 @@ class Home extends Component {
         let modelnumber = this.state.modelnum
         let nulltype = this.state.nulltype
         let clusteringType = this.state.clusteringType
-        let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType }
+        let numClusters = this.state.numClusters
+        let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType ,numClusters}
         console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))
@@ -478,12 +485,26 @@ class Home extends Component {
                                                 <select name="clusteringType" id="clusteringType" value={this.state.clusteringType} onChange={this.handleClusteringTypeChange}>
                                                     <option value="kmeans">K-Means</option>
                                                     <option value="kmodes">K-Modes</option>
-                                                    <option value="dbscan">DBSCAN</option>
+                                                    <option value="dbscan">Density-Based Spatial Clustering</option>
+                                                    <option value="birch">Birch Clustering</option>
+                                                    <option value="optics">OPTICS Clustering</option>
+                                                    <option value="hclust"> Agglomerative Clustering</option>
+                                                    <option value="meanshift">Mean shift Clustering</option>
+                                                    <option value="ap">Affinity Propagation</option>
                                                 </select>
 
                                             </div>
                                         </div>
+                                        <div className="row">
+                                            <div className="col-40">
+                                                <label htmlFor="num_clusters">Number of clusters <span className="ibtn">i <span id="idesc">K=4 works good most of times</span></span></label>
+                                            </div>
+                                            <div className="col-60" >
+                                                <input type="number" id="num_clusters" name="num_clusters" onChange={this.handleCLusterNumberChange} placeholder="Enter K" required />
+                                            </div>
+                                        </div>
                                     </div>
+
                                 }
 
                                 {/* <div className="row">
@@ -584,15 +605,18 @@ class Home extends Component {
                                         </div>
                                         <div className="col-60 ">
                                             <select name="Frequency" id="Frequency" value={this.state.frequency} onChange={this.handleFrequencyChange}>
-                                                <option value="D">Calendar days</option>
-                                                <option value="S">Secondly</option>
-                                                <option value="T">Minutely</option>
-                                                <option value="H">Hourly</option>
-                                                <option value="B">Business days</option>
+                                                <option value="D">Daily</option>
                                                 <option value="W">Weekly</option>
                                                 <option value="M">Monthly</option>
                                                 <option value="Q">Quaterly</option>
                                                 <option value="Y">Yearly</option>
+                                                {/* <option value="S">Secondly</option>
+                                                <option value="T">Minutely</option>
+                                                <option value="H">Hourly</option>
+                                                <option value="B">Business days</option> */}
+
+
+
 
                                             </select>
 

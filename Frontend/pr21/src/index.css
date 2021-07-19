@@ -1162,11 +1162,12 @@ table {
 .metricstable tr:nth-child(odd) {
 	color: #000;
   background-color: #fff;
+  text-align: center;
 }
 .metricstable tr:nth-child(even){
   background-color: #a7c8e9;
   color: #000;
- 
+  text-align: center;
 }
 .metricstable td{
   padding: 12px;
@@ -1183,7 +1184,7 @@ table {
 .metricstable td :hover{
 			background-color: #BBD1EA;		
 }
-.metricstable tr:nth-child(even) .metricValue {
+/* .metricstable tr:nth-child(even) .metricValue {
   background-color: #fff;
   text-align: center;
   font-size: large;
@@ -1192,7 +1193,7 @@ table {
   background-color: #a7c8e9;
   text-align: center;
   font-size: large;
-}	
+}	 */
 /* ************************************************************************************************************************ */
 /* plots */
 .plot{

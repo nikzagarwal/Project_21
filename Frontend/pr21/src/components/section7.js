@@ -115,6 +115,7 @@ class Section7 extends Component {
 
                         <div className="card-body">
                             <div className="sec7h2">
+                                
                                 <h2 className="card-title sec7text">{this.state.projectList[j].projectName}</h2>
                             </div>
                             <div className="sec7h5">
