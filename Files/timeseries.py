@@ -17,6 +17,8 @@ from pmdarima.arima import StepwiseContext
 from statsmodels.tsa.arima_model import ARIMAResults
 import random
 from Files.metrics import Metrics as met
+import warnings
+import pickle 
 
 class timeseries:
     def createprophet(self,dataconfig):
@@ -68,6 +70,7 @@ class timeseries:
         choice=dataconfigfile['frequency']
         diction={"D":1,"W":7,"M":30,"Q":90,"Y":365,}
         freq=12  ##hard coded as of now
+        warnings.filterwarnings("ignore")
         with StepwiseContext(max_dur=15):
             model = auto_arima(data, stepwise=True, error_action='ignore', seasonal=True,m=freq,trace=True)
         #metrics=met.calculate_metrics("fbprophet","Regression",testpred,testactual)
@@ -107,7 +110,7 @@ class timeseries:
 
         pickleFilePath =os.path.join(location,name)
         
-        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath}
+        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":os.path.join(plotlocation,"plot.html")}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
         model=ARIMAResults.load(pickleFileLocation)

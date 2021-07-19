@@ -49,7 +49,7 @@ class ProjectsSection5 extends Component {
         this.setState({
             data: result.data
         });
-         }
+    }
     handlemetric = event => {
         console.log(this.props.projectdetails)
         var thebtnItself = document.getElementById('show');
@@ -77,7 +77,7 @@ class ProjectsSection5 extends Component {
         const projectid = this.props.projectdetails["projectID"];
         axios.get('http://localhost:8000/getPlots/' + projectid)
             .then((response) => {
-                 this.setState({ plot: response.data });
+                this.setState({ plot: response.data });
                 var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
                 if (answer) {
                     FileDownload(response.data, 'plot.html');
@@ -89,7 +89,7 @@ class ProjectsSection5 extends Component {
         this.setState({ countplot: 1 })
     }
 
-   
+
     handleInferenceChange = event => {
         this.setState({
             inferencefile: event.target.files[0]
@@ -147,14 +147,21 @@ class ProjectsSection5 extends Component {
 
         );
         const FileDownload = require('js-file-download');
-        axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://localhost:8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful", res)
-                FileDownload(res.data[0], 'prediction.csv');
-                FileDownload(res.data[1], 'predictionplot.html');
-                alert("Prediction and prediction plot is Ready and Downloaded");
+                FileDownload(res.data, 'prediction.csv');
+                alert("Prediction is Ready and Downloaded");
             },
                 (error) => { console.log(error) });
+        axios.post('http://localhost:8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            .then((res) => {
+                console.log("Successful", res)
+                FileDownload(res.data, 'predictionplot.html');
+                alert("Prediction plot is Ready and Downloaded");
+            },
+                (error) => { console.log(error) });
+
     }
 
     render() {
