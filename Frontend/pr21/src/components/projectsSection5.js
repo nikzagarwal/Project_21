@@ -97,7 +97,7 @@ class ProjectsSection5 extends Component {
     }
     handleTimeInferenceChange = event => {
         this.setState({
-            inferenceTime: event.target.files
+            inferenceTime: event.target.value
         })
 
     }
@@ -146,6 +146,7 @@ class ProjectsSection5 extends Component {
             this.state.inferenceTime
 
         );
+        console.log(this.state.inferenceTime)
         const FileDownload = require('js-file-download');
         axios.post('http://localhost:8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
