@@ -214,6 +214,7 @@ class AutoFormData(BaseModel):
     projectID: Optional[int]
     userID: Optional[int]
     clusteringType: Optional[str]
+    numClusters: Optional[int]
 
     class Config:
         arbitrary_types_allowed=True
@@ -226,7 +227,8 @@ class AutoFormData(BaseModel):
                 "nulltype":"NA",
                 "projectID": 45,
                 "userID": 101,
-                "clusteringType": "kmeans"
+                "clusteringType": "kmeans",
+                "numClusters": "3"
             }
         }
 
