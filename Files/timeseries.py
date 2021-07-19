@@ -12,8 +12,12 @@ import shutil
 #import kaleido
 import plotly.express as px
 import plotly.graph_objects as go
-
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from pmdarima.arima import StepwiseContext
+from statsmodels.tsa.arima_model import ARIMAResults
+import random
 from Files.metrics import Metrics as met
+
 class timeseries:
     def createprophet(self,dataconfig):
         with open(dataconfig) as f:
@@ -61,24 +65,30 @@ class timeseries:
         
         data=pd.read_csv(dataconfigfile["clean_data_address"])
         location=dataconfigfile["location"]
-        testsize=int(len(data)*0.2)
-        train=data.iloc[:-testsize]
-        test=data.iloc[-testsize:]
-        model = auto_arima(train['y'],trace=True) 
-        testpred=model.predict(testsize)
-        testactual=test.y
+        choice=dataconfigfile['frequency']
+        diction={"D":1,"W":7,"M":30,"Q":90,"Y":365,}
+        freq=12  ##hard coded as of now
+        with StepwiseContext(max_dur=15):
+            model = auto_arima(data, stepwise=True, error_action='ignore', seasonal=True,m=freq,trace=True)
+        #metrics=met.calculate_metrics("fbprophet","Regression",testpred,testactual)
+        order=model.get_params(deep=False)['order']
+        seasonal=model.get_params(deep=False)['seasonal_order']
 
-        metrics_new_row=met.calculate_metrics("arima","Regression",testpred,testactual)
+        modelfinal=SARIMAX(data,order=order,seasonal_order=seasonal).fit()
+        start=1
+        end=len(data)
+        compare=modelfinal.predict(start=start,end=end,typ='levels')
+        compare.index=data.index
+
+        metrics_new_row=met.calculate_metrics("arima","Regression",data['y'],compare)
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.loc[len(metrics.index)]=metrics_new_row
         metrics.to_csv(metricsLocation, index=True)
-        compare=pd.DataFrame(testpred,columns=['predictions'])
-        compare['actual']=testactual.values
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=compare.index,y=compare.actual,name="actual"))
+        fig.add_trace(go.Scatter(x=data.index,y=data.y,name="actual"))
 
-        fig.add_trace(go.Scatter(x=compare.index,y=compare.predictions,name="predictions"))
+        fig.add_trace(go.Scatter(x=compare.index,y=compare,name="predictions"))
   
  
         plotlocation=dataconfigfile['location']
@@ -95,3 +105,18 @@ class timeseries:
         
         return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath}
         
+    def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
+        model=ARIMAResults.load(pickleFileLocation)
+        predictions=model.forecast(daysintothefuture)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=predictions.index,y=predictions,name="predictions"))
+        
+        fig.write_html(os.path.join(storeLocation,"inference.html"))
+        ran=random.randint(100,999)
+        csvresults=predictions.to_csv()
+        inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
+        inference=open(inferenceDataResultsPath,"w+")
+        inference.write(csvresults)
+        inference.close()
+
+        return inferenceDataResultsPath,os.path.join(storeLocation,"inference.html")
