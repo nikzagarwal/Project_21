@@ -103,14 +103,15 @@ class timeseries:
         os.makedirs(location)
         name=str(dataconfigfile["experimentname"])+str(dataconfigfile["id"])+"_model"
         # modelfinal.save(name)
-        with open(name, 'wb') as pkl:
+        pickleFilePath =os.path.join(location,name)
+        with open(pickleFilePath, 'wb') as pkl:
             pickle.dump(modelfinal, pkl)
 
-        shutil.move(name,location)
+        # shutil.move(name,location)
 
-        pickleFilePath =os.path.join(location,name)
         
-        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":os.path.join(plotlocation,"plot.html")}
+        
+        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":plotlocation}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
         model=ARIMAResults.load(pickleFileLocation)

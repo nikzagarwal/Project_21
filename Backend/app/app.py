@@ -518,8 +518,8 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID})
 
 
-@app.get('/doTimeseriesInference',tags=["Timeseries"])
-def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),daysintothefuture:int=Form(...)):
+@app.post('/doTimeseriesInference',tags=["Timeseries"])
+def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...)):
     
     pickleFilePath='/'
     path='/'
@@ -538,10 +538,10 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
                     os.makedirs(path)
             
             inference=timeseries()
-            inferenceDataResultsPath, inferenceDataResultsPlot=inference.arimainference(pickleFilePath,storeLocation,daysintothefuture)
+            inferenceDataResultsPath, inferenceDataResultsPlot=inference.arimainference(pickleFilePath,storeLocation,inferenceTime)
             
             Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
-                "daysintothefuture": daysintothefuture,
+                "inferenceTime": inferenceTime,
                 "results": inferenceDataResultsPath,
                 "inferenceDataResultsPlot":inferenceDataResultsPlot,
                 "belongsToUserID": currentIDs.get_current_user_id(),
@@ -557,8 +557,8 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
         return JSONResponse({"Metrics Generation":"Failed"})
 
 
-@app.get('/doTimeseriesInferencePlot',tags=["Timeseries"])
-def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...)):
+@app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
+def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...)):
     try:
         result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
         if result is not None:
