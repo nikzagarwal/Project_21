@@ -150,7 +150,7 @@ class Home extends Component {
         var theFormItself2 = document.getElementById('form4');
         $(theFormItself2).show();
     }
-    handleModelForm= (value) => event => {
+    handleModelForm = (value) => event => {
         this.setState({
             modelForm: value
         })
@@ -294,7 +294,7 @@ class Home extends Component {
             currentmodel: val
         })
     }
-    handleAutoPreprocess =(val) => {
+    handleAutoPreprocess = (val) => {
         var theFormItself = document.getElementById('preprocesstable');
         $(theFormItself).toggle();
         this.setState({
@@ -319,24 +319,25 @@ class Home extends Component {
 
     }
     handleNewProject() {
-        var theFormItself = document.getElementById('form2');
-        $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('form3');
-        $(theFormItself2).hide();
-        var theFormItself3 = document.getElementById('form4');
-        $(theFormItself3).hide();
-        var theFormItself4 = document.getElementById('form5');
-        $(theFormItself4).hide();
-        var theFormItself5 = document.getElementById('loader');
-        $(theFormItself5).hide();
-        var theFormItself6 = document.getElementById('section6');
-        $(theFormItself6).hide();
-        var theFormItself7 = document.getElementById('section5');
-        $(theFormItself7).hide()
-        var theFormItself9 = document.getElementById('form6');
-        $(theFormItself9).hide();
-        var theFormItself8 = document.getElementById('form1');
-        $(theFormItself8).show();
+        window.location.reload();
+        // var theFormItself = document.getElementById('form2');
+        // $(theFormItself).hide();
+        // var theFormItself2 = document.getElementById('form3');
+        // $(theFormItself2).hide();
+        // var theFormItself3 = document.getElementById('form4');
+        // $(theFormItself3).hide();
+        // var theFormItself4 = document.getElementById('form5');
+        // $(theFormItself4).hide();
+        // var theFormItself5 = document.getElementById('loader');
+        // $(theFormItself5).hide();
+        // var theFormItself6 = document.getElementById('section6');
+        // $(theFormItself6).hide();
+        // var theFormItself7 = document.getElementById('section5');
+        // $(theFormItself7).hide()
+        // var theFormItself9 = document.getElementById('form6');
+        // $(theFormItself9).hide();
+        // var theFormItself8 = document.getElementById('form1');
+        // $(theFormItself8).show();
 
     }
 
@@ -355,13 +356,15 @@ class Home extends Component {
 
                     </div>
                     <div className="createpagebox " id="sec1heading">
-                        <h1 className="">Start your project  <button className="btn btn-primary  sec1startbtn " onClick={this.handleNewProject}  >Start New Project </button>
-                       
-                           </h1>
-                          
+                        <button className="btn btn-primary  sec1startbtn " onClick={this.handleNewProject}  >Start New Project </button>
+                        <h1 >Start your project </h1>
+
                     </div>
                     <div className="createpagebox " id="sec1heading2">
+                        <button className="btn btn-primary  sec1startbtn " onClick={this.handleNewProject}  >Start New Project </button>
+
                         <h1>TwentyOne Results</h1>
+
                         {/* <p>" Just fill relevant feeds and select few choices and you are good to go"</p> */}
                     </div>
 
@@ -523,7 +526,7 @@ class Home extends Component {
                             </div>
                             <h1>Pre-process</h1>
                             <p>Each Column can be processed differently as required</p>
-                            <Preprocess rawdata={this.state.traindata} proprocessForm={this.state.preprocessForm} automanualpreprocess={this.state.automanualpreprocess} handleModelForm={this.handleModelForm} projectdetail={this.state.projectdetail}/>
+                            <Preprocess rawdata={this.state.traindata} proprocessForm={this.state.preprocessForm} automanualpreprocess={this.state.automanualpreprocess} handleModelForm={this.handleModelForm} projectdetail={this.state.projectdetail} />
                         </div>
                     </div>
                     {/* form 5 for model and hypeparameters selection*/}

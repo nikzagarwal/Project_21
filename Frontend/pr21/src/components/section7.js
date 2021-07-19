@@ -46,6 +46,19 @@ class Section7 extends Component {
             });
 
     }
+    handleRefreshProject=event=>{
+        axios.get('http://localhost:8000/getAllProjects?userID=101')
+        .then((response) => {
+            console.log(response.data)
+            if (response.data.length !== 0) {
+                this.setState({
+                    projectList: response.data,
+                    emptyProject: false
+                });
+
+            }
+        });
+    }
     handleProjectResult = event => {
         this.setState(
             {
@@ -141,6 +154,8 @@ class Section7 extends Component {
                 <div className="section7" id="section7">
                     <div className="projectDetails" id="projectDetails">
                         <div className=" sec7heading">
+                        <button className="btn btn-primary " onClick={this.handleRefreshProject}  >Refresh</button>
+
                             <h2>List of all your Projects</h2>
                         </div>
 
@@ -170,6 +185,8 @@ class Section7 extends Component {
                 <div className="section7" id="section7">
                     <div className="projectDetails" id="projectDetails">
                         <div className=" sec7heading">
+                            <button className="btn btn-primary " onClick={this.handleRefreshProject}  >Refresh</button>
+
                             <h2>List of all your Projects</h2>
                         </div>
                         <div className="card sec7card">

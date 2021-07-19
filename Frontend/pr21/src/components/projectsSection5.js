@@ -21,7 +21,7 @@ class ProjectsSection5 extends Component {
             inferencefile: undefined,
             plot: "",
             countplot: 0,
-            inferenceTime:1,
+            inferenceTime: 1,
         };
         this.updateData = this.updateData.bind(this);
     }
@@ -45,25 +45,11 @@ class ProjectsSection5 extends Component {
         this.setState({ data: "" });
 
     }
-    // handleRetrain = event => {
-    //     event.preventDefault();
-    //     var theFormItself = document.getElementById('section5');
-    //     $(theFormItself).hide();
-    //     var theFormItself2 = document.getElementById('form2');
-    //     $(theFormItself2).show();
-    // }
-
-    // handleChange = event => {
-    //     this.setState({
-    //         csvfile: event.target.files[0]
-    //     });
-    // };
     updateData(result) {
         this.setState({
             data: result.data
         });
-        // console.log(this.state.traindata);
-    }
+         }
     handlemetric = event => {
         console.log(this.props.projectdetails)
         var thebtnItself = document.getElementById('show');
@@ -74,18 +60,14 @@ class ProjectsSection5 extends Component {
         const FileDownload = require('js-file-download');
         axios.get('http://localhost:8000/getMetrics/' + projectid + "/" + modelid)
             .then((response) => {
-                // console.log(response)
-                // console.log(response.data);
                 Papa.parse(response.data, {
                     complete: this.updateData,
                     header: true
                 });
-                if (this.props.projectdetails.modelType === "clustering")
-                {
+                if (this.props.projectdetails.modelType === "clustering") {
                     FileDownload(response.data, 'metrics.csv');
                     alert("File is big so it is downloaded");
-                }// this.setState({data: response.data});
-                // console.log(this.state.data);
+                }
             });
 
 
@@ -93,11 +75,9 @@ class ProjectsSection5 extends Component {
     handlePlot = event => {
         const FileDownload = require('js-file-download');
         const projectid = this.props.projectdetails["projectID"];
-        // if (this.state.countplot === 0) {
         axios.get('http://localhost:8000/getPlots/' + projectid)
             .then((response) => {
-                // console.log(response);
-                this.setState({ plot: response.data });
+                 this.setState({ plot: response.data });
                 var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
                 if (answer) {
                     FileDownload(response.data, 'plot.html');
@@ -107,24 +87,9 @@ class ProjectsSection5 extends Component {
                 }
             });
         this.setState({ countplot: 1 })
-        // }
     }
 
-    // importCSV = () => {
-    //     const { csvfile } = this.state;
-    //     Papa.parse(csvfile, {
-    //         complete: this.updateData,
-    //         header: true
-    //     });
-    // };
-
-    // updateData(result) {
-    //     this.setState({
-    //         data: result.data
-    //     });
-    //     var data = result.data;
-    //     console.log(data);
-    // }
+   
     handleInferenceChange = event => {
         this.setState({
             inferencefile: event.target.files[0]
@@ -134,7 +99,7 @@ class ProjectsSection5 extends Component {
         this.setState({
             inferenceTime: event.target.files
         })
-       
+
     }
     handleGetPrediction = event => {
         event.preventDefault();
@@ -200,12 +165,6 @@ class ProjectsSection5 extends Component {
                     <button className="backbtn btn btn-secondary" onClick={this.handleGoBack}  > &lArr; Models </button>
 
                 </div>
-                {/* {this.props.showRetrain === false ? null :
-                    <div className="goback">
-                        <button className="backbtn" onClick={this.handleRetrain}  >Retrain</button>
-
-                    </div>
-                } */}
 
                 <div className="sec5heading">
                     <h1>Results (Model Number:  {this.props.currentmodel})</h1>
@@ -217,7 +176,7 @@ class ProjectsSection5 extends Component {
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                         <li className="nav-item" role="presentation">
                             <button className="nav-link tabbtn active" id="Metrics-tab" data-bs-toggle="tab" data-bs-target="#metrics" type="button" role="tab" aria-controls="metrics" aria-selected="true">
-                            {this.props.projectdetails.modelType==="clustering"?"Alloted Clusters":"Metrics"}</button>
+                                {this.props.projectdetails.modelType === "clustering" ? "Alloted Clusters" : "Metrics"}</button>
                         </li>
                         <li className="nav-item" role="presentation">
                             <button className="nav-link tabbtn " id="plot-tab" onClick={this.handlePlot} data-bs-toggle="tab" data-bs-target="#plot" type="button" role="tab" aria-controls="Plot" aria-selected="false">Plots</button>
@@ -289,38 +248,38 @@ class ProjectsSection5 extends Component {
                             <div className="container " id="form1">
                                 <form >
                                     <div className="createform">
-                                         {this.props.projectdetails.modelType!=="timeseries"?<div>
-                                        
-                                        <div className="row">
-                                            <div className="col-40">
-                                                <label htmlFor="Inference">Enter data to get Prediction</label>
-                                            </div>
-                                            <div className="col-60">
-                                                <input type="file" className="form-control" id="inference" onChange={this.handleInferenceChange} accept=".csv" name="inference"
-                                                    placeholder="enter training data in csv format" required />
-                                            </div>
-                                        </div>
+                                        {this.props.projectdetails.modelType !== "timeseries" ? <div>
 
-
-                                        <div>
-                                            <button type="submit" className="btn btn-secondary" onClick={this.handleGetPrediction} id="getresults" >Get Results</button>
-                                        </div>
-                                        </div>:
-                                        <div>
                                             <div className="row">
-                                            <div className="col-40">
-                                                <label htmlFor="Inferencetime">Enter Number of days you want to forecast</label>
+                                                <div className="col-40">
+                                                    <label htmlFor="Inference">Enter data to get Prediction</label>
+                                                </div>
+                                                <div className="col-60">
+                                                    <input type="file" className="form-control" id="inference" onChange={this.handleInferenceChange} accept=".csv" name="inference"
+                                                        placeholder="enter training data in csv format" required />
+                                                </div>
                                             </div>
-                                            <div className="col-60">
-                                                <input type="number" className="form-control" id="inferencetime" onChange={this.handleTimeInferenceChange} name="inferencetime"
-                                                    placeholder="Enter number of future days for prediction" required />
-                                            </div>
-                                        </div>
 
 
-                                        <div>
-                                            <button type="submit" className="btn btn-secondary" onClick={this.handleGetTimePrediction} id="getresultstime" >Get Results</button>
-                                        </div>
+                                            <div>
+                                                <button type="submit" className="btn btn-secondary" onClick={this.handleGetPrediction} id="getresults" >Get Results</button>
+                                            </div>
+                                        </div> :
+                                            <div>
+                                                <div className="row">
+                                                    <div className="col-40">
+                                                        <label htmlFor="Inferencetime">Enter Number of days you want to forecast</label>
+                                                    </div>
+                                                    <div className="col-60">
+                                                        <input type="number" className="form-control" id="inferencetime" onChange={this.handleTimeInferenceChange} name="inferencetime"
+                                                            placeholder="Enter number of future days for prediction" required />
+                                                    </div>
+                                                </div>
+
+
+                                                <div>
+                                                    <button type="submit" className="btn btn-secondary" onClick={this.handleGetTimePrediction} id="getresultstime" >Get Results</button>
+                                                </div>
                                             </div>
                                         }
                                     </div>
