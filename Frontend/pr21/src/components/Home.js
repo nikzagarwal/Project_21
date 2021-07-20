@@ -151,12 +151,10 @@ class Home extends Component {
         var theFormItself2 = document.getElementById('form4');
         $(theFormItself2).show();
     }
-    handleModelForm = (value) => event => {
+    handleModelForm  = (val) =>  {
         this.setState({
-            modelForm: value
+            modelForm: val
         })
-        console.log(value)
-
     }
     handleTargetChange = event => {
         this.setState({
