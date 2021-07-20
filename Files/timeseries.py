@@ -128,9 +128,11 @@ class timeseries:
         return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":plotlocation}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
+        print(pickleFileLocation)
         model=ARIMAResults.load(pickleFileLocation)
-        predictions=model.forecast(daysintothefuture)
-
+        predictions,confint=model.predict(n_periods=daysintothefuture, return_conf_int=True)
+        predictions=pd.DataFrame({"predictions":predictions})
+        print(predictions)
         ran=random.randint(100,999)
         csvresults=predictions.to_csv()
         inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
@@ -138,7 +140,7 @@ class timeseries:
         inference.write(csvresults)
         inference.close()
 
-        return inferenceDataResultsPath,predictions
+        return inferenceDataResultsPath
 
     def plot_graphs(self,acf,name):
     
@@ -146,7 +148,8 @@ class timeseries:
         # acfig.show()
         return acfig
 
-    def plotinference(self,predictions,storeLocation):
+    def plotinference(self,predictionsPath,storeLocation):
+        predictions=pd.read_csv(predictionsPath)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=predictions.index,y=predictions,name="predictions"))
         
