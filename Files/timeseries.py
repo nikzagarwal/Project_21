@@ -104,13 +104,13 @@ class timeseries:
         acf_=pd.DataFrame(acf_,columns=['data'])
         pacf_=pacf(data['y'])
         pacf_=pd.DataFrame(pacf_,columns=['data'])
-        # fig2=self.plot_graphs(acf_,"Auto correlative function")
-        # fig3=self.plot_graphs(pacf_,"Partial-Auto correlative funtion")
+        fig2=self.plot_graphs(acf_,"Auto correlative function")
+        fig3=self.plot_graphs(pacf_,"Partial-Auto correlative funtion")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-            # f.write(fig2.to_html(include_plotlyjs='cdn',full_html=False))
-            # f.write(fig3.to_html(include_plotlyjs='cdn',full_html=False))
-        # f.close()
+            f.write(fig2.to_html(include_plotlyjs='cdn',full_html=False))
+            f.write(fig3.to_html(include_plotlyjs='cdn',full_html=False))
+        f.close()
 
         modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True, seasonal=True)
         location=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
