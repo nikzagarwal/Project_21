@@ -104,13 +104,13 @@ class timeseries:
         acf_=pd.DataFrame(acf_,columns=['data'])
         pacf_=pacf(data['y'])
         pacf_=pd.DataFrame(pacf_,columns=['data'])
-        # fig2=self.plot_graphs(acf_,"Auto correlative function")
-        # fig3=self.plot_graphs(pacf_,"Partial-Auto correlative funtion")
+        fig2=self.plot_graphs(acf_,"Auto correlative function")
+        fig3=self.plot_graphs(pacf_,"Partial-Auto correlative funtion")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-            # f.write(fig2.to_html(include_plotlyjs='cdn',full_html=False))
-            # f.write(fig3.to_html(include_plotlyjs='cdn',full_html=False))
-        # f.close()
+            f.write(fig2.to_html(include_plotlyjs='cdn',full_html=False))
+            f.write(fig3.to_html(include_plotlyjs='cdn',full_html=False))
+        f.close()
 
         modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True, seasonal=True)
         location=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
@@ -128,9 +128,11 @@ class timeseries:
         return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":plotlocation}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
+        print(pickleFileLocation)
         model=ARIMAResults.load(pickleFileLocation)
-        predictions=model.forecast(daysintothefuture)
-
+        predictions,confint=model.predict(n_periods=daysintothefuture, return_conf_int=True)
+        predictions=pd.DataFrame({"predictions":predictions})
+        print(predictions)
         ran=random.randint(100,999)
         csvresults=predictions.to_csv()
         inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
@@ -138,7 +140,7 @@ class timeseries:
         inference.write(csvresults)
         inference.close()
 
-        return inferenceDataResultsPath,predictions
+        return inferenceDataResultsPath
 
     def plot_graphs(self,acf,name):
     

@@ -527,36 +527,36 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
     path='/'
     inferenceDataResultsPath='/'
     storeLocation='/'
-    try:
-        result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
-        if result is not None:
-            result=serialiseDict(result)
-            if result["pickleFilePath"] is not None:
-                pickleFilePath=result["pickleFilePath"]
-            if result["pickleFolderPath"] is not None:
-                projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
-                path=os.path.join(projectRunPath,"inference_data")
-                if(not os.path.exists(path)):
-                    os.makedirs(path)
-            
-            inference=timeseries()
-            inferenceDataResultsPath, inferenceDataResultsPlot=inference.arimainference(pickleFilePath,storeLocation,inferenceTime)
-            
-            Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
-                "inferenceTime": inferenceTime,
-                "results": inferenceDataResultsPath,
-                "inferenceDataResultsPlot":inferenceDataResultsPlot,
-                "belongsToUserID": currentIDs.get_current_user_id(),
-                "belongsToProjectID": projectID,
-                "belongsToModelID": modelID
-            })
-            if os.path.exists(inferenceDataResultsPath):
-                print({"Metrics Generation":"Successful"})
-                return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
-    except Exception as e:
-        print("An error occured: ", e)
-        print("Unable to find model from model Collection")
-        return JSONResponse({"Metrics Generation":"Failed"})
+    # try:
+    result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
+    if result is not None:
+        result=serialiseDict(result)
+        if result["pickleFilePath"] is not None:
+            pickleFilePath=result["pickleFilePath"]
+        if result["pickleFolderPath"] is not None:
+            projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
+            path=os.path.join(projectRunPath,"inference_data")
+            if(not os.path.exists(path)):
+                os.makedirs(path)
+        
+        inference=timeseries()
+        inferenceDataResultsPath=inference.arimainference(pickleFilePath,storeLocation,inferenceTime)
+        
+        Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+            "inferenceTime": inferenceTime,
+            "results": inferenceDataResultsPath,
+            # "inferenceDataResultsPlot":inferenceDataResultsPlot,
+            "belongsToUserID": currentIDs.get_current_user_id(),
+            "belongsToProjectID": projectID,
+            "belongsToModelID": modelID
+        })
+        if os.path.exists(inferenceDataResultsPath):
+            print({"Metrics Generation":"Successful"})
+            return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
+    # except Exception as e:
+    #     print("An error occured: ", e)
+    #     print("Unable to find model from model Collection")
+    return JSONResponse({"Metrics Generation":"Failed"})
 
 
 @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
