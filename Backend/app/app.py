@@ -526,7 +526,6 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
     pickleFilePath='/'
     path='/'
     inferenceDataResultsPath='/'
-    storeLocation='/'
     # try:
     result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
     if result is not None:
@@ -540,12 +539,12 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
                 os.makedirs(path)
         
         inference=timeseries()
-        inferenceDataResultsPath=inference.arimainference(pickleFilePath,storeLocation,inferenceTime)
+        inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
         
         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
             "inferenceTime": inferenceTime,
             "results": inferenceDataResultsPath,
-            # "inferenceDataResultsPlot":inferenceDataResultsPlot,
+            "inferenceFolderPath": path,
             "belongsToUserID": currentIDs.get_current_user_id(),
             "belongsToProjectID": projectID,
             "belongsToModelID": modelID
@@ -565,15 +564,16 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
         result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
         if result is not None:
             result=serialiseDict(result)
-            inferenceDataResultsPlot=result["inferenceDataResultsPlot"]
-            if (os.path.exists(inferenceDataResultsPlot)):
-                return FileResponse(inferenceDataResultsPlot,media_type="text/csv",filename="inference.csv")
+            inferenceFilePath=result["results"]
+            if (os.path.exists(inferenceFilePath)):
+                timeseriesObj=timeseries()
+                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"])
+                return FileResponse(plotFilepath,media_type="text/html",filename="inferencePlots.html")
             else:
                 return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
     except Exception as e:
         print("An Error Occured: ",e)
         return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
-
 
 
 # @app.get('/stream-logs')
