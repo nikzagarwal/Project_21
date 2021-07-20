@@ -22,6 +22,7 @@ class TimeseriesPreprocess:
         print("DataFrame again: ", df)
         df.set_index(config_data['date_index'], inplace = True)
         df.index=pd.to_datetime(df.index) 
+        
         # df = df['Cases'].resample(config_data['frequency']).sum()
 
 
@@ -33,7 +34,9 @@ class TimeseriesPreprocess:
         df = df.fillna(method='bfill')
     
         df.rename(columns = {config_data['target_column_name']:'y'}, inplace = True)
-
+        df.drop([] ,axis=1, inplace=True)
+        df2 = pd.DataFrame(df['y'])
+        print(df2)
         # df['Date'] = df.index
 
         # object_type_column_name = []
@@ -52,7 +55,7 @@ class TimeseriesPreprocess:
         #     df.drop([object_type_column_name] ,axis=1, inplace=True)
         #     df= pd.concat([df, df_encoded ], axis=1)                 
             
-        df.to_csv('clean_data.csv', index_label=False)
+        df2.to_csv('clean_data.csv', index_label=False)
         shutil.move("clean_data.csv",folderLocation)
         clean_data_address = os.path.abspath(os.path.join(folderLocation,"clean_data.csv"))
         config_data['clean_data_address'] = clean_data_address

@@ -21,6 +21,7 @@ class Section5 extends Component {
             plot: "",
             countplot: 0,
             inferenceTime: 1,
+            freq: "D"
         };
         this.updateData = this.updateData.bind(this);
     }
@@ -97,6 +98,11 @@ class Section5 extends Component {
             inferencefile: event.target.files[0]
         })
     }
+    handleFrequencyChange = event => {
+        this.setState({
+            freq: event.target.value
+        })
+    }
     handleTimeInferenceChange = event => {
         this.setState({
             inferenceTime: event.target.value
@@ -148,6 +154,11 @@ class Section5 extends Component {
             this.state.inferenceTime
 
         );
+        formdata.append(
+            "frequency",
+            this.state.freq
+
+        );
         console.log(this.state.inferenceTime)
         const FileDownload = require('js-file-download');
         axios.post('http://localhost:8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
@@ -155,15 +166,16 @@ class Section5 extends Component {
                 console.log("Successful", res)
                 FileDownload(res.data, 'prediction.csv');
                 alert("Prediction is Ready and Downloaded");
+                axios.post('http://localhost:8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                    .then((res) => {
+                        console.log("Successful", res)
+                        FileDownload(res.data, 'predictionplot.html');
+                        alert("Prediction plot is Ready and Downloaded");
+                    },
+                        (error) => { console.log(error) });
             },
                 (error) => { console.log(error) });
-        axios.post('http://localhost:8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-            .then((res) => {
-                console.log("Successful", res)
-                FileDownload(res.data, 'predictionplot.html');
-                alert("Prediction plot is Ready and Downloaded");
-            },
-                (error) => { console.log(error) });
+
     }
     render() {
         return (
@@ -289,7 +301,20 @@ class Section5 extends Component {
                                                             placeholder="Enter number of future days for prediction" required />
                                                     </div>
                                                 </div>
-
+                                                <div className="row">
+                                                    <div className="col-40">
+                                                        <label htmlFor="Frequency">What is frequency of period? <span className="ibtn">i <span id="idesc">Is your period daily or monthly and so on</span></span></label>
+                                                    </div>
+                                                    <div className="col-60 ">
+                                                        <select name="Frequency" id="Frequency" value={this.state.frequency} onChange={this.handleFrequencyChange}>
+                                                            <option value="D">Daily</option>
+                                                            <option value="W">Weekly</option>
+                                                            <option value="M">Monthly</option>
+                                                            <option value="Q">Quaterly</option>
+                                                            <option value="Y">Yearly</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
 
                                                 <div>
                                                     <button type="submit" className="btn btn-secondary" onClick={this.handleGetTimePrediction} id="getresultstime" >Get Results</button>
