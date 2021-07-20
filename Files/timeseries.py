@@ -19,6 +19,7 @@ import random
 from Files.metrics import Metrics as met
 import warnings
 import pickle 
+from statsmodels.graphics.tsaplots import acf,pacf
 
 class timeseries:
     def createprophet(self,dataconfig):
@@ -68,8 +69,11 @@ class timeseries:
         data=pd.read_csv(dataconfigfile["clean_data_address"])
         location=dataconfigfile["location"]
         choice=dataconfigfile['frequency']
-        diction={"D":1,"W":7,"M":30,"Q":90,"Y":365,}
-        freq=12  ##hard coded as of now
+        diction={"D":7,"W":52,"M":12,"Q":4,"Y":2,}
+        if choice in diction:
+            freq=diction[choice]
+        else:
+            freq=12
         warnings.filterwarnings("ignore")
         with StepwiseContext(max_dur=15):
             model = auto_arima(data, stepwise=True, error_action='ignore', seasonal=True,m=freq,trace=True)
@@ -95,8 +99,18 @@ class timeseries:
   
  
         plotlocation=dataconfigfile['location']
-        fig.write_html(os.path.join(plotlocation,"plot.html"))
         plotlocation=os.path.join(plotlocation,"plot.html")
+        acf=acf(data['y'])
+        acf=pd.DataFrame(acf,columns=['data'])
+        pacf=pacf(data['y'])
+        pacf=pd.DataFrame(pacf,columns=['data'])
+        fig2=plot_graphs(acf,"Auto correlative function")
+        fig3=plot_graphs(pacf,"Partial-Auto correlative funtion")
+        with open(plotlocation, 'a') as f:
+            f.write(fig.to_html(include_plotlyjs='cdn'))
+            f.write(fig2.to_html(include_plotlyjs='cdn'))
+            f.write(fig3.to_html(include_plotlyjs='cdn'))
+        f.close()
 
         modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True, seasonal=True)
         location=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
@@ -116,10 +130,7 @@ class timeseries:
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
         model=ARIMAResults.load(pickleFileLocation)
         predictions=model.forecast(daysintothefuture)
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=predictions.index,y=predictions,name="predictions"))
-        
-        fig.write_html(os.path.join(storeLocation,"inference.html"))
+
         ran=random.randint(100,999)
         csvresults=predictions.to_csv()
         inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
@@ -127,4 +138,18 @@ class timeseries:
         inference.write(csvresults)
         inference.close()
 
-        return inferenceDataResultsPath,os.path.join(storeLocation,"inference.html")
+        return inferenceDataResultsPath,predictions
+
+    def plot_graphs(acf,name):
+    
+        acfig = px.bar(acf, x=acf.index, y="data",title=name)
+        acfig.show()
+        return acfig
+
+    def plotinference(self,predictions,storeLocation):
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=predictions.index,y=predictions,name="predictions"))
+        
+        fig.write_html(os.path.join(storeLocation,"inference.html"))
+
+        return os.path.join(storeLocation,"inference.html")
