@@ -148,7 +148,8 @@ class timeseries:
         # acfig.show()
         return acfig
 
-    def plotinference(self,predictions,storeLocation):
+    def plotinference(self,predictionsPath,storeLocation):
+        predictions=pd.read_csv(predictionsPath)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=predictions.index,y=predictions,name="predictions"))
         
