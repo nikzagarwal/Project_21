@@ -33,10 +33,10 @@ from Files.training import training
 from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
 
-from sse_starlette.sse import EventSourceResponse
-from sh import tail
-import time
-import asyncio
+# from sse_starlette.sse import EventSourceResponse
+# from sh import tail
+# import time
+# import asyncio
 
 origins=settings.CORS_ORIGIN
 
@@ -576,43 +576,43 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
 
 
 
-@app.get('/stream-logs')
-async def run(request: Request):
-    async def autologs(request):
-        for line in tail("-f", 'logs.log', _iter=True):
-            if await request.is_disconnected():
-                print("Client Disconnected!")
-                break
-            yield line
-            time.sleep(0.25)
-    event_generator = autologs(request)
-    return EventSourceResponse(event_generator)
+# @app.get('/stream-logs')
+# async def run(request: Request):
+#     async def autologs(request):
+#         for line in tail("-f", 'logs.log', _iter=True):
+#             if await request.is_disconnected():
+#                 print("Client Disconnected!")
+#                 break
+#             yield line
+#             time.sleep(0.25)
+#     event_generator = autologs(request)
+#     return EventSourceResponse(event_generator)
 
 
-MESSAGE_STREAM_DELAY = 1  # second
-MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
+# MESSAGE_STREAM_DELAY = 1  # second
+# MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
 
 
-@app.get('/stream')
-async def message_stream(request: Request):     
-    async def event_generator():
-        while True:
-            # If client was closed the connection
-            if await request.is_disconnected():
-                print("Client Disconnected!")
-                break
+# @app.get('/stream')
+# async def message_stream(request: Request):     
+#     async def event_generator():
+#         while True:
+#             # If client was closed the connection
+#             if await request.is_disconnected():
+#                 print("Client Disconnected!")
+#                 break
 
-            # Checks for new messages and return them to client if any
-            for line in tail("-f", 'logs.log', _iter=True):
-                yield {
-                    "event": line,
-                    "id": "message_id",
-                    "retry": MESSAGE_STREAM_RETRY_TIMEOUT,
-                    "data": "message_content"
-                }
-            await asyncio.sleep(MESSAGE_STREAM_DELAY)
+#             # Checks for new messages and return them to client if any
+#             for line in tail("-f", 'logs.log', _iter=True):
+#                 yield {
+#                     "event": line,
+#                     "id": "message_id",
+#                     "retry": MESSAGE_STREAM_RETRY_TIMEOUT,
+#                     "data": "message_content"
+#                 }
+#             await asyncio.sleep(MESSAGE_STREAM_DELAY)
 
-    return EventSourceResponse(event_generator())
+#     return EventSourceResponse(event_generator())
 
 # @app.websocket("/ws")
 # async def training_status(websocket: WebSocket):

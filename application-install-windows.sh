@@ -18,7 +18,7 @@ python -m venv venv
 echo 'Project21 Python Virtual Environment Created...'
 
 #To Activate the Virtual Environment
-. venv\Scripts\activate
+. venv\\Scripts\\activate
 
 #install requirements
 echo 'Installing Requirements in the virtual environment... This may take a while... (15-20 mins) Please be patient...'
