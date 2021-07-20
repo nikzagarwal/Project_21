@@ -100,17 +100,17 @@ class timeseries:
  
         plotlocation=dataconfigfile['location']
         plotlocation=os.path.join(plotlocation,"plot.html")
-        acf=acf(data['y'])
-        acf=pd.DataFrame(acf,columns=['data'])
-        pacf=pacf(data['y'])
-        pacf=pd.DataFrame(pacf,columns=['data'])
-        fig2=plot_graphs(acf,"Auto correlative function")
-        fig3=plot_graphs(pacf,"Partial-Auto correlative funtion")
+        acf_=acf(data['y'])
+        acf_=pd.DataFrame(acf_,columns=['data'])
+        pacf_=pacf(data['y'])
+        pacf_=pd.DataFrame(pacf_,columns=['data'])
+        # fig2=self.plot_graphs(acf_,"Auto correlative function")
+        # fig3=self.plot_graphs(pacf_,"Partial-Auto correlative funtion")
         with open(plotlocation, 'a') as f:
-            f.write(fig.to_html(include_plotlyjs='cdn'))
-            f.write(fig2.to_html(include_plotlyjs='cdn'))
-            f.write(fig3.to_html(include_plotlyjs='cdn'))
-        f.close()
+            f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
+            # f.write(fig2.to_html(include_plotlyjs='cdn',full_html=False))
+            # f.write(fig3.to_html(include_plotlyjs='cdn',full_html=False))
+        # f.close()
 
         modelfinal=auto_arima(data['y'], trace=True,suppress_warnings=True, seasonal=True)
         location=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
@@ -140,10 +140,10 @@ class timeseries:
 
         return inferenceDataResultsPath,predictions
 
-    def plot_graphs(acf,name):
+    def plot_graphs(self,acf,name):
     
         acfig = px.bar(acf, x=acf.index, y="data",title=name)
-        acfig.show()
+        # acfig.show()
         return acfig
 
     def plotinference(self,predictions,storeLocation):

@@ -14,13 +14,13 @@ terminationFunction () {
 trap "terminationFunction" INT
 
 #To Activate the Virtual Environment
-. venv\Scripts\activate
+. venv\\Scripts\\activate
 
 #To Start React - Frontend Server
-/bin/bash -ec 'cd Frontend/pr21 && npm start &'
+/bin/bash -ec 'cd Frontend\\pr21 && npm start &'
 
 #To Start FastAPI - Backend Server
-/bin/bash -ec 'python3 api.py'
+/bin/bash -ec 'python api.py'
 
 # Restore signal handling to previous before exit.
 trap INT
