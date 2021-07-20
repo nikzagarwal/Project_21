@@ -2,7 +2,7 @@ import os
 import pickle
 import shutil
 import yaml
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
@@ -29,8 +29,14 @@ from Files.auto_clustering import Autoclu
 from Files.plot import plot
 from Files.inference import Inference
 from Files.preprocess import Preprocess
+from Files.training import training
 from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
+
+from sse_starlette.sse import EventSourceResponse
+from sh import tail
+import time
+import asyncio
 
 origins=settings.CORS_ORIGIN
 
@@ -354,30 +360,31 @@ def get_preprocessing_parameters():
 def get_hyper_parameters(preprocessJSONFormData:dict):
     preprocessJSONFormData=dict(preprocessJSONFormData)
     # projectManualConfigFileLocation, dataID, problem_type, folderLocation = generate_project_manual_config_file(preprocessJSONFormData["projectID"],preprocessJSONFormData,Project21Database)
-    # TODO: Call function manual preprocess generate the clean data and save it in DB
-    # inferenceObj=Preprocess()
-    # cleanDataPath=inferenceObj.manual_preprocess(projectManualConfigFileLocation, folderLocation)
+    # # TODO: Call function manual preprocess generate the clean data and save it in DB
+    # preprocessObj=Preprocess()
+    # cleanDataPath=preprocessObj.manual_preprocess(projectManualConfigFileLocation, folderLocation)
     # print(cleanDataPath)
-    # # if(problem_type=='regression'):
-    #     automatic_model_training=AutoReg()
-    #     Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
-    # elif (problem_type=='classification'):
-    #     automatic_model_training=Auto()
-    #     Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
-    # elif (problem_type=='clustering'):
-    #     automatic_model_training=Autoclu()
-    #     Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
     
-    # if Operation["Successful"]:
+    # if os.path.exists(cleanDataPath):
     #     try:
     #         Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
     #             "dataID": dataID,
-    #             "cleanDataPath": Operation["cleanDataPath"],
-    #             "target": formData["target"],
+    #             "cleanDataPath": cleanDataPath,
+    #             "target": preprocessJSONFormData["target_column_name"],
     #             "belongsToUserID": currentIDs.get_current_user_id(),
-    #             "belongsToProjectID": formData["projectID"]
+    #             "belongsToProjectID": preprocessJSONFormData["projectID"]
     #         })
-    #         currentIDs.set_current_data_id(dataID)
+    #     except Exception as e:
+    #         print("An Error Occured: ",e)
+    #         print("Could not Insert into Data Collection")
+    yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
+    return yaml_json
+
+@app.post('/manual',tags=["Manual Mode"])
+def start_manual_training():
+    # trainingObj=training()
+    # trainingObj.train() #Have to add the arguments here
+
     #         Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
     #             "modelID": dataID,
     #             "modelName": "Default Name",
@@ -429,11 +436,6 @@ def get_hyper_parameters(preprocessJSONFormData:dict):
     #     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": preprocessJSONFormData["projectID"], "dataID":dataID, "modelID": dataID})
     # else:
     #     return JSONResponse({"Successful":"False"})
-    yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
-    return yaml_json
-
-@app.post('/manual',tags=["Manual Mode"])
-def start_manual_training():
     return JSONResponse({"Working":"True"})
 
 @app.post('/timeseries',tags=["Timeseries"])
@@ -571,6 +573,46 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
     except Exception as e:
         print("An Error Occured: ",e)
         return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
+
+
+
+@app.get('/stream-logs')
+async def run(request: Request):
+    async def autologs(request):
+        for line in tail("-f", 'logs.log', _iter=True):
+            if await request.is_disconnected():
+                print("Client Disconnected!")
+                break
+            yield line
+            time.sleep(0.25)
+    event_generator = autologs(request)
+    return EventSourceResponse(event_generator)
+
+
+MESSAGE_STREAM_DELAY = 1  # second
+MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
+
+
+@app.get('/stream')
+async def message_stream(request: Request):     
+    async def event_generator():
+        while True:
+            # If client was closed the connection
+            if await request.is_disconnected():
+                print("Client Disconnected!")
+                break
+
+            # Checks for new messages and return them to client if any
+            for line in tail("-f", 'logs.log', _iter=True):
+                yield {
+                    "event": line,
+                    "id": "message_id",
+                    "retry": MESSAGE_STREAM_RETRY_TIMEOUT,
+                    "data": "message_content"
+                }
+            await asyncio.sleep(MESSAGE_STREAM_DELAY)
+
+    return EventSourceResponse(event_generator())
 
 # @app.websocket("/ws")
 # async def training_status(websocket: WebSocket):
