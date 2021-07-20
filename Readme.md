@@ -1,10 +1,9 @@
 # TwentyOne - 21
 
-
 <p align="center">
   <img src="images/21_logo.png" alt="logo" style="width: 200px" />
 </p>
----
+<hr>
 
 Project 21 is an AutoML engine that aims to make the life of Data Scientists a lot easier by automating the process of generating, tuning and testing the best model according to their dataset.
 You provide the data, we provide the best model along with the required expertise to get you started in the field of ML.
@@ -63,7 +62,7 @@ To run the project on Ubuntu by manually typing the commands one by one, do the 
 
 * Once all dependencies are installed go to the project root folder and run the following commands:
 
-  1.  Activate the virtual environment if not done so:
+  1. Activate the virtual environment if not done so:
 
      ```shell
      source venv/bin/activate
@@ -151,7 +150,7 @@ To run the project on Windows by manually typing the commands one by one, do the
 
 * Once all dependencies are installed go to the project root folder and run the following commands:
 
-  1.  Activate the virtual environment if not done so:
+  1. Activate the virtual environment if not done so:
 
      ```shell
      .\venv\Scripts\activate
@@ -181,13 +180,13 @@ To run the project on Windows using shell scripts, do the following -
 * Run the Installation shell script
 
   ```shell
-  .\application-install-ubuntu.sh
+  .\application-install-windows.sh
   ```
 
 * Start the Frontend, Backend and Database server
 
   ```shell
-  .\application-startup-ubuntu.sh
+  .\application-startup-windows.sh
   ```
 
 * Go to `localhost:3000` and use Project21 for your needs!
@@ -204,7 +203,7 @@ Note: In case of any errors or bugs faced, please raise an issue on the GitHub p
 
 -  [Architecture of Auto ML 21](#BLOCKS)
 
--  [Features of Auto ML 21](#Features-of-Auto-ML-21)
+-  [Features of Auto ML 21](#Features-of-Project-21)
 
 -  [ML Models](#ML-Models)
 
@@ -217,7 +216,7 @@ Note: In case of any errors or bugs faced, please raise an issue on the GitHub p
 
 
 
-# Architecture of AUTO ML 21  <a id='BLOCKS'></a>
+# Architecture of Project 21  <a id='BLOCKS'></a>
 
 ### Main concepts
 
@@ -240,7 +239,7 @@ Top level architecture provides how things works in twentyone.
 
 
 
-# Features of Auto ML 21 <a id='Features-of-Auto-ML-21'></a>
+# Features of Project 21 <a id='Features-of-Project-21'></a>
 
 - TwentyOne is designed to leverage transfer learning as much as possible. For  many problems the data requirement for 21 is minimal. This saves a lot  of time, effort and cost in data collection. Model training is also  greatly reduced.
 
