@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import HyperModal from './hypermodal.js';
+import axios from 'axios';
 class ManualModel extends Component {
     constructor(props) {
         super(props)
@@ -21,21 +22,22 @@ class ManualModel extends Component {
     handlehyperselection = (val) => event => {
         var checkbox = event.target;
         if (checkbox.checked) {
-            this.setState(prevState => ({
+            // this.setState(prevState => ({
 
-                hyperForm: Object.values({
-                    ...prevState.hyperForm,
-                    [val]: {
-                        ...prevState.hyperForm[val],
-                        "isSelected": true
-                    }
-                }),
+            //     hyperForm: Object.values({
+            //         ...prevState.hyperForm,
+            //         [val]: {
+            //             ...prevState.hyperForm[val],
+            //             "isSelected": true
+            //         }
+            //     }),
 
 
-            }
-            ))
-            // this.setState({ modalShow: true })
-            // this.setState({ currentModel: event.target.value })
+            // }
+            // ))
+            // console.log(val)
+            this.setState({ modalShow: true })
+            this.setState({ currentModel: val })
         }
 
         else {
@@ -54,6 +56,27 @@ class ManualModel extends Component {
 
             this.setState({ modalShow: false })
         }
+    }
+    handlehyperChange = (data) => {
+        this.setState({
+            hyperForm: data
+        })
+    }
+    handleTrain = event => {
+        let projectID= this.props.projectdetail.projectID
+        let userID= this.props.projectdetail.userID
+        console.log(JSON.stringify(this.state.hyperForm))
+        axios.post('http://localhost:8000/manual/'+projectID+'/'+userID, JSON.stringify(this.state.hyperForm))
+            .then(res => {
+                console.log("SuccessfulTime", res)
+                this.setState({
+                    modeldetail: res.data
+                })
+                console.log(this.state.modeldetail)
+            },
+                (error) => { console.log(error) });
+
+
     }
     render() {
         console.log(this.state.hyperForm)
@@ -75,8 +98,10 @@ class ManualModel extends Component {
                                         <HyperModal
                                             show={this.state.modalShow}
                                             onHide={() => this.setState({ modalShow: false })}
-                                            modelName={this.state.currentModel}
+                                            modelNumber={this.state.currentModel}
                                             mtype={this.props.mtype}
+                                            hyperForm={this.state.hyperForm}
+                                            handlehyperChange={this.handlehyperChange}
                                         />
                                     </div>
                                 </div>
@@ -96,7 +121,7 @@ class ManualModel extends Component {
                     <div id="modellist">
                         {Classificationitems}
                     </div>
-                    <button className="preprocessbtn" onClick={this.handleTraining} >Train Now</button>
+                    <button className="preprocessbtn" onClick={this.handleTrain} >Train Now</button>
 
                 </div >
             );
@@ -108,11 +133,11 @@ class ManualModel extends Component {
                 let item = []
                 for (let j = i; j < i + 3 && j < len; j++) {
                     item.push(
-                        this.state.hyperForm[j].type === "Classification" ?
+                        this.state.hyperForm[j].type === "Regression" ?
                             <div className="card sec6card manualcard">
 
                                 <div className="card-body manualmodellist">
-                                    <span> <input type="checkbox" id={i + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlehyperselection} name="automodel" />
+                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlehyperselection(j)} name="automodel" />
                                         <label htmlFor="automodel" className="card-model-list"> {this.state.hyperForm[j].name}</label>
                                     </span>
 
@@ -123,8 +148,10 @@ class ManualModel extends Component {
                                         <HyperModal
                                             show={this.state.modalShow}
                                             onHide={() => this.setState({ modalShow: false })}
-                                            modelName={this.state.currentModel}
+                                            modelNumber={this.state.currentModel}
                                             mtype={this.props.mtype}
+                                            hyperForm={this.state.hyperForm}
+                                            handlehyperChange={this.handlehyperChange}
                                         />
                                     </div>
                                 </div>

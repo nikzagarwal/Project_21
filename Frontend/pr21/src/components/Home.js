@@ -560,7 +560,7 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
-                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} />
+                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail}/>
                         </div>
                     </div>
                     {/* form6 for time series */}
