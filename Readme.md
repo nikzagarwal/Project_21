@@ -1,9 +1,9 @@
 # TwentyOne - 21
 
 
-
-<img src="https://github.com/pooja-bs-3003/twentyone/raw/main/imgs/21_logo.png" alt="logo" style="zoom: 80%;" />
-
+<p align="center">
+  <img src="images/21_logo.png" alt="logo" style="width: 200px" />
+</p>
 ---
 
 Project 21 is an AutoML engine that aims to make the life of Data Scientists a lot easier by automating the process of generating, tuning and testing the best model according to their dataset.
@@ -14,28 +14,187 @@ Get started now!
 
 ---
 
-To run the project do the following - 
-1. Fork this repository.
+## Running Project21
 
-2. `git clone <url>` - put the url of your forked repo.
+This project requires the following dependencies installed beforehand.
 
-3. Create a virtual environment inside the project folder using the following:
-   
-   ```shell
-   python3 -m venv venv
-   ```
-   
-4. Activate the virtual environment using:
+* `python` version `3.8+` and/or above.
+* `node` version `v10.19.0` 
+* `npm` version `6.14.4`
+* `MongoDB Community` version `4.4.7` 
+* `pip` version 20.0.2
 
-   ```shell
-   source venv/bin/activate
-   ```
+### Installation and Running Instructions - Ubuntu
 
-5. Once the environment is activated, install the dependencies using:
+#### Method 1: Manually Typing Instructions In Terminal
 
-   ```shell
-   pip3 install -r requirements.txt
-   ```
+To run the project on Ubuntu by manually typing the commands one by one, do the following - 
+
+* Get a copy of this project locally and install the dependencies:
+
+  1. Fork this repository.
+
+  2. `git clone <url>` - put the url of your forked repo. Once you have the cloned copy locally. `cd` into the project folder.
+
+  3. Create a virtual environment inside the project folder using the following:
+
+     ```shell
+     python3 -m venv venv
+     ```
+
+  4. Activate the virtual environment using:
+
+     ```shell
+     source venv/bin/activate
+     ```
+
+  5. Once the environment is activated, install the dependencies using:
+
+     ```shell
+     pip3 install -r requirements.txt
+     ```
+
+  6. Now install the react dependencies by the following:
+
+     ```shell
+     cd Frontend/pr21/
+     npm i
+     ```
+
+* Once all dependencies are installed go to the project root folder and run the following commands:
+
+  1.  Activate the virtual environment if not done so:
+
+     ```shell
+     source venv/bin/activate
+     ```
+
+  2. Start the Database server (mongodb community server)
+
+     ```shell
+     sudo systemctl start mongod
+     ```
+
+     Enter your password, if prompted to do so.
+
+  3. Start the Backend server (From the root folder)
+
+     ```shell
+     python3 api.py
+     ```
+
+  4. Start the Frontend server (From the root folder - can be done by opening a new terminal window)
+
+     ```shell
+     cd Frontend/pr21/
+     npm start
+     ```
+
+* Go to `localhost:3000` and use Project21 for your needs!
+
+#### Method 2: Using Shell Scripts
+
+To run the project on Ubuntu using shell scripts, do the following - 
+
+* Run the Installation shell script
+
+  ```shell
+  ./application-install-ubuntu.sh
+  ```
+
+* Start the Frontend, Backend and Database server
+
+  ```shell
+  ./application-startup-ubuntu.sh
+  ```
+
+* Go to `localhost:3000` and use Project21 for your needs!
+
+---
+
+### Installation and Running Instructions - Windows
+
+#### Method 1 - Manually Typing Instructions In Terminal
+
+To run the project on Windows by manually typing the commands one by one, do the following - 
+
+* Get a copy of this project locally and install the dependencies
+
+  1. Fork this repository.
+
+  2. `git clone <url>` - put the url of your forked repo. Once you have the cloned copy locally. `cd` into the project folder.
+
+  3. Create a virtual environment inside the project folder using the following:
+
+     ```shell
+     python -m venv venv
+     ```
+
+  4. Activate the virtual environment using:
+
+     ```shell
+     .\venv\Scripts\activate
+     ```
+
+  5. Now Install React dependencies by the following:
+
+     ```shell
+     cd Frontend\pr21\
+     npm i
+     ```
+
+  6. Once the environment is activated, install the dependencies using:
+
+     ```
+     pip install -r requirements.txt
+     ```
+
+* Once all dependencies are installed go to the project root folder and run the following commands:
+
+  1.  Activate the virtual environment if not done so:
+
+     ```shell
+     .\venv\Scripts\activate
+     ```
+
+  2. Start the Database server - By running MongoDB Community Edition. (Can be downloaded from their website)
+
+  3. Start the Backend server (From the root folder)
+
+     ```shell
+     python api.py
+     ```
+
+  4. Start the Frontend server (From the root folder - can be done by opening a new terminal window)
+
+     ```shell
+     cd Frontend\pr2\
+     npm start
+     ```
+
+* Go to `localhost:3000/` and use Project21 for your needs!
+
+#### Method 2 - Using Shell Scripts
+
+To run the project on Windows using shell scripts, do the following - 
+
+* Run the Installation shell script
+
+  ```shell
+  .\application-install-ubuntu.sh
+  ```
+
+* Start the Frontend, Backend and Database server
+
+  ```shell
+  .\application-startup-ubuntu.sh
+  ```
+
+* Go to `localhost:3000` and use Project21 for your needs!
+
+---
+
+Note: In case of any errors or bugs faced, please raise an issue on the GitHub page. Contributions are gladly welcomed!
 
 ---
 
@@ -224,4 +383,4 @@ y= b0+b1x1+ b2x12+ b2x13+...... bnx1n
 
 ### Maintained By
 
-This repo is maintained by  **Shivaramkrs** curl team members and contibutors **NikhilAgarwal**, **Paarth S Barkur**, **Pooja BS**, **Rishabh Bhatt** & **Shubham Kumar Shaw**.
+This repository is maintained by  **Shivaramkrs** curl team members and contibutors **Nikhil Agarwal**, **Paarth S Barkur**, **Pooja BS**, **Rishabh Bhatt** & **Shubham Kumar Shaw**.
