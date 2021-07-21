@@ -98,7 +98,7 @@ class timeseries:
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.loc[len(metrics.index)]=metrics_new_row
         metrics.to_csv(metricsLocation, index=True)
-      
+        r2score=metrics_new_row[3]
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=data.index,y=data.y,name="actual"))
@@ -133,7 +133,7 @@ class timeseries:
 
         
         
-        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":plotlocation}
+        return {"Successful": True, "cleanDataPath": dataconfigfile["clean_data_address"], "metricsLocation":metricsLocation, "pickleFolderPath":location, "pickleFilePath":pickleFilePath,"plotLocation":plotlocation, "accuracy":r2score}
         
     def arimainference(self,pickleFileLocation,storeLocation,daysintothefuture):
         print(pickleFileLocation)
