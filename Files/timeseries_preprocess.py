@@ -17,11 +17,14 @@ class TimeseriesPreprocess:
         
         df = pd.read_csv(config_data["raw_data_address"])
         
-        df.dropna(how='all', axis=1, inplace=True)
+        # df.dropna(how='all', axis=1, inplace=True)
         
         print("DataFrame again: ", df)
         df.set_index(config_data['date_index'], inplace = True)
-        df.index=pd.to_datetime(df.index) 
+        df.index=pd.to_datetime(df.index,utc=True) 
+        df.index=df.index.tz_convert(None)
+        df=df.resample(config_data['frequency']).ffill()
+        df.dropna(how='any', axis=0, inplace=True)
         
         # df = df['Cases'].resample(config_data['frequency']).sum()
 
