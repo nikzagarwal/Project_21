@@ -68,7 +68,7 @@ class ResultsCache:
         self.status=False
 
     def set_auto_mode_status(self,status):
-        self.status=False
+        self.status=status
     
     def get_auto_mode_status(self):
         return self.status

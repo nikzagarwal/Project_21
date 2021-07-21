@@ -28,6 +28,7 @@ class Settings(CommonSettings,ServerSettings,DatabaseSettings):
     CONFIG_YAML_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Files','config'))
     CONFIG_PREPROCESS_YAML_FILE: str =os.path.abspath(os.path.join(os.getcwd(),'Files','config','preprocess_config.yaml'))
     CONFIG_MODEL_YAML_FILE: str=os.path.abspath(os.path.join(os.getcwd(),'Files','config','model.yaml'))
+    DATA_TEMP_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Database','TempFiles'))
     pass
 
 settings=Settings()

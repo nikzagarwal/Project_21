@@ -22,7 +22,7 @@ from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
 from Backend.app.schemas import AutoFormData, TimeseriesFormData, PreprocessJSONFormData
-from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file
+from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles
 from Files.auto import Auto
 from Files.autoreg import AutoReg
 from Files.auto_clustering import Autoclu
@@ -33,10 +33,10 @@ from Files.training import training
 from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
 
-# from sse_starlette.sse import EventSourceResponse
+from sse_starlette.sse import EventSourceResponse
 # from sh import tail
 # import time
-# import asyncio
+import asyncio
 
 origins=settings.CORS_ORIGIN
 
@@ -89,6 +89,12 @@ def startup_mongodb_client():
 @app.on_event("shutdown")
 def shutdown_mongodb_client():
     Project21Database.close()
+
+
+@app.post('/convertFile')
+def converting_uploaded_file(train:UploadFile=File(...)):
+    convertedFilePath, originalFilePath=convertFile(train)
+    return FileResponse(convertedFilePath,media_type="text/csv", filename="convertedFile.csv")
 
 @app.post('/create',tags=["Auto Mode"])
 def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFile=File(...)):
@@ -578,15 +584,15 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
         return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
 
 
-# @app.get('/stream-logs')
+# @app.get('/stream-logs2')
 # async def run(request: Request):
 #     async def autologs(request):
-#         for line in tail("-f", 'logs.log', _iter=True):
+#         for line in tail_F('logs.log'):
 #             if await request.is_disconnected():
 #                 print("Client Disconnected!")
 #                 break
 #             yield line
-#             time.sleep(0.25)
+            
 #     event_generator = autologs(request)
 #     return EventSourceResponse(event_generator)
 
@@ -643,3 +649,90 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
 #         print("Error: ",e)
 #         # break
 #     print("Websocket connection closing...")
+
+# def tail_F(some_file):
+#     first_call = True
+#     while True:
+#         try:
+#             with open(some_file) as input:
+#                 if first_call:
+#                     input.seek(0, 2)
+#                     first_call = False
+#                 latest_data = input.read()
+#                 while True:
+#                     if '\n' not in latest_data:
+#                         latest_data += input.read()
+#                         if '\n' not in latest_data:
+#                             yield ''
+#                             if not os.path.isfile(some_file):
+#                                 break
+#                             continue
+#                     latest_lines = latest_data.split('\n')
+#                     if latest_data[-1] != '\n':
+#                         latest_data = latest_lines[-1]
+#                     else:
+#                         latest_data = input.read()
+#                     for line in latest_lines[:-1]:
+#                         yield line + '\n'
+#         except IOError:
+#             yield ''
+
+
+
+# @app.get('/stream-logs')
+# def streaming_logs_auto(request:Request):
+#     def autoLogs():
+#         for line in tail_F("logs.log"):
+#             if not resultsCache.get_auto_mode_status():
+#                 print("Client Disconnected!")
+#                 break
+#             yield line
+#     event_generator = autoLogs()
+#     return EventSourceResponse(event_generator)
+
+@app.get('/autoStatus')
+def change_status_of_auto_mode(status:bool):
+    resultsCache.set_auto_mode_status(status)
+    return JSONResponse({"Status Changed":"Successfully","Status Changed To":status})
+
+
+
+'''
+Get status as an event generator
+'''
+status_stream_delay = 5  # second
+status_stream_retry_timeout = 30000  # milisecond
+
+async def status_event_generator(request):
+    previous_status = None
+    while True:
+        if await request.is_disconnected():
+            print('Request disconnected')
+            break
+
+        if previous_status and resultsCache.get_auto_mode_status():
+            print('Request completed. Disconnecting now')
+            yield {
+                "event": "end",
+                "data" : ''
+            }
+            break
+
+        current_status = resultsCache.get_auto_mode_status()
+        if previous_status != current_status:
+            yield {
+                "event": "update",
+                "retry": status_stream_retry_timeout,
+                "data": current_status
+            }
+            previous_status = current_status
+            print('Current status :%s', current_status)
+        else:
+            print('No change in status...')
+
+        await asyncio.sleep(status_stream_delay)
+
+@app.get('/status/stream')
+async def runStatus(request: Request):
+    event_generator = status_event_generator(request)
+    return EventSourceResponse(event_generator)

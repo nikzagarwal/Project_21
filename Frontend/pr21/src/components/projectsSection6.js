@@ -10,10 +10,15 @@ class ProjectsSection6 extends Component {
         var theFormItself2 = document.getElementById('projectsection5');
         $(theFormItself2).show();
         this.props.handler(event.target.value);
-        this.props.handleModelDetails(this.props.currentproject,event.target.value-1);
+        this.props.handleModelDetails(this.props.currentproject, event.target.value - 1);
     }
     render() {
         const items = []
+        let mtype
+        if(this.props.mtype==="classification")
+            mtype="Accuracy"
+        else
+            mtype="R2 Score"
         for (let i = 0; i < this.props.modelnum; i += 2) {
             let item = []
             for (let j = i; j < i + 2 && j < this.props.modelnum; j++) {
@@ -30,7 +35,7 @@ class ProjectsSection6 extends Component {
                     <div key={j} className="card projectsec6autocard">
 
                         <div className="card-body">
-                            <h2 className="card-title">{this.props.isauto === true ? <span>Top Model for run: <em>{j + 1} </em></span> : <span><em>Model: {j + 1}</em></span> }</h2>
+                            <h2 className="card-title">{this.props.isauto === true ? <span>Top Model for run: <em>{j + 1} </em></span> : <span><em>Model: {j + 1}</em></span>}</h2>
                             {/* <h4 className="card-text cardp">See Details For:
                                 <li>Metrics</li>
                                 <li>Plots</li>
@@ -38,6 +43,9 @@ class ProjectsSection6 extends Component {
                                 <li>Pickle File</li>
                                 <li>Inferencing New Data</li>
                             </h4> */}
+                            {this.props.Accuracies?
+                            <h4 className="cardp">{mtype}: <em>{this.props.Accuracies[j]}%</em></h4>:
+                            null}
                             <button value={j + 1} onClick={this.handleModelResult} className="btn sec6btn btn-primary">See Details</button>
                         </div>
                     </div>
@@ -48,6 +56,7 @@ class ProjectsSection6 extends Component {
                     {item}
                 </div>
             )
+
 
         }
         if (this.props.isauto === false) {
