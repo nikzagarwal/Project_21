@@ -182,10 +182,10 @@ class Section5 extends Component {
 
             <div className="section5 " id="section5">
                 <div className="goback">
-                    <button className="backbtn btn btn-secondary" onClick={this.handleGoBack}  > &lArr; Models </button>
+                    <button className="backbtn btn btn-secondary" onClick={this.handleGoBack}  > &larr; Models </button>
                     {this.props.showRetrain === false ? null :
                         // <div className="goback">
-                        <button className="backbtn btn btn-secondary" onClick={this.handleRetrain} > &lArr; Retrain</button>
+                        <button className="backbtn btn btn-secondary" onClick={this.handleRetrain} > &larr; Retrain</button>
 
                         // </div>
                     }

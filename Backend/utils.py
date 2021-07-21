@@ -28,6 +28,7 @@ def generate_project_folder(projectName,trainFileStream):
         or Success, Error
     """
     try:
+        
         newpath=os.path.join(os.getcwd(),"Database",merge_project_path(projectName),'raw_data')
         if(not os.path.exists(newpath)):
             os.makedirs(newpath)

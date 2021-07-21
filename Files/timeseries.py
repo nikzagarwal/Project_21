@@ -70,7 +70,7 @@ class timeseries:
         data=pd.read_csv(dataconfigfile["clean_data_address"])
         location=dataconfigfile["location"]
         choice=dataconfigfile['frequency']
-        diction={"D":30,"W":52,"M":12,"Q":4,"Y":2,}
+        diction={"D":7,"W":52,"M":12,"Q":4,"Y":2,}
         freq=24
         if choice in diction:
             freq=diction[choice]

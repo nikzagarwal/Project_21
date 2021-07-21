@@ -392,13 +392,13 @@ class Home extends Component {
                                         <label htmlFor="train">Enter training data <span className="ibtn">i <span id="idesc">Enter the data on which you want to train your model</span></span></label>
                                     </div>
                                     <div className="col-60">
-                                        <input type="file" className="form-control" id="train" onChange={this.handleTrainChange} accept=".csv" name="train"
+                                        <input type="file" className="form-control" id="train" onChange={this.handleTrainChange} accept=".csv ,.json" name="train"
                                             placeholder="enter training data in csv format" required />
                                     </div>
                                 </div>
                                 <div className="row">
                                     <div className="col-40">
-                                        <label htmlFor="type">Which type of data is it? <span className="ibtn">i <span id="idesc">Genrally if no. of classes less than 10 for target its Classification</span></span></label>
+                                        <label htmlFor="type">Which type of data is it? <span className="ibtn">i <span id="idesc">Generally if no. of classes less than 10 for target its Classification</span></span></label>
                                     </div>
                                     <div className="col-60 ">
                                         <select name="mtype" id="modeltype" value={this.state.mtype} onChange={this.handleMtypeChange}>
