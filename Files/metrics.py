@@ -18,7 +18,7 @@ class Metrics:
         metricsnewrow=[modelname]
         for criteria in criterias:
             try:
-                metricsnewrow.append(eval(criteria+"(y,prediction)"))
+                metricsnewrow.append(round(eval(criteria+"(y,prediction)"),2))
 
             except:
                 metricsnewrow.append("Not Available")
