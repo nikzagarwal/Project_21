@@ -264,6 +264,8 @@ Top level architecture provides how things works in twentyone.
   - **CLASSIFICATION**
 
   - **REGRESSION**
+  - **CLUSTERING**
+  - **TIME SERIES**
 
     
 
@@ -382,4 +384,4 @@ y= b0+b1x1+ b2x12+ b2x13+...... bnx1n
 
 ### Maintained By
 
-This repository is maintained by  **Shivaramkrs** curl team members and contibutors **Nikhil Agarwal**, **Paarth S Barkur**, **Pooja BS**, **Rishabh Bhatt** & **Shubham Kumar Shaw**.
+This repository is maintained by  **Shivaramkrs** curl team members and contibutors **Nikhil Agarwal**, **Paarth S Barkur**, **Rishabh Bhatt**, **Pooja BS** & **Shubham Kumar Shaw**.
