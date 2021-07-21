@@ -521,7 +521,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 
 
 @app.post('/doTimeseriesInference',tags=["Timeseries"])
-def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...)):
+def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     
     pickleFilePath='/'
     path='/'
@@ -559,16 +559,18 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
 
 
 @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
-def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...)):
+def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     try:
         result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
+        result_Data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        result_Data=serialiseDict(result_Data)
         if result is not None:
             result=serialiseDict(result)
             inferenceFilePath=result["results"]
             if (os.path.exists(inferenceFilePath)):
                 timeseriesObj=timeseries()
-                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"])
-                return FileResponse(plotFilepath,media_type="text/html",filename="inferencePlots.html")
+                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"],result_Data["cleanDataPath"],inferenceTime,frequency)
+                return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
             else:
                 return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
     except Exception as e:

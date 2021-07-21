@@ -31,7 +31,7 @@ class Autoclu:
 
     def model_create(self,config,type="kmeans"):
         config=yaml.load(open(config),Loader=SafeLoader)
-        model=create_model(type,num_clusters=config['num_clusters'])
+        model=create_model(type,num_clusters=config['numClusters'])
         assignedlabels=assign_model(model)
         resultLocation=os.path.join(config["location"],"assignedlabels.csv")
         assignedlabels.to_csv(resultLocation,index=True)

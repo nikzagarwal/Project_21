@@ -3,7 +3,7 @@ import os
 
 class CommonSettings(BaseSettings):
     APP_NAME: str = "Project 21"
-    DEBUG_MODE: bool=True           #Debug Mode
+    DEBUG_MODE: bool=False           #Debug Mode
 
 class ServerSettings(BaseSettings):
     HOST: str = "localhost"         #Backend server running on host
