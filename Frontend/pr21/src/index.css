@@ -1287,9 +1287,9 @@ em{
   text-align: center;
   color: rgb(3, 53, 99);
 }
-.sec7h5 table{
+/* .sec7h5 table{
   margin: 0 auto;
-}
+} */
 .projecttable tbody{
   /* background-color: #dae3e5; */
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
@@ -1299,7 +1299,7 @@ em{
 
 .projecttable tr{
   padding: 0.5em;
-  background-color: #DAE3E5;
+  /* background-color: #DAE3E5; */
   font-family: 'Roberto',sans-serif;
   font-weight: 600;
   
@@ -1310,7 +1310,7 @@ em{
   
 }
 .firstcol{
-  background-color: #cbdfe4;
+  /* background-color: #cbdfe4; */
   
 }
 /* ************************************************************************************************************************ */

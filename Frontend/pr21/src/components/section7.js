@@ -166,7 +166,7 @@ class Section7 extends Component {
                     <div className="modelDetails" id="modelDetails">
 
                         <div className="goback">
-                            <button className="backbtn btn btn-primary" onClick={this.handleGoBack}  > &lArr; Projects </button>
+                            <button className="backbtn btn btn-primary" onClick={this.handleGoBack}  > &larr; Projects </button>
 
                         </div>
                         <div id="sec6">
