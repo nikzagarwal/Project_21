@@ -38,6 +38,7 @@ class Auto:
         config=yaml.load(open(config),Loader=SafeLoader)
         best = compare_models()
         request = pull()
+        request.Accuracy=request.Accuracy*100
         request = request.rename({'Prec.': 'Precision'}, axis='columns')
         request.reset_index(drop=True, inplace=True)
         metricsLocation=os.path.join(config["location"],"metrics.csv")
