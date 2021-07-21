@@ -54,30 +54,30 @@ class Home extends Component {
         })
     }
     handleTrainChange = event => {
-        // const formdata = new FormData();
-        // formdata.append(
-        //     "train",
-        //     event.target.files[0]
-        // );
-        // axios.post('http://localhost:8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-        // .then((response) => {
-        //     console.log("Successful1", response);
-        //     Papa.parse(response.data, {
-        //         complete: this.updateData,
-        //         header: true
-        //     })
-        // },
-        //     (error) => { console.log(error) });
+        const formdata = new FormData();
+        formdata.append(
+            "train",
+            event.target.files[0]
+        );
+        axios.post('http://localhost:8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        .then((response) => {
+            console.log("Successful1", response);
+            Papa.parse(response.data, {
+                complete: this.updateData,
+                header: true
+            })
+        },
+            (error) => { console.log(error) });
         this.setState({
             train: event.target.files[0]
         })
-        console.log(event.target.files[0]);
+        // console.log(event.target.files[0]);
     }
     updateData(result) {
         this.setState({
             traindata: result.data
         });
-        // console.log(this.state.traindata);
+        console.log(this.state.traindata);
     }
     handleMtypeChange = event => {
         this.setState({
@@ -100,11 +100,11 @@ class Home extends Component {
             var theFormItself6 = document.getElementById('form6');
             $(theFormItself6).show();
         }
-        const { train } = this.state;
-        Papa.parse(train, {
-            complete: this.updateData,
-            header: true
-        });
+        // const { train } = this.state;
+        // Papa.parse(train, {
+        //     complete: this.updateData,
+        //     header: true
+        // });
         const formdata = new FormData();
         formdata.append(
             "userID",
@@ -126,7 +126,8 @@ class Home extends Component {
             this.state.train
         );
 
-        // console.log(formdata.getAll('train'))
+        
+        // console.log(this.state.traindata)
 
         axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {

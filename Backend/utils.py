@@ -34,9 +34,9 @@ def convertFile(trainFile):
     elif extension=='.xlsx':
         df=pd.read_excel(originalFilePath)
     
-    df.to_csv(os.path.join(tempDataFilePath+'convertedData.csv'))
+    df.to_csv(os.path.join(tempDataFilePath,'raw_data.csv'), index=False)
 
-    return os.path.join(tempDataFilePath+'convertedData.csv'), originalFilePath
+    return os.path.join(tempDataFilePath,'raw_data.csv'), originalFilePath
 
 
 def deleteTempFiles(filePath1,filePath2):
@@ -58,14 +58,18 @@ def generate_project_folder(projectName,trainFileStream):
         or Success, Error
     """
     try:
-        
+        convertedFilePath, OriginalFilePath = convertFile(trainFileStream)
+        print(convertedFilePath)
         newpath=os.path.join(os.getcwd(),"Database",merge_project_path(projectName),'raw_data')
         if(not os.path.exists(newpath)):
             os.makedirs(newpath)
-        with open(os.path.join(newpath,"raw_data.csv"),"wb") as buffer:
-            shutil.copyfileobj(trainFileStream.file,buffer)
+        # with open(os.path.join(newpath,"raw_data.csv"),"wb") as buffer:
+        #     shutil.copyfileobj(trainFileStream.file,buffer)
+        print(newpath)
+        shutil.move(convertedFilePath,newpath)
         return {"Success":True, "RawDataPath":os.path.abspath(os.path.join(newpath,"raw_data.csv")),"ProjectFolderPath":os.path.abspath(os.path.join(newpath,os.pardir))}
-    except:
+    except Exception as e:
+        print(e)
         return {"Success":False,"Error": "File could not be saved. Folder creation unsuccessful"}
 
 

@@ -93,7 +93,7 @@ def shutdown_mongodb_client():
 
 @app.post('/convertFile')
 def converting_uploaded_file(train:UploadFile=File(...)):
-    convertedFilePath=convertFile(train)
+    convertedFilePath, originalFilePath=convertFile(train)
     return FileResponse(convertedFilePath,media_type="text/csv", filename="convertedFile.csv")
 
 @app.post('/create',tags=["Auto Mode"])
