@@ -24,11 +24,11 @@ class Section7 extends Component {
                     "target": "NONE",
                     "modelType": "NONE",
                     "listOfDataIDs": [13235, 65526],
-                    "Accuracies":[97,89],
+                    "accuracies":[97,89],
                     "isAuto": true
                 },
             },
-            emptyProject: false
+            emptyProject: true
         }
         this.changeChild = React.createRef()
     }
@@ -171,10 +171,22 @@ class Section7 extends Component {
 
                         </div>
                         <div id="sec6">
-                            < ProjectsSection6 handler={this.props.handler} handleModelDetails={this.handleModelDetails} modelnum={this.state.projectList[this.state.currentProject].listOfDataIDs.length} isauto={this.state.projectList[this.state.currentProject].isAuto} projectname={this.state.projectList[this.state.currentProject].projectName} Accuracies={this.state.projectList[this.state.currentProject].Accuracies} currentproject={this.state.currentProject} />
+                            < ProjectsSection6 
+                            handler={this.props.handler} 
+                            handleModelDetails={this.handleModelDetails} 
+                            modelnum={this.state.projectList[this.state.currentProject].listOfDataIDs.length} 
+                            isauto={this.state.projectList[this.state.currentProject].isAuto} 
+                            projectname={this.state.projectList[this.state.currentProject].projectName} 
+                            Accuracies={this.state.projectList[this.state.currentProject].accuracies} 
+                            currentproject={this.state.currentProject} 
+                            mtype={this.state.projectList[this.state.currentProject].modelType}/>
                         </div>
                         <div id="sec5">
-                            < ProjectsSection5 ref={this.changeChild} showRetrain={this.state.showRetrain} currentmodel={this.props.currentmodel} projectdetails={this.state.currentProjectDetails} />
+                            < ProjectsSection5 
+                            ref={this.changeChild} 
+                            showRetrain={this.state.showRetrain} 
+                            currentmodel={this.props.currentmodel} 
+                            projectdetails={this.state.currentProjectDetails} />
                         </div>
                     </div>
                 </div>

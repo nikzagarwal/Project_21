@@ -208,6 +208,9 @@ class Home extends Component {
         })
     }
     handleSubmit2 = event => {
+        this.setState({
+            auto: true
+        })
         event.preventDefault();
         var theFormItself = document.getElementById('form3');
         $(theFormItself).hide();
