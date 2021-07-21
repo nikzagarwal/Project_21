@@ -331,4 +331,4 @@ Top level architecture provides how things works in twentyone.
 
 ### Maintained By
 
-This repository is maintained by  **Shivaramkrs** and curl team members and contibutors **Nikhil Agarwal**, **Paarth S Barkur**, **Rishabh Bhatt**, **Pooja BS** & **Shubham Kumar Shaw**.
+This repository is maintained by  **Shivaramkrs** and curl team members and contributors **Nikhil Agarwal**, **Paarth S Barkur**, **Rishabh Bhatt**, **Pooja BS** & **Shubham Kumar Shaw**.
