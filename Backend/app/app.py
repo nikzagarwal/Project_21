@@ -181,12 +181,21 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
                 "belongsToProjectID": autoFormData["projectID"],
                 "belongsToDataID": dataID
             })
-            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-                "belongsToUserID": autoFormData["userID"],
-                "belongsToProjectID": autoFormData["projectID"],
-                "belongsToModelID": dataID,
-                "addressOfMetricsFile": Operation["metricsLocation"]
-            })
+            if problem_type!='clustering':                
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": autoFormData["userID"],
+                    "belongsToProjectID": autoFormData["projectID"],
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                    "accuracy": Operation["accuracy"]
+                })
+            else:
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": autoFormData["userID"],
+                    "belongsToProjectID": autoFormData["projectID"],
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                })
             result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":autoFormData["projectID"]})
             result=serialiseDict(result)
             if result is not None:
@@ -287,20 +296,49 @@ def get_plots(projectID:int):       #check if it already exists - change locatio
 @app.get('/getAllProjects',tags=["Auto Mode"])
 def get_all_project_details(userID:int):
     listOfProjects=[]
+    listOfAccuracies=[]
     try:   
-        results=Project21Database.find(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
-        for result in results:
-            result=serialiseDict(result)
-            if result["target"] is not None:
-                projectTemplate={
-                    "projectID": result["projectID"],
-                    "projectName": result["projectName"],
-                    "target": result["target"],
-                    "modelType": result["projectType"],
-                    "listOfDataIDs": result["listOfDataIDs"],
-                    "isAuto": result["isAuto"]
-                }
-                listOfProjects.append(projectTemplate)
+        userProjects=Project21Database.find(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
+        for project in userProjects:
+            project=serialiseDict(project)
+            if project["projectType"]=='clustering':
+                listOfDataIDs=project["listOfDataIDs"]
+                if project["target"] is not None:
+                    for dataID in listOfDataIDs:
+                        projectMetrics=Project21Database.find_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})
+                        if projectMetrics is not None:
+                            projectMetrics=serialiseDict(projectMetrics)
+                    projectTemplate={
+                        "projectID": project["projectID"],
+                        "projectName": project["projectName"],
+                        "target": project["target"],
+                        "modelType": project["projectType"],
+                        "listOfDataIDs": project["listOfDataIDs"],
+                        "isAuto": project["isAuto"],
+                        "accuracies":listOfAccuracies
+                    }
+                    listOfProjects.append(projectTemplate)
+                    listOfAccuracies=[]
+            else:
+                listOfDataIDs=project["listOfDataIDs"]
+                if project["target"] is not None:
+                    for dataID in listOfDataIDs:
+                        projectMetrics=Project21Database.find_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})
+                        if projectMetrics is not None:
+                            projectMetrics=serialiseDict(projectMetrics)
+                            if projectMetrics["accuracy"] is not None:
+                                listOfAccuracies.append(projectMetrics["accuracy"])
+                    projectTemplate={
+                        "projectID": project["projectID"],
+                        "projectName": project["projectName"],
+                        "target": project["target"],
+                        "modelType": project["projectType"],
+                        "listOfDataIDs": project["listOfDataIDs"],
+                        "isAuto": project["isAuto"],
+                        "accuracies":listOfAccuracies
+                    }
+                    listOfProjects.append(projectTemplate)
+                    listOfAccuracies=[]
     except Exception as e:
         print("An Error Occured: ",e)
         print("Unable to get all projects")
@@ -486,7 +524,8 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                 "belongsToUserID": timeseriesFormData["userID"],
                 "belongsToProjectID": timeseriesFormData["projectID"],
                 "belongsToModelID": dataID,
-                "addressOfMetricsFile": Operation["metricsLocation"]
+                "addressOfMetricsFile": Operation["metricsLocation"],
+                "accuracy":Operation["accuracy"]
             })
         except Exception as e:
             print("Could not insert into Metrics Collection. An Error Occured: ",e)

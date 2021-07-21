@@ -48,7 +48,7 @@ class Auto:
         #     f.write(request.to_csv('metrics.csv', index=True, index_label="Sno"))
         #     f.close()
         
-        return best, metricsLocation
+        return best, metricsLocation, request["Accuracy"][0]
     
 
     
@@ -113,14 +113,14 @@ class Auto:
         try:
             config2=yaml.load(open(config),Loader=SafeLoader)
             cleanDataPath=self.auto_setup(config)
-            model,metricsLocation=self.top_models_auto(config,config2["n"])
+            model, metricsLocation, accuracy=self.top_models_auto(config,config2["n"])
             tunedmodel=self.model_tune(model)
 
             print("Model List:",model)
             print("Tuned List: ",tunedmodel)
             # self.model_plot(tunedmodel,config)
             pickleFolderPath,pickleFilePath=self.model_save(tunedmodel,config)
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath}
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy}
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}
