@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import yaml
+import pandas as pd
 from yaml.loader import SafeLoader
 from Backend.app.config import settings
 from Backend.app.helpers.project_helper import merge_project_path, get_raw_data_path, get_project_type
@@ -13,6 +14,35 @@ def generate_random_id():
     Generates a 5 digit random number from 10000 to 99999
     """
     return random.randint(10000,99999)
+
+def convertFile(trainFile):
+    tempDataFilePath=settings.DATA_TEMP_FOLDER
+    if(not os.path.exists(tempDataFilePath)):
+        os.makedirs(tempDataFilePath)
+    
+    name, extension = os.path.splitext(trainFile.filename)
+
+    originalFilePath=os.path.join(tempDataFilePath,trainFile.filename)
+
+    with open(originalFilePath,"wb") as buffer:
+        shutil.copyfileobj(trainFile.file,buffer)
+    
+    if extension=='.json':
+        df=pd.read_json(originalFilePath)
+    elif extension=='.csv':
+        df=pd.read_csv(originalFilePath)
+    elif extension=='.xlsx':
+        df=pd.read_excel(originalFilePath)
+    
+    df.to_csv(os.path.join(tempDataFilePath+'convertedData.csv'))
+
+    return os.path.join(tempDataFilePath+'convertedData.csv'), originalFilePath
+
+
+def deleteTempFiles(filePath1,filePath2):
+    os.remove(filePath1)
+    os.remove(filePath2)
+    return
 
 def generate_project_folder(projectName,trainFileStream):
     """
