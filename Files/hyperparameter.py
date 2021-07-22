@@ -1,4 +1,5 @@
 import yaml
+import os
 from yaml.loader import FullLoader
 import numpy as np
 import pandas as pd

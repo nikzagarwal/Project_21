@@ -49,7 +49,7 @@
  - name:  RandomForestClassifier
    isSelected: false
    type: Classification
-   data_type: Tabular
+   datatype: Tabular
    complexity: ML
    hyper: 
     - name: n_estimators
@@ -78,7 +78,7 @@
  - name: SVC
    isSelected: false
    type: Classification
-   data_type: Tabular
+   datatype: Tabular
    complexity: ML
    hyper:
     - name:  C
@@ -116,7 +116,7 @@
  - name: LogisticRegression
    isSelected: false
    type: Classification
-   data_type: Tabular
+   datatype: Tabular
    complexity: ML
    hyper:
     - name: penalty
@@ -447,7 +447,7 @@
  - name: LinearRegression
    isSelected: false
    type: Regression
-   data_type: Tabular
+   datatype: Tabular
    complexity: ML
    hyper:
     - name: fit_intercept
@@ -461,7 +461,7 @@
  - name: SVR
    isSelected: false
    type: Regression
-   data_type: Tabular
+   datatype: Tabular
    complexity: ML
    hyper:
     - name: C

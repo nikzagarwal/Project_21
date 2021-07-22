@@ -345,3 +345,79 @@ class PreprocessJSONFormData(BaseModel):
                 "inference_clean_data_address": "path/to/inference/data.csv"
                 }
         }
+
+
+class Range(BaseModel):
+    min: Optional[int]=None
+    max: Optional[int]=None
+    num_samp: Optional[int]=None
+    type: Optional[str]=None
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+        schema_extra={
+            "min": 10,
+            "max": 200,
+            "num_samp": 5
+        }
+
+class Hyper(BaseModel):
+    name: Optional[str]
+    value: Optional[str]=None      #Was Null - Changed to str
+    ischanged: Optional[bool]
+    type: Optional[str]         #Type can be either bool or number so front frontend we get a string that is either int or bool
+    options: Optional[List[str]]=None     #Was null, can be just one str or list of str
+    vary: Optional[bool]
+    range: Optional[Range]=None
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+        schema_extra={
+            "name": "max_depth",
+            "value": None,
+            "ischanged": False,
+            "type": "int",
+            "options": None,
+            "vary": True,
+            "range": {
+                "min": 10,
+                "max": 200,
+                "num_samp": 5
+            }
+        }
+
+class ModelHyperParametersJSON(BaseModel):
+    name: Optional[str]
+    isSelected: Optional[bool]
+    type: Optional[str]
+    datatype: Optional[str]         #Potential error, saw a key with data_type instead of datatype. Use data_type everywhere
+    complexity: Optional[str]
+    hyper: Optional[List[Hyper]]=None
+    
+    class Config:
+        arbitrary_types_allowed=True
+        allow_population_by_field_name=True
+        schema_extra={
+            "examples":{
+                    "name": "DecisionTreeClassifier",
+                    "isSelected": True,
+                    "type": "Classification",
+                    "datatype": "Tabular",
+                    "complexity": "ML",
+                    "hyper": [
+                        {
+                            "name": "max_depth",
+                            "value": None,
+                            "ischanged": False,
+                            "type": "int",
+                            "options": None,
+                            "vary": True,
+                            "range": {
+                                "min": 10,
+                                "max": 200,
+                                "num_samp": 5
+                            }
+                        }
+                    ]
+                }
+        }
