@@ -12,7 +12,7 @@ import os
 
 class training:
 
-    def train(userinputconfig,dataconfig,preprocessconfig):
+    def train(self,userinputconfig,dataconfig,preprocessconfig,cleanDataPath):
         
         with open(preprocessconfig) as f:
             preprocessconfigfile= yaml.load(f,Loader=FullLoader) #for split ratio
@@ -28,8 +28,9 @@ class training:
 
         test_ratio=preprocessconfigfile["split_ratio_test"] #input given the the user usually 0.3 by default
 
-        data=dataconfigfile["data"] 
-        
+        # data=dataconfigfile["clean_data"] 
+        data=cleanDataPath
+
         target_column=preprocessconfigfile["target_column_name"]
         
         
@@ -58,3 +59,5 @@ class training:
         #stores the metrics in the assigned folder       
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.to_csv(metricsLocation, index=True, index_label="modelname")
+
+        return {"Successful":True,"metricsLocation":metricsLocation}

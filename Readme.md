@@ -3,6 +3,9 @@
 <p align="center">
   <img src="images/21_logo.png" alt="logo" style="width: 200px" />
 </p>
+
+![Curl Tech](http://img.shields.io/badge/-CurlTech-purple?style=plastic&link=https://curl.tech/) ![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![Version](https://img.shields.io/badge/Version-v2.0-purple.svg)
+
 <hr>
 
 Project 21 is an AutoML engine that aims to make the life of Data Scientists a lot easier by automating the process of generating, tuning and testing the best model according to their dataset.
@@ -286,7 +289,7 @@ Top level architecture provides how things works in twentyone.
 
 - Performance of random forest is evaluated by Precision, Recall, F1-score & Accuracy.
 
- 
+
    ## Regression
 
 - Regression is a supervised learning technique which helps in finding the correlation between variables and enables us to predict the continuous output variable based on the one or more  predictor variables.

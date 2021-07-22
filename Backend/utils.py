@@ -135,30 +135,42 @@ def generate_project_manual_config_file(projectID,preprocessJSONFormData,Project
     """
     
     """
-    # user_yaml=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
-    
+    user_yaml=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
     random_id=generate_random_id()
-    preprocessJSONFormData["id"]=random_id
-    preprocessJSONFormData["raw_data_address"]=get_raw_data_path(projectID,Project21Database)
-    
+    manualConfig={}
+    manualConfig["id"]=random_id
+    manualConfig["raw_data_address"]=get_raw_data_path(projectID,Project21Database)
     location="/"
-    random_id=generate_random_id()
+    preprocessJSONFormData["raw_data_address"]=get_raw_data_path(projectID,Project21Database)
+    # user_yaml[""]
+    print(preprocessJSONFormData["raw_data_address"])
+    print(manualConfig["raw_data_address"])
+
     try:
         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
         result_project=serialiseDict(result_project)
+        print(result_project)
         if result_project is not None:
+            manualConfig["problem_type"]=result_project["projectType"]
+            manualConfig["experimentname"]=result_project["projectName"]
             location=os.path.join(result_project["projectFolderPath"],'run'+str(random_id))
+            # preprocessJSONFormData["raw_data_address"]=result_project["rawDataPath"]
     except:
         print("Unable to Update User's Project's Config File")
     if(not os.path.exists(location)):
         os.makedirs(location)
 
-    preprocessJSONFormData["location"]=location
+    print(preprocessJSONFormData["raw_data_address"])
     with open(os.path.join(location,"preprocess_config.yaml"), "w") as f:
         yaml.dump(preprocessJSONFormData,f)
         f.close()
+
+    manualConfig["location"]=location
+    with open(os.path.join(location,"manual_config.yaml"),"w") as f:
+        yaml.dump(manualConfig,f)
+        f.close()
     
-    return os.path.join(location,'preprocess_config.yaml'), random_id , result_project["projectType"], location
+    return os.path.join(location,'preprocess_config.yaml'), os.path.join(location,"manual_config.yaml"),random_id , result_project["projectType"], location
 
 def generate_project_timeseries_config_file(projectID,currentIDs,timeseriesFormData,Project21Database):
     user_yaml=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)

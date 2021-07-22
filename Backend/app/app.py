@@ -1,6 +1,8 @@
 import os
 import pickle
 import shutil
+from pydantic.types import Json
+from typing import List, Optional
 import yaml
 from fastapi import FastAPI, Form, Request
 from fastapi.datastructures import UploadFile
@@ -21,7 +23,7 @@ from Backend.app.helpers.project_helper import create_project_id
 from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
-from Backend.app.schemas import AutoFormData, TimeseriesFormData, PreprocessJSONFormData
+from Backend.app.schemas import AutoFormData, Project, TimeseriesFormData, PreprocessJSONFormData, ModelHyperParametersJSON
 from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles
 from Files.auto import Auto
 from Files.autoreg import AutoReg
@@ -117,7 +119,10 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
                 "configFileLocation": None,
                 "plotsPath": None,
                 "projectType": mtype,
-                "target":None
+                "target":None,
+                "isAuto": None,
+                "preprocessConfigFileLocation":None,
+                "configModelJSONData": None
                 })
             # Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
             #     "modelID": inserted_modelID,
@@ -400,87 +405,110 @@ def get_preprocessing_parameters():
     yaml_json=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
     return JSONResponse(yaml_json)
 
-@app.post('/getHyperparams',tags=["Manual Mode"])
-def get_hyper_parameters(preprocessJSONFormData:dict):
+@app.post('/getHyperparams/{userID}/{projectID}',tags=["Manual Mode"])
+def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int):
     preprocessJSONFormData=dict(preprocessJSONFormData)
-    # projectManualConfigFileLocation, dataID, problem_type, folderLocation = generate_project_manual_config_file(preprocessJSONFormData["projectID"],preprocessJSONFormData,Project21Database)
-    # # TODO: Call function manual preprocess generate the clean data and save it in DB
-    # preprocessObj=Preprocess()
-    # cleanDataPath=preprocessObj.manual_preprocess(projectManualConfigFileLocation, folderLocation)
-    # print(cleanDataPath)
+    print(preprocessJSONFormData)
+    preprocessConfigFileLocation, manualConfigFileLocation, dataID, problem_type, folderLocation = generate_project_manual_config_file(projectID,preprocessJSONFormData,Project21Database)
+    preprocessObj=Preprocess()
+    cleanDataPath=preprocessObj.manual_preprocess(preprocessConfigFileLocation, folderLocation)
+    print(cleanDataPath)
+    if os.path.exists(cleanDataPath):
+        try:
+            Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+                "dataID": dataID,
+                "cleanDataPath": cleanDataPath,
+                "target": preprocessJSONFormData["target_column_name"],
+                "belongsToUserID": currentIDs.get_current_user_id(),
+                "belongsToProjectID": projectID
+            })
+        except Exception as e:
+            print("An Error Occured: ",e)
+            print("Could not Insert into Data Collection")
+        try:
+            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                "$set":{
+                    "preprocessConfigFileLocation":preprocessConfigFileLocation,
+                    "configFileLocation":manualConfigFileLocation,
+                    "target":preprocessJSONFormData["target_column_name"]
+                }
+            })
+        except Exception as e:
+            print("An Error Occured: ",e)
+            print("Could not Update the Project Collection")
+
+        yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
+        return yaml_json
+
+@app.post('/manual/{userID}/{project}',tags=["Manual Mode"])
+def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
+    print(configModelJSONData)
     
-    # if os.path.exists(cleanDataPath):
-    #     try:
-    #         Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
-    #             "dataID": dataID,
-    #             "cleanDataPath": cleanDataPath,
-    #             "target": preprocessJSONFormData["target_column_name"],
-    #             "belongsToUserID": currentIDs.get_current_user_id(),
-    #             "belongsToProjectID": preprocessJSONFormData["projectID"]
-    #         })
-    #     except Exception as e:
-    #         print("An Error Occured: ",e)
-    #         print("Could not Insert into Data Collection")
-    yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
-    return yaml_json
+    result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+    if result_project is not None:
+        configFileLocation=result_project["configFileLocation"]
+        preprocessConfigFileLocation=result_project["preprocessConfigFileLocation"]
+        
+        configModelJSONDataPath=os.path.join(os.path.dirname(result_project["preprocessConfigFileLocation"]),"userinputconfig.yaml")
+    
+    with open(configModelJSONDataPath,"w") as f:
+        yaml.dump(configModelJSONData,f)
+        f.close()
 
-@app.post('/manual',tags=["Manual Mode"])
-def start_manual_training():
-    # trainingObj=training()
-    # trainingObj.train() #Have to add the arguments here
+    result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":result_project["projectID"]})
+    if result_data is not None:
+        cleanDataPath=result_data["cleanDataPath"]
+        dataID=result_data["dataID"]
 
+    trainingObj=training()
+    Operation = trainingObj.train(configModelJSONDataPath,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
+    if Operation["Successful"]:
     #         Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
     #             "modelID": dataID,
     #             "modelName": "Default Name",
-    #             "modelType": problem_type,
+    #             "modelType": result_project["projectType"],
     #             "pickleFolderPath": Operation["pickleFolderPath"],
     #             "pickleFilePath": Operation["pickleFilePath"],
     #             "belongsToUserID": formData["userID"],
     #             "belongsToProjectID": formData["projectID"],
     #             "belongsToDataID": dataID
     #         })
-    #         Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-    #             "belongsToUserID": formData["userID"],
-    #             "belongsToProjectID": formData["projectID"],
-    #             "belongsToModelID": dataID,
-    #             "addressOfMetricsFile": Operation["metricsLocation"]
-    #         })
-    #         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":formData["projectID"]})
-    #         result=serialiseDict(result)
-    #         if result is not None:
-    #             if result["listOfDataIDs"] is not None:
-    #                 newListOfDataIDs=result["listOfDataIDs"]
-    #                 newListOfDataIDs.append(dataID)
-    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-    #                     "$set":{
-    #                         "listOfDataIDs":newListOfDataIDs,
-    #                         "configFileLocation": projectAutoConfigFileLocation,
-    #                         "isAuto": formData["isauto"],
-    #                         "target": formData["target"]
-    #                         }
-    #                     })
-    #             else:
-    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-    #                     "$set":{
-    #                         "listOfDataIDs":[dataID],
-    #                         "configFileLocation": projectAutoConfigFileLocation,
-    #                         "isAuto": formData["isauto"],
-    #                         "target": formData["target"]
-    #                         }
-    #                     })
-    #             if (problem_type=='clustering'):
-    #                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-    #                     "$set":{
-    #                         "clusterPlotLocation":Operation["clusterPlotLocation"]
-    #                     }
-    #                 })
-    #     except Exception as e:
-    #         print("An Error occured: ",e)
-    #         return JSONResponse({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
-    #     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": preprocessJSONFormData["projectID"], "dataID":dataID, "modelID": dataID})
-    # else:
-    #     return JSONResponse({"Successful":"False"})
-    return JSONResponse({"Working":"True"})
+            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                "belongsToUserID": userID,
+                "belongsToProjectID": projectID,
+                "belongsToModelID": dataID,
+                "addressOfMetricsFile": Operation["metricsLocation"]
+            })
+            if result_project["listOfDataIDs"] is not None:
+                newListOfDataIDs=result_project["listOfDataIDs"]
+                newListOfDataIDs.append(dataID)
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "listOfDataIDs":newListOfDataIDs,
+                        "configModelJSONData":configModelJSONData,
+                        "isAuto": False,
+                        }
+                    })
+            else:
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "listOfDataIDs":[dataID],
+                        "configModelJSONData": configModelJSONData,
+                        "isAuto": False
+                        }
+                    })
+            # if (result_project["projectType"]=='clustering'):
+            #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+            #         "$set":{
+            #             "clusterPlotLocation":Operation["clusterPlotLocation"]
+            #         }
+            #     })
+    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": dataID})
+
+@app.post('/manual2/{userID}/{projectID}')
+def mymanualfunction(configModelJSONData):
+    print(configModelJSONData)
+    return
 
 @app.post('/timeseries',tags=["Timeseries"])
 def timeseries_training(timeseriesFormData: TimeseriesFormData):
