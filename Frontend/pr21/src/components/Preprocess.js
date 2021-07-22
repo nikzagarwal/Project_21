@@ -10,7 +10,8 @@ class Preprocess extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            preprocessForm: ""
+            preprocessForm: "",
+            automanualpreprocess:false
         };
     }
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -20,29 +21,44 @@ class Preprocess extends React.Component {
 
         return null;
     }
+    handleAutoPreprocess = (val) => {
+        var theFormItself = document.getElementById('preprocesstable');
+        $(theFormItself).toggle();
+        // this.setState({
+        //     automanualpreprocess: !this.state.automanualpreprocess
+        // })
+        this.setState(prevState => ({
+
+            preprocessForm: {
+                ...prevState.preprocessForm,
+                "is_auto_preprocess": !this.state.automanualpreprocess
+            }
+        }
+        ))
+    }
     handlePreProcess = event => {
         event.preventDefault();
         var theFormItself = document.getElementById('form4');
         $(theFormItself).hide();
         var theFormItself2 = document.getElementById('form5');
         $(theFormItself2).show();
-        if (this.props.automanualpreprocess === true) {
-            this.setState(prevState => ({
+        // if (this.props.automanualpreprocess === true) {
+        //     this.setState(prevState => ({
 
-                preprocessForm: {
-                    ...prevState.preprocessForm,
-                    "is_auto_preprocess": this.props.automanualpreprocess
-                }
-            }
-            ))
-        }
+        //         preprocessForm: {
+        //             ...prevState.preprocessForm,
+        //             "is_auto_preprocess": this.props.automanualpreprocess
+        //         }
+        //     }
+        //     ))
+        // }
         // this.setState(prevState => ({
 
         //     preprocessForm: {
         //         ...prevState.preprocessForm,
         //         "projectID": this.props.projectdetail.projectID,
         //         "userID": this.props.projectdetail.userID,
-                   
+
         //     }
 
         // }
@@ -51,7 +67,7 @@ class Preprocess extends React.Component {
         let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.preprocessForm))
 
-        axios.post('http://localhost:8000/getHyperparams' + userID + '/' + projectID, JSON.stringify(this.state.preprocessForm))
+        axios.post('http://localhost:8000/getHyperparams/' + userID + '/' + projectID, JSON.stringify(this.state.preprocessForm))
             .then(res => {
                 console.log("Successful2", res)
                 this.props.handleModelForm(res.data)
@@ -344,6 +360,12 @@ class Preprocess extends React.Component {
         console.log(this.state.preprocessForm)
         return (
             <div>
+                <div className="autocheckbox">
+                    <input type="checkbox" id="autopreprocess" onClick={this.handleAutoPreprocess} name="autopreprocess" />
+                    <label htmlFor="autopreprocess"> Auto Pre-process</label>
+                </div>
+                <h1>Pre-process</h1>
+                <p>Each Column can be processed differently as required</p>
                 {rawdata.map((data, i) => (
                     i === 1 ? (
                         <div className="preprocesstable " id="preprocesstable">
