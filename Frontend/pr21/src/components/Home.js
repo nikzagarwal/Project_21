@@ -325,11 +325,11 @@ class Home extends Component {
         })
 
     }
-    handleAutoModelSelect() {
-        var theFormItself = document.getElementById('modellist');
-        $(theFormItself).toggle();
+    // handleAutoModelSelect() {
+    //     var theFormItself = document.getElementById('modellist');
+    //     $(theFormItself).toggle();
 
-    }
+    // }
     handleGoForm2() {
         var theFormItself = document.getElementById('form3');
         $(theFormItself).hide();
@@ -572,12 +572,12 @@ class Home extends Component {
                             <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  > Go Back </button>
                         </div>
                         <div className="Modelselection">
-                            <div className="autocheckbox">
+                            {/* <div className="autocheckbox">
                                 <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
                                 <label htmlFor="automodel"> Auto Models</label>
                             </div>
                             <h1>Models</h1>
-                            <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
+                            <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
                             <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail}/>
                         </div>
                     </div>

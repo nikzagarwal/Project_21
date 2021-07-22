@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import HyperModal from './hypermodal.js';
 import axios from 'axios';
+import $ from 'jquery';
 class ManualModel extends Component {
     constructor(props) {
         super(props)
@@ -62,11 +63,20 @@ class ManualModel extends Component {
             hyperForm: data
         })
     }
+    handleAutoModelSelect =event=> {
+        var checkbox = event.target;
+        var theFormItself = document.getElementById('modellist');
+        $(theFormItself).toggle();
+        if(checkbox.checked===true){
+        console.log("hi")
+        }
+
+    }
     handleTrain = event => {
-        let projectID= this.props.projectdetail.projectID
-        let userID= this.props.projectdetail.userID
+        let projectID = this.props.projectdetail.projectID
+        let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.hyperForm))
-        axios.post('http://localhost:8000/manual/'+projectID+'/'+userID, JSON.stringify(this.state.hyperForm))
+        axios.post('http://localhost:8000/manual/' + projectID + '/' + userID, JSON.stringify(this.state.hyperForm))
             .then(res => {
                 console.log("SuccessfulTime", res)
                 this.setState({
@@ -168,6 +178,12 @@ class ManualModel extends Component {
             }
             return (
                 <div>
+                    <div className="autocheckbox">
+                        <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
+                        <label htmlFor="automodel"> Auto Models</label>
+                    </div>
+                    <h1>Models</h1>
+                    <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
                     <div id="modellist">
                         {Regressionitems}
                     </div>
