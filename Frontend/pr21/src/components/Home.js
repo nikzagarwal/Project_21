@@ -319,14 +319,14 @@ class Home extends Component {
             currentmodel: val
         })
     }
-    handleAutoPreprocess = (val) => {
-        var theFormItself = document.getElementById('preprocesstable');
-        $(theFormItself).toggle();
-        this.setState({
-            automanualpreprocess: !this.state.automanualpreprocess
-        })
+    // handleAutoPreprocess = (val) => {
+    //     var theFormItself = document.getElementById('preprocesstable');
+    //     $(theFormItself).toggle();
+    //     this.setState({
+    //         automanualpreprocess: !this.state.automanualpreprocess
+    //     })
 
-    }
+    // }
     // handleAutoModelSelect() {
     //     var theFormItself = document.getElementById('modellist');
     //     $(theFormItself).toggle();
@@ -573,12 +573,12 @@ class Home extends Component {
 
                         </div>
                         <div className="PreprocessForm">
-                            <div className="autocheckbox">
+                            {/* <div className="autocheckbox">
                                 <input type="checkbox" id="autopreprocess" onClick={this.handleAutoPreprocess} name="autopreprocess" />
                                 <label htmlFor="autopreprocess"> Auto Pre-process</label>
                             </div>
                             <h1>Pre-process</h1>
-                            <p>Each Column can be processed differently as required</p>
+                            <p>Each Column can be processed differently as required</p> */}
                             <Preprocess rawdata={this.state.traindata} proprocessForm={this.state.preprocessForm} automanualpreprocess={this.state.automanualpreprocess} handleModelForm={this.handleModelForm} projectdetail={this.state.projectdetail} />
                         </div>
                     </div>
