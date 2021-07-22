@@ -20,7 +20,7 @@ class ProjectsSection6 extends Component {
             mtype = "Accuracy"
             type = "%"
         }
-        if (this.props.mtype === "regression" || this.props.mtype==="timeseries" && this.props.Accuracies)
+        if ((this.props.mtype === "regression" || this.props.mtype==="timeseries") && this.props.Accuracies)
             mtype = "R2 Score"
         for (let i = 0; i < this.props.modelnum; i += 2) {
             let item = []

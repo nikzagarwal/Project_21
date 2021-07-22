@@ -63,12 +63,55 @@ class ManualModel extends Component {
             hyperForm: data
         })
     }
-    handleAutoModelSelect =event=> {
+    handleAutoModelSelect = event => {
         var checkbox = event.target;
         var theFormItself = document.getElementById('modellist');
         $(theFormItself).toggle();
-        if(checkbox.checked===true){
-        console.log("hi")
+        let type
+        if (this.props.mtype === 'classification')
+            type = "Classification"
+        else
+            type = "Regression"
+        if (checkbox.checked === true) {
+            const len = this.state.hyperForm.length
+            for (let i = 0; i < len; i++) {
+                if (this.state.hyperForm[i].type === type) {
+                    this.setState(prevState => ({
+
+                        hyperForm: Object.values({
+                            ...prevState.hyperForm,
+                            [i]: {
+                                ...prevState.hyperForm[i],
+                                "isSelected": true
+                            }
+                        }),
+
+
+                    }
+                    ))
+                }
+            }
+
+        }
+        else{
+            const len = this.state.hyperForm.length
+            for (let i = 0; i < len; i++) {
+                if (this.state.hyperForm[i].type === type) {
+                    this.setState(prevState => ({
+
+                        hyperForm: Object.values({
+                            ...prevState.hyperForm,
+                            [i]: {
+                                ...prevState.hyperForm[i],
+                                "isSelected": false
+                            }
+                        }),
+
+
+                    }
+                    ))
+                }
+            }
         }
 
     }
@@ -128,10 +171,17 @@ class ManualModel extends Component {
             }
             return (
                 <div>
+                    <div className="autocheckbox">
+                        <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
+                        <label htmlFor="automodel"> Auto Models</label>
+                    </div>
+                    <h1>Models</h1>
+                    <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
+
                     <div id="modellist">
                         {Classificationitems}
                     </div>
-                    <button className="preprocessbtn" onClick={this.handleTrain} >Train Now</button>
+                    <button className="preprocessbtn btn btn-secondary" onClick={this.handleTrain} >Train Now</button>
 
                 </div >
             );

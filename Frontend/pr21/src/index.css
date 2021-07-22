@@ -526,6 +526,10 @@ input[type=text],input[type=number] ,select, textarea {
   display: none;
   /* display: block; */
 }
+.sampleData{
+  float: none;
+  margin:0 auto;
+}
 /* ****************************************************************************************** */
 /* For form 3 */
 #form3
@@ -923,7 +927,7 @@ background-image: url(./assets/img/bg19.png); */
 }
 .backbtn{
   /* color: rgba(12, 24, 49, 0.901); */
-  padding: 0.5em;
+  /* padding: 0.5em; */
   margin: 1em;
   /* background-image:linear-gradient(to left bottom , rgba(236, 236, 236, 0.815),rgba(119, 119, 116, 0.822)); */
   /* font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; */
