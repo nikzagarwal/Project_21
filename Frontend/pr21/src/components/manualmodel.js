@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import HyperModal from './hypermodal.js';
 import axios from 'axios';
+import $ from 'jquery';
 class ManualModel extends Component {
     constructor(props) {
         super(props)
@@ -62,11 +63,63 @@ class ManualModel extends Component {
             hyperForm: data
         })
     }
+    handleAutoModelSelect = event => {
+        var checkbox = event.target;
+        var theFormItself = document.getElementById('modellist');
+        $(theFormItself).toggle();
+        let type
+        if (this.props.mtype === 'classification')
+            type = "Classification"
+        else
+            type = "Regression"
+        if (checkbox.checked === true) {
+            const len = this.state.hyperForm.length
+            for (let i = 0; i < len; i++) {
+                if (this.state.hyperForm[i].type === type) {
+                    this.setState(prevState => ({
+
+                        hyperForm: Object.values({
+                            ...prevState.hyperForm,
+                            [i]: {
+                                ...prevState.hyperForm[i],
+                                "isSelected": true
+                            }
+                        }),
+
+
+                    }
+                    ))
+                }
+            }
+
+        }
+        else{
+            const len = this.state.hyperForm.length
+            for (let i = 0; i < len; i++) {
+                if (this.state.hyperForm[i].type === type) {
+                    this.setState(prevState => ({
+
+                        hyperForm: Object.values({
+                            ...prevState.hyperForm,
+                            [i]: {
+                                ...prevState.hyperForm[i],
+                                "isSelected": false
+                            }
+                        }),
+
+
+                    }
+                    ))
+                }
+            }
+        }
+
+    }
     handleTrain = event => {
-        let projectID= this.props.projectdetail.projectID
-        let userID= this.props.projectdetail.userID
+        let projectID = this.props.projectdetail.projectID
+        let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.hyperForm))
-        axios.post('http://localhost:8000/manual/'+projectID+'/'+userID, JSON.stringify(this.state.hyperForm))
+        axios.post('http://localhost:8000/manual/' + userID + '/' + projectID, JSON.stringify(this.state.hyperForm))
             .then(res => {
                 console.log("SuccessfulTime", res)
                 this.setState({
@@ -118,10 +171,17 @@ class ManualModel extends Component {
             }
             return (
                 <div>
+                    <div className="autocheckbox">
+                        <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
+                        <label htmlFor="automodel"> Auto Models</label>
+                    </div>
+                    <h1>Models</h1>
+                    <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
+
                     <div id="modellist">
                         {Classificationitems}
                     </div>
-                    <button className="preprocessbtn" onClick={this.handleTrain} >Train Now</button>
+                    <button className="preprocessbtn btn btn-secondary" onClick={this.handleTrain} >Train Now</button>
 
                 </div >
             );
@@ -168,6 +228,12 @@ class ManualModel extends Component {
             }
             return (
                 <div>
+                    <div className="autocheckbox">
+                        <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
+                        <label htmlFor="automodel"> Auto Models</label>
+                    </div>
+                    <h1>Models</h1>
+                    <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
                     <div id="modellist">
                         {Regressionitems}
                     </div>

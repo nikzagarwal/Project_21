@@ -14,11 +14,14 @@ class ProjectsSection6 extends Component {
     }
     render() {
         const items = []
-        let mtype
-        if(this.props.mtype==="classification")
-            mtype="Accuracy"
-        else
-            mtype="R2 Score"
+        let mtype = ""
+        let type = ""
+        if (this.props.mtype === "classification" && this.props.Accuracies) {
+            mtype = "Accuracy"
+            type = "%"
+        }
+        if ((this.props.mtype === "regression" || this.props.mtype==="timeseries") && this.props.Accuracies)
+            mtype = "R2 Score"
         for (let i = 0; i < this.props.modelnum; i += 2) {
             let item = []
             for (let j = i; j < i + 2 && j < this.props.modelnum; j++) {
@@ -43,9 +46,9 @@ class ProjectsSection6 extends Component {
                                 <li>Pickle File</li>
                                 <li>Inferencing New Data</li>
                             </h4> */}
-                            {this.props.Accuracies?
-                            <h4 className="cardp">{mtype}: <em>{this.props.Accuracies[j]}%</em></h4>:
-                            null}
+                            {mtype !== "" ?
+                                <h4 className="cardp">{mtype}: <em>{this.props.Accuracies[j]} {type}</em></h4> :
+                                null}
                             <button value={j + 1} onClick={this.handleModelResult} className="btn sec6btn btn-primary">See Details</button>
                         </div>
                     </div>

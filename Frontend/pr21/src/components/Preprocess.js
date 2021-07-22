@@ -36,21 +36,22 @@ class Preprocess extends React.Component {
             }
             ))
         }
-        this.setState(prevState => ({
+        // this.setState(prevState => ({
 
-            preprocessForm: {
-                ...prevState.preprocessForm,
-                "projectID": this.props.projectdetail.projectID,
-                "userID": this.props.projectdetail.userID,
+        //     preprocessForm: {
+        //         ...prevState.preprocessForm,
+        //         "projectID": this.props.projectdetail.projectID,
+        //         "userID": this.props.projectdetail.userID,
                    
-            }
+        //     }
 
-        }
-        ))
-
+        // }
+        // ))
+        let projectID = this.props.projectdetail.projectID
+        let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.preprocessForm))
 
-        axios.post('http://localhost:8000/getHyperparams', JSON.stringify(this.state.preprocessForm))
+        axios.post('http://localhost:8000/getHyperparams' + userID + '/' + projectID, JSON.stringify(this.state.preprocessForm))
             .then(res => {
                 console.log("Successful2", res)
                 this.props.handleModelForm(res.data)

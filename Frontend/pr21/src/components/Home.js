@@ -11,6 +11,7 @@ import Section4 from './section4.js';
 import Section7 from './section7.js';
 // import Section5 from './section5.js';
 // import Section6 from './section6.js';
+import ShowdataModal from './showdataModal.js';
 import Papa from 'papaparse';
 
 class Home extends Component {
@@ -45,6 +46,7 @@ class Home extends Component {
             automanualpreprocess: false,
             modelForm: "",
             numClusters: 4,
+            modalShow: false,
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -60,14 +62,14 @@ class Home extends Component {
             event.target.files[0]
         );
         axios.post('http://localhost:8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-        .then((response) => {
-            console.log("Successful1", response);
-            Papa.parse(response.data, {
-                complete: this.updateData,
-                header: true
-            })
-        },
-            (error) => { console.log(error) });
+            .then((response) => {
+                console.log("Successful1", response);
+                Papa.parse(response.data, {
+                    complete: this.updateData,
+                    header: true
+                })
+            },
+                (error) => { console.log(error) });
         this.setState({
             train: event.target.files[0]
         })
@@ -126,7 +128,7 @@ class Home extends Component {
             this.state.train
         );
 
-        
+
         // console.log(this.state.traindata)
 
         axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
@@ -166,7 +168,7 @@ class Home extends Component {
         var theFormItself2 = document.getElementById('form4');
         $(theFormItself2).show();
     }
-    handleModelForm  = (val) =>  {
+    handleModelForm = (val) => {
         this.setState({
             modelForm: val
         })
@@ -243,7 +245,7 @@ class Home extends Component {
         let nulltype = this.state.nulltype
         let clusteringType = this.state.clusteringType
         let numClusters = this.state.numClusters
-        let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType ,numClusters}
+        let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
         console.log(JSON.stringify(data))
 
         axios.post('http://localhost:8000/auto', JSON.stringify(data))
@@ -325,11 +327,11 @@ class Home extends Component {
         })
 
     }
-    handleAutoModelSelect() {
-        var theFormItself = document.getElementById('modellist');
-        $(theFormItself).toggle();
+    // handleAutoModelSelect() {
+    //     var theFormItself = document.getElementById('modellist');
+    //     $(theFormItself).toggle();
 
-    }
+    // }
     handleGoForm2() {
         var theFormItself = document.getElementById('form3');
         $(theFormItself).hide();
@@ -340,6 +342,11 @@ class Home extends Component {
         var theFormItself2 = document.getElementById('form2');
         $(theFormItself2).show();
 
+    }
+    handleSampleData = event => {
+        this.setState({
+            modalShow: true
+        })
     }
     handleNewProject() {
         window.location.reload();
@@ -367,11 +374,12 @@ class Home extends Component {
     render() {
         return (
             <div>
+
                 {/* ************************************************************************************************************************ */}
 
                 {/* Section1 */}
                 <Section1 />
-
+                {/* <showdataModal/> */}
                 {/* ************************************************************************************************************************ */}
                 {/* Section2  */}
                 <div className="section2" id="section2">
@@ -410,7 +418,7 @@ class Home extends Component {
                                         <label htmlFor="train">Enter training data <span className="ibtn">i <span id="idesc">Enter the data on which you want to train your model</span></span></label>
                                     </div>
                                     <div className="col-60">
-                                        <input type="file" className="form-control" id="train" onChange={this.handleTrainChange} accept=".csv ,.json" name="train"
+                                        <input type="file" className="form-control" id="train" onChange={this.handleTrainChange} accept=".csv ,.json, .xlsx" name="train"
                                             placeholder="enter training data in csv format" required />
                                     </div>
                                 </div>
@@ -468,10 +476,17 @@ class Home extends Component {
                             </section>
                         </div>
                     </div>
+
                     {/* form3 */}
                     <div className="container" id="form3">
                         <div className="goback">
-                            <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > Go Back </button>
+                            <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > &larr; Back </button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                            < ShowdataModal
+                                show={this.state.modalShow}
+                                onHide={() => this.setState({ modalShow: false })}
+                                rawdata={this.state.traindata}
+                            />
                         </div>
                         <form onSubmit={this.handleSubmit2}>
                             <div className="createform">
@@ -541,7 +556,8 @@ class Home extends Component {
                                 </div> */}
 
                                 <div>
-                                    <button type="submit" className="btn btn-secondary" id="trainnow" >Train Now</button>
+                                    <button type="submit" className="btn btn-secondary " id="trainnow" >Train Now</button>
+
                                 </div>
                             </div>
                         </form>
@@ -572,18 +588,20 @@ class Home extends Component {
                             <button className="btn btn-primary backbtn" onClick={this.handleGoForm2}  > Go Back </button>
                         </div>
                         <div className="Modelselection">
-                            <div className="autocheckbox">
+                            {/* <div className="autocheckbox">
                                 <input type="checkbox" id="automodel" onClick={this.handleAutoModelSelect} name="automodel" />
                                 <label htmlFor="automodel"> Auto Models</label>
                             </div>
                             <h1>Models</h1>
-                            <p>Preprocessing is being done. Now, select models and their hyperparameters</p>
-                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail}/>
+                            <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
+                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} />
                         </div>
                     </div>
                     {/* form6 for time series */}
                     <div className="container" id="form6">
-
+                        <div className="goback">
+                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                        </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">
 
