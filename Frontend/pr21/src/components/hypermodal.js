@@ -12,8 +12,6 @@ class HyperModal extends Component {
         // if (prevState.hyperForm === "") {
             return { hyperForm: Object.values(nextProps)[4] };
         // }
-
-        return null;
     }
     handleHyperChange = (val) => event => {
         console.log(this.state.hyperForm)

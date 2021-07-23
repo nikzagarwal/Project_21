@@ -319,19 +319,11 @@ class Home extends Component {
             currentmodel: val
         })
     }
-    // handleAutoPreprocess = (val) => {
-    //     var theFormItself = document.getElementById('preprocesstable');
-    //     $(theFormItself).toggle();
-    //     this.setState({
-    //         automanualpreprocess: !this.state.automanualpreprocess
-    //     })
-
-    // }
-    // handleAutoModelSelect() {
-    //     var theFormItself = document.getElementById('modellist');
-    //     $(theFormItself).toggle();
-
-    // }
+    handleManualModelDetails= (res) =>{
+        this.setState({
+            modeldetail: res.data
+        })
+    }
     handleGoForm2() {
         var theFormItself = document.getElementById('form3');
         $(theFormItself).hide();
@@ -594,7 +586,7 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
-                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} />
+                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} handleManualModelDetails={this.handleManualModelDetails} />
                         </div>
                     </div>
                     {/* form6 for time series */}
