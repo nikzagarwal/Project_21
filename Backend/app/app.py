@@ -335,7 +335,7 @@ def get_all_project_details(userID:int):
                                 listOfAccuracies.append(projectMetrics["accuracy"])
                     projectTemplate={
                         "projectID": project["projectID"],
-                        "projectName": project["projectName"],
+                        "projectName": project["projectName"].title(),
                         "target": project["target"],
                         "modelType": project["projectType"],
                         "listOfDataIDs": project["listOfDataIDs"],
