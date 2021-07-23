@@ -60,4 +60,11 @@ class training:
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.to_csv(metricsLocation, index=True, index_label="modelname")
 
-        return {"Successful":True,"metricsLocation":metricsLocation}
+        return {
+            "Successful":True,
+            "metricsLocation":metricsLocation,
+            "pickleFolderPath": "pickleFolderPath",         #Generate a folder where all pickle files are residing
+            "pickleFilePath": "pickleFilePath",             #Best model pickle file path
+            "accuracy":"accuracy",                          #Accuracy of best model
+            "clusterPlotLocation": "clusterPlotLocation"    #Only if it is clustering
+        }

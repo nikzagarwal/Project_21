@@ -3,8 +3,9 @@ import pickle
 import shutil
 from pydantic.types import Json
 from typing import List, Optional
+from starlette.responses import StreamingResponse
 import yaml
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, WebSocket, WebSocketDisconnect
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
@@ -36,8 +37,8 @@ from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
 
 from sse_starlette.sse import EventSourceResponse
-# from sh import tail
-# import time
+from sh import tail
+import time
 import asyncio
 
 origins=settings.CORS_ORIGIN
@@ -82,7 +83,7 @@ def startup_mongodb_client():
                 "password": "password@Super@Secure",
                 "listOfProjects": []
             })
-        resultsCache.set_auto_mode_status(False)
+        resultsCache.set_training_status(False)
     except Exception as e:
         print("An Error Occured: ",e)
         print("Duplicate Key Error can be ignored safely")
@@ -122,7 +123,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
                 "target":None,
                 "isAuto": None,
                 "preprocessConfigFileLocation":None,
-                "configModelJSONData": None
+                "modelsConfigFileLocation": None
                 })
             # Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
             #     "modelID": inserted_modelID,
@@ -155,7 +156,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
 def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
     autoFormData=dict(autoFormData)
     projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(autoFormData["projectID"],currentIDs,autoFormData,Project21Database)
-    resultsCache.set_auto_mode_status(False)
+    resultsCache.set_training_status(False)
     if(problem_type=='regression'):
         automatic_model_training=AutoReg()
         Operation=automatic_model_training.auto(projectAutoConfigFileLocation)
@@ -233,12 +234,18 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
         except Exception as e:
             print("An Error occured: ",e)
             return JSONResponse({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
-        
+        currentIDs.set_current_data_id(dataID)
+        currentIDs.set_current_model_id(dataID)
+        currentIDs.set_current_project_id(autoFormData["projectID"])
+
         resultsCache.set_clean_data_path(Operation["cleanDataPath"])
         resultsCache.set_metrics_path(Operation["metricsLocation"])
         resultsCache.set_pickle_file_path(Operation["pickleFilePath"])
         resultsCache.set_pickle_folder_path(Operation["pickleFolderPath"])
-        resultsCache.set_auto_mode_status(True)
+        resultsCache.set_training_status(True)
+        with open("logs.log","a+") as f:
+            f.write("\nPROJECT21_TRAINING_ENDED\n")
+            f.write("\nPROJECT21_TRAINING_ENDED\n")
         return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": autoFormData["projectID"], "dataID":dataID, "modelID": dataID})
     else:
         return JSONResponse({"Successful":"False"})
@@ -335,7 +342,7 @@ def get_all_project_details(userID:int):
                                 listOfAccuracies.append(projectMetrics["accuracy"])
                     projectTemplate={
                         "projectID": project["projectID"],
-                        "projectName": project["projectName"],
+                        "projectName": project["projectName"].title(),
                         "target": project["target"],
                         "modelType": project["projectType"],
                         "listOfDataIDs": project["listOfDataIDs"],
@@ -448,10 +455,10 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
     if result_project is not None:
         configFileLocation=result_project["configFileLocation"]
         preprocessConfigFileLocation=result_project["preprocessConfigFileLocation"]
-        
-        configModelJSONDataPath=os.path.join(os.path.dirname(result_project["preprocessConfigFileLocation"]),"userinputconfig.yaml")
+
+        modelsConfigFileLocation=os.path.join(os.path.dirname(result_project["preprocessConfigFileLocation"]),"userinputconfig.yaml")
     
-    with open(configModelJSONDataPath,"w") as f:
+    with open(modelsConfigFileLocation,"w") as f:
         yaml.dump(configModelJSONData,f)
         f.close()
 
@@ -461,31 +468,42 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
         dataID=result_data["dataID"]
 
     trainingObj=training()
-    Operation = trainingObj.train(configModelJSONDataPath,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
+    Operation = trainingObj.train(modelsConfigFileLocation,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
+    
     if Operation["Successful"]:
-    #         Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
-    #             "modelID": dataID,
-    #             "modelName": "Default Name",
-    #             "modelType": result_project["projectType"],
-    #             "pickleFolderPath": Operation["pickleFolderPath"],
-    #             "pickleFilePath": Operation["pickleFilePath"],
-    #             "belongsToUserID": formData["userID"],
-    #             "belongsToProjectID": formData["projectID"],
-    #             "belongsToDataID": dataID
-    #         })
-            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+            Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
+                "modelID": dataID,
+                "modelName": "Default Name",
+                "modelType": result_project["projectType"],
+                "pickleFolderPath": Operation["pickleFolderPath"],
+                "pickleFilePath": Operation["pickleFilePath"],
                 "belongsToUserID": userID,
                 "belongsToProjectID": projectID,
-                "belongsToModelID": dataID,
-                "addressOfMetricsFile": Operation["metricsLocation"]
+                "belongsToDataID": dataID
             })
+
+            if result_project["projectType"]!='clustering':                
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": userID,
+                    "belongsToProjectID": projectID,
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                    "accuracy": Operation["accuracy"]
+                })
+            else:
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": userID,
+                    "belongsToProjectID": projectID,
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                })
             if result_project["listOfDataIDs"] is not None:
                 newListOfDataIDs=result_project["listOfDataIDs"]
                 newListOfDataIDs.append(dataID)
                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                     "$set":{
                         "listOfDataIDs":newListOfDataIDs,
-                        "configModelJSONData":configModelJSONData,
+                        "modelsConfigFileLocation":modelsConfigFileLocation,
                         "isAuto": False,
                         }
                     })
@@ -493,22 +511,18 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                     "$set":{
                         "listOfDataIDs":[dataID],
-                        "configModelJSONData": configModelJSONData,
+                        "modelsConfigFileLocation": modelsConfigFileLocation,
                         "isAuto": False
                         }
                     })
-            # if (result_project["projectType"]=='clustering'):
-            #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-            #         "$set":{
-            #             "clusterPlotLocation":Operation["clusterPlotLocation"]
-            #         }
-            #     })
+            if (result_project["projectType"]=='clustering'):
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "clusterPlotLocation":Operation["clusterPlotLocation"]
+                    }
+                })
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": dataID})
 
-@app.post('/manual2/{userID}/{projectID}')
-def mymanualfunction(configModelJSONData):
-    print(configModelJSONData)
-    return
 
 @app.post('/timeseries',tags=["Timeseries"])
 def timeseries_training(timeseriesFormData: TimeseriesFormData):
@@ -651,155 +665,51 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
         return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
 
 
-# @app.get('/stream-logs2')
-# async def run(request: Request):
-#     async def autologs(request):
-#         for line in tail_F('logs.log'):
-#             if await request.is_disconnected():
-#                 print("Client Disconnected!")
-#                 break
-#             yield line
-            
-#     event_generator = autologs(request)
-#     return EventSourceResponse(event_generator)
 
+@app.websocket("/websocketStream")
+async def training_status(websocket: WebSocket):
+    def generatorLineLogs(file):
+        """ Yield each line from a file as they are written. """
+        line = ''
+        while True:
+            tmp = file.readline()
+            if tmp is not None:
+                line += tmp
+                if line.endswith("\n"):
+                    yield line
+                    line = ''
+            else:
+                yield ''
+    
+    print("Connecting to the Frontend...")
+    await websocket.accept()
 
-# MESSAGE_STREAM_DELAY = 1  # second
-# MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
-
-
-# @app.get('/stream')
-# async def message_stream(request: Request):     
-#     async def event_generator():
-#         while True:
-#             # If client was closed the connection
-#             if await request.is_disconnected():
-#                 print("Client Disconnected!")
-#                 break
-
-#             # Checks for new messages and return them to client if any
-#             for line in tail("-f", 'logs.log', _iter=True):
-#                 yield {
-#                     "event": line,
-#                     "id": "message_id",
-#                     "retry": MESSAGE_STREAM_RETRY_TIMEOUT,
-#                     "data": "message_content"
-#                 }
-#             await asyncio.sleep(MESSAGE_STREAM_DELAY)
-
-#     return EventSourceResponse(event_generator())
-
-# @app.websocket("/ws")
-# async def training_status(websocket: WebSocket):
-#     print("Connecting to the Frontend...")
-#     await websocket.accept()
-#     # while (not resultsCache.get_auto_mode_status()):
-#     try:
-#         data={
-#             "Successful":"False",
-#             "Status": "Model Running"
-#         }
-#         if (resultsCache.get_auto_mode_status()):
-#             data={
-#             "Successful":"True",
-#             "Status": "Model Successfully Created",
-#             "userID": currentIDs.get_current_user_id(),
-#             "projectID": currentIDs.get_current_project_id(),
-#             "dataID":currentIDs.get_current_data_id(),
-#             "modelID": currentIDs.get_current_model_id()
-#             }
-#             await websocket.send_json(data)
-#         data2= await websocket.receive_text()  #Can be used to receive data from frontend
-#         print(data2)
-#         await websocket.send_json(data) #Can be used to return data to the frontend
-#     except Exception as e:
-#         print("Error: ",e)
-#         # break
-#     print("Websocket connection closing...")
-
-# def tail_F(some_file):
-#     first_call = True
-#     while True:
-#         try:
-#             with open(some_file) as input:
-#                 if first_call:
-#                     input.seek(0, 2)
-#                     first_call = False
-#                 latest_data = input.read()
-#                 while True:
-#                     if '\n' not in latest_data:
-#                         latest_data += input.read()
-#                         if '\n' not in latest_data:
-#                             yield ''
-#                             if not os.path.isfile(some_file):
-#                                 break
-#                             continue
-#                     latest_lines = latest_data.split('\n')
-#                     if latest_data[-1] != '\n':
-#                         latest_data = latest_lines[-1]
-#                     else:
-#                         latest_data = input.read()
-#                     for line in latest_lines[:-1]:
-#                         yield line + '\n'
-#         except IOError:
-#             yield ''
-
-
-
-# @app.get('/stream-logs')
-# def streaming_logs_auto(request:Request):
-#     def autoLogs():
-#         for line in tail_F("logs.log"):
-#             if not resultsCache.get_auto_mode_status():
-#                 print("Client Disconnected!")
-#                 break
-#             yield line
-#     event_generator = autoLogs()
-#     return EventSourceResponse(event_generator)
-
-@app.get('/autoStatus')
-def change_status_of_auto_mode(status:bool):
-    resultsCache.set_auto_mode_status(status)
-    return JSONResponse({"Status Changed":"Successfully","Status Changed To":status})
-
-
-
-'''
-Get status as an event generator
-'''
-status_stream_delay = 5  # second
-status_stream_retry_timeout = 30000  # milisecond
-
-async def status_event_generator(request):
-    previous_status = None
-    while True:
-        if await request.is_disconnected():
-            print('Request disconnected')
+    for line in generatorLineLogs(open("logs.log", 'r')):
+        if resultsCache.get_training_status()==True or line=="PROJECT21_TRAINING_ENDED\n":
+            websocket.close()
             break
+        await websocket.send_json({"logs":line})
+        print(line, end='')
+    print("File Reading ended")
+    resultsCache.set_training_status(False)
 
-        if previous_status and resultsCache.get_auto_mode_status():
-            print('Request completed. Disconnecting now')
-            yield {
-                "event": "end",
-                "data" : ''
-            }
-            break
+    # while (not resultsCache.get_training_status()):
+    #     try:
+    #         for line in tail_F("logs.log"):
+    #             data={
+    #                 "Successful":"False",
+    #                 "Status": "Model Running",
+    #                 "Logs": line
+    #             }
+    #             if line=="PROJECT21_TRAINING_ENDED":
+    #                 print("Closing Websocket connection")
+    #                 break
+    #             await websocket.send_json(data)
+    #     except WebSocketDisconnect:
+    #         print("Websocket connection has been disconnected...")
+    #         break
+    #     # except Exception as e:
+    #     #     print("Error: ",e)
+    #     #     # break
+    print("Websocket connection closing...")
 
-        current_status = resultsCache.get_auto_mode_status()
-        if previous_status != current_status:
-            yield {
-                "event": "update",
-                "retry": status_stream_retry_timeout,
-                "data": current_status
-            }
-            previous_status = current_status
-            print('Current status :%s', current_status)
-        else:
-            print('No change in status...')
-
-        await asyncio.sleep(status_stream_delay)
-
-@app.get('/status/stream')
-async def runStatus(request: Request):
-    event_generator = status_event_generator(request)
-    return EventSourceResponse(event_generator)
