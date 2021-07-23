@@ -3,9 +3,15 @@
 <p align="center">
   <img src="images/21_logo.png" alt="logo" style="width: 200px" />
 </p>
-
-![Curl Tech](http://img.shields.io/badge/-CurlTech-purple?style=plastic&link=https://curl.tech/) ![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![Version](https://img.shields.io/badge/Version-v2.0-purple.svg)
-
+<p align="center">
+    <a href="https://curl.tech/" alt="Curl Tech">
+    	<img src="http://img.shields.io/badge/CurlTech-informational?style=plastic">
+    </a>
+</p>
+<p align="center">
+    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg">
+    <img src="https://img.shields.io/badge/Version-v2.0-orange.svg">
+</p>
 <hr>
 
 Project 21 is an AutoML engine that aims to make the life of Data Scientists a lot easier by automating the process of generating, tuning and testing the best model according to their dataset.
