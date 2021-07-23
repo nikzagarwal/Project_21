@@ -100,7 +100,14 @@ class Preprocess:
                 del config_data['encoding_type'][0]
                 for index, column in enumerate(config_data["encode_column_name"]):
                     type = config_data["encoding_type"][index]
-
+                    
+                    if config_data["target_column_name"] == column:
+                        encoder = LabelEncoder()
+                        df[column] = encoder.fit_transform(df[column])
+                        label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                        config_data['labels'] = {}
+                        config_data['labels']= [label_encoding_dict]
+            
                     if type == "Label Encodeing":
                         encoder = LabelEncoder()
                         df[column] = encoder.fit_transform(df[column])
