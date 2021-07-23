@@ -5,75 +5,13 @@ class HyperModal extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            reghyper: {
-                "LinearRegression": {
-                    "1": { "name": "fit_intercept", "value": null, "ishype": false }
-                },
-                "PolynomialRegression": {
-                    "1": { "name": "poly_degree", "value": null, "ishype": false }
-                },
-                "RandomForest": {
-                    "1": { "name": "criterion", "value": null, "ishype": false },
-                    "2": { "name": "n_estimators", "value": null, "ishype": false },
-                    "3": { "name": "max_depth", "value": null, "ishype": false },
-                    "4": { "name": "min_samples_split", "value": null, "ishype": false }
-                },
-                "DecisionTree": {
-                    "1": { "name": "criterion", "value": null, "ishype": false },
-                    "2": { "name": "max_deptht", "value": null, "ishype": false },
-                    "3": { "name": "min_samples_split", "value": null, "ishype": false },
-                },
-                "XGBOOST": {
-                    "1": { "name": "verbosity", "value": null, "ishype": false },
-                    "2": { "name": "booster", "value": null, "ishype": false },
-                    "3": { "name": "updater", "value": null, "ishype": false }
-                },
-                "K-NN": {
-                    "1": { "name": "n_neighbors", "value": null, "ishype": false },
-                    "2": { "name": "leaf_size", "value": null, "ishype": false },
-                    "3": { "name": "algorithm", "value": null, "ishype": false }
-                }
-            },
-            classimodellist: ['LogisticRegression', 'RandomForestClassifier', 'DecisionTree', 'XGBOOST', 'GaussianNB', 'K-NN'],
-            classihyper: {
-                "LogisticRegression": {
-                    "1": { "name": "penalty", "value": null, "ishype": false },
-                    "2": { "name": "fit_intercept", "value": null, "ishype": false },
-                    "3": { "name": "solver", "value": null, "ishype": false },
-                    "4": { "name": "multi_class", "value": null, "ishype": false }
-                },
-                "RandomForestClassifier": {
-                    "1": { "name": "n_estimators", "value": null, "ishype": false },
-                    "2": { "name": "max_depth", "value": null, "ishype": false },
-                },
-                "DecisionTree": {
-                    "1": { "name": "max_depth", "value": null, "ishype": false },
-                    "2": { "name": "min_samples_split", "value": null, "ishype": false },
-                    "3": { "name": "criterion", "value": null, "ishype": false },
-                    "4": { "name": "min_samples_leaf", "value": null, "ishype": false }
-                },
-                "XGBOOST": {
-                    "1": { "name": "learning rate", "value": null, "ishype": false },
-                    "2": { "name": "max_depth", "value": null, "ishype": false },
-                    "3": { "name": "gamma", "value": null, "ishype": false }
-                },
-
-                "GaussianNB": {
-                    "1": { "name": "var_smoothing", "value": null, "ishype": false },
-                },
-                "K-NN": {
-                    "1": { "name": "n_neighbors", "value": null, "ishype": false },
-                    "2": { "name": "leaf_size", "value": null, "ishype": false },
-                    "3": { "name": "algorithm", "value": null, "ishype": false }
-                }
-            },
             hyperForm: "",
         }
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (prevState.hyperForm === "") {
+        // if (prevState.hyperForm === "") {
             return { hyperForm: Object.values(nextProps)[4] };
-        }
+        // }
 
         return null;
     }
@@ -96,12 +34,13 @@ class HyperModal extends Component {
                             }
                         })
                 }
-            }),
-        }
-        ))
-        
-        this.props.handlehyperChange(this.state.hyperForm)
-        
+            })
+        }), () => {
+            this.props.handlehyperChange(this.state.hyperForm)
+        });
+
+
+
 
 
     }
@@ -114,8 +53,8 @@ class HyperModal extends Component {
 
         if (this.props.show === true) {
             model = this.props.modelNumber
-            console.log(model)
-            console.log(this.state.hyperForm[model])
+            // console.log(model)
+            // console.log(this.state.hyperForm[model])
             const items = this.state.hyperForm[model].hyper
             // console.log(items)
             for (let i = 0; i < items.length; i++) {

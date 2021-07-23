@@ -36,7 +36,7 @@ class Section7 extends Component {
     componentDidMount() {
         axios.get('http://localhost:8000/getAllProjects?userID=101')
             .then((response) => {
-                console.log(response.data)
+                // console.log(response.data)
                 if (response.data.length !== 0) {
                     this.setState({
                         projectList: response.data,
@@ -112,7 +112,7 @@ class Section7 extends Component {
             let item = []
             for (let j = i; j < i + 3 && j < len; j++) {
                 item.push(
-                    <div className="card sec7card">
+                    <div key={i} className="card sec7card">
 
                         <div className="card-body">
                             <div className="sec7h2">
@@ -205,7 +205,7 @@ class Section7 extends Component {
                         </div>
                         <div className="card sec7card">
                             <h4 className="emptyproject">Either server is not started or you don't have any previous project</h4>
-                            <div class="text-center btnDiv">
+                            <div className="text-center btnDiv">
                                 <a href='#section2' > <button className="btn btn-primary">Create New Project</button></a>
                             </div>
                         </div>

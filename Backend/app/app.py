@@ -440,7 +440,7 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
         yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
         return yaml_json
 
-@app.post('/manual/{userID}/{project}',tags=["Manual Mode"])
+@app.post('/manual/{userID}/{projectID}',tags=["Manual Mode"])
 def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
     print(configModelJSONData)
     

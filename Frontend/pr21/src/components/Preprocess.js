@@ -368,7 +368,7 @@ class Preprocess extends React.Component {
                 <p>Each Column can be processed differently as required</p>
                 {rawdata.map((data, i) => (
                     i === 1 ? (
-                        <div className="preprocesstable " id="preprocesstable">
+                        <div key={i} className="preprocesstable " id="preprocesstable">
                             <table>
                                 <thead>
                                     <tr>

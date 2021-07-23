@@ -14,7 +14,7 @@ class Section3 extends Component {
                             <p>Your browser does not support the video tag.</p>
                         </video>
                     </div>
-                    <div class="text-center btnDiv">
+                    <div className="text-center btnDiv">
                     <a href='#section2' > <button className="btn btn-primary section3button">Start Experience</button></a>
                     </div>
             </div>

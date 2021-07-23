@@ -6,8 +6,6 @@ class ManualModel extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            classimodellist: ['LogisticRegression', 'RandomForestClassifier', 'DecisionTree', 'XGBOOST', 'GaussianNB', 'K-NN'],
-            regmodellist: ['LinearRegression', 'PolynomialRegression', 'RandomForest', 'DecisionTree', 'XGBOOST', 'K-NN'],
             modalShow: false,
             currentModel: "",
             hyperForm: ""
@@ -20,22 +18,22 @@ class ManualModel extends Component {
 
         return null;
     }
-    handlehyperselection = (val) => event => {
+    handlemodelselection = (val) => event => {
         var checkbox = event.target;
         if (checkbox.checked) {
-            // this.setState(prevState => ({
+            this.setState(prevState => ({
 
-            //     hyperForm: Object.values({
-            //         ...prevState.hyperForm,
-            //         [val]: {
-            //             ...prevState.hyperForm[val],
-            //             "isSelected": true
-            //         }
-            //     }),
+                hyperForm: Object.values({
+                    ...prevState.hyperForm,
+                    [val]: {
+                        ...prevState.hyperForm[val],
+                        "isSelected": true
+                    }
+                }),
 
 
-            // }
-            // ))
+            }
+            ))
             // console.log(val)
             this.setState({ modalShow: true })
             this.setState({ currentModel: val })
@@ -62,6 +60,7 @@ class ManualModel extends Component {
         this.setState({
             hyperForm: data
         })
+        console.log(data)
     }
     handleAutoModelSelect = event => {
         var checkbox = event.target;
@@ -144,7 +143,7 @@ class ManualModel extends Component {
                             <div className="card sec6card manualcard">
 
                                 <div className="card-body manualmodellist">
-                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlehyperselection(j)} name="automodel" />
+                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
                                         <label htmlFor="automodel" className="card-model-list"> {this.state.hyperForm[j].name}</label>
                                     </span>
                                     <div className="manualmodelcard">
@@ -197,13 +196,13 @@ class ManualModel extends Component {
                             <div className="card sec6card manualcard">
 
                                 <div className="card-body manualmodellist">
-                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlehyperselection(j)} name="automodel" />
+                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
                                         <label htmlFor="automodel" className="card-model-list"> {this.state.hyperForm[j].name}</label>
                                     </span>
 
                                     {/* <h4 className="card-title">{this.state.classimodellist[j]}</h4> */}
                                     <div className="manualmodelcard">
-                                        {/* <input type="checkbox" id="automodel" value={this.state.classimodellist[j]} onClick={this.handlehyperselection} name="automodel" /> */}
+                                        {/* <input type="checkbox" id="automodel" value={this.state.classimodellist[j]} onClick={this.handlemodelselection} name="automodel" /> */}
                                         {/* <label htmlFor="automodel" > Select</label> */}
                                         <HyperModal
                                             show={this.state.modalShow}

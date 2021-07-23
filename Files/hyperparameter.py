@@ -57,7 +57,7 @@ class hyperparameter:
                             if hyper["type"]=="option":
                                 params[hyper["name"]]=hyper["options"]
         model=eval(model_str)
-        clf=RandomizedSearchCV(model, params,verbose=10)
+        clf=RandomizedSearchCV(model, params,verbose=10,n_jobs=-1)
         x_train,x_test,y_train,y_test=train_test_split(xdata,ydata,test_size=0.2)
         print("working on "+ modelname)
         clf.fit(x_train,y_train)
