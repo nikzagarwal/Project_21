@@ -122,7 +122,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
                 "target":None,
                 "isAuto": None,
                 "preprocessConfigFileLocation":None,
-                "configModelJSONData": None
+                "modelsConfigFileLocation": None
                 })
             # Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
             #     "modelID": inserted_modelID,
@@ -448,10 +448,10 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
     if result_project is not None:
         configFileLocation=result_project["configFileLocation"]
         preprocessConfigFileLocation=result_project["preprocessConfigFileLocation"]
-        
-        configModelJSONDataPath=os.path.join(os.path.dirname(result_project["preprocessConfigFileLocation"]),"userinputconfig.yaml")
+
+        modelsConfigFileLocation=os.path.join(os.path.dirname(result_project["preprocessConfigFileLocation"]),"userinputconfig.yaml")
     
-    with open(configModelJSONDataPath,"w") as f:
+    with open(modelsConfigFileLocation,"w") as f:
         yaml.dump(configModelJSONData,f)
         f.close()
 
@@ -461,31 +461,42 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
         dataID=result_data["dataID"]
 
     trainingObj=training()
-    Operation = trainingObj.train(configModelJSONDataPath,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
+    Operation = trainingObj.train(modelsConfigFileLocation,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
+    
     if Operation["Successful"]:
-    #         Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
-    #             "modelID": dataID,
-    #             "modelName": "Default Name",
-    #             "modelType": result_project["projectType"],
-    #             "pickleFolderPath": Operation["pickleFolderPath"],
-    #             "pickleFilePath": Operation["pickleFilePath"],
-    #             "belongsToUserID": formData["userID"],
-    #             "belongsToProjectID": formData["projectID"],
-    #             "belongsToDataID": dataID
-    #         })
-            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+            Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
+                "modelID": dataID,
+                "modelName": "Default Name",
+                "modelType": result_project["projectType"],
+                "pickleFolderPath": Operation["pickleFolderPath"],
+                "pickleFilePath": Operation["pickleFilePath"],
                 "belongsToUserID": userID,
                 "belongsToProjectID": projectID,
-                "belongsToModelID": dataID,
-                "addressOfMetricsFile": Operation["metricsLocation"]
+                "belongsToDataID": dataID
             })
+
+            if result_project["projectType"]!='clustering':                
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": userID,
+                    "belongsToProjectID": projectID,
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                    "accuracy": Operation["accuracy"]
+                })
+            else:
+                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                    "belongsToUserID": userID,
+                    "belongsToProjectID": projectID,
+                    "belongsToModelID": dataID,
+                    "addressOfMetricsFile": Operation["metricsLocation"],
+                })
             if result_project["listOfDataIDs"] is not None:
                 newListOfDataIDs=result_project["listOfDataIDs"]
                 newListOfDataIDs.append(dataID)
                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                     "$set":{
                         "listOfDataIDs":newListOfDataIDs,
-                        "configModelJSONData":configModelJSONData,
+                        "modelsConfigFileLocation":modelsConfigFileLocation,
                         "isAuto": False,
                         }
                     })
@@ -493,22 +504,18 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                     "$set":{
                         "listOfDataIDs":[dataID],
-                        "configModelJSONData": configModelJSONData,
+                        "modelsConfigFileLocation": modelsConfigFileLocation,
                         "isAuto": False
                         }
                     })
-            # if (result_project["projectType"]=='clustering'):
-            #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-            #         "$set":{
-            #             "clusterPlotLocation":Operation["clusterPlotLocation"]
-            #         }
-            #     })
+            if (result_project["projectType"]=='clustering'):
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "clusterPlotLocation":Operation["clusterPlotLocation"]
+                    }
+                })
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": dataID})
 
-@app.post('/manual2/{userID}/{projectID}')
-def mymanualfunction(configModelJSONData):
-    print(configModelJSONData)
-    return
 
 @app.post('/timeseries',tags=["Timeseries"])
 def timeseries_training(timeseriesFormData: TimeseriesFormData):
