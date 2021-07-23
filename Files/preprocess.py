@@ -19,11 +19,17 @@ class Preprocess:
         """
         This function is for preprocessing the data when the user selects manual preprocessing.                     
         """
-        config_data = yaml.safe_load(open(config,'r'))
+        config_data = yaml.safe_load(open("preprocess_config.yaml",'r'))
         df = pd.read_csv(config_data["raw_data_address"])
         
         df.dropna(how='all', axis=1, inplace=True)
 
+        
+        for col_name in df.columns:
+            if df[col_name].dtype == 'object'and df[col_name].nunique() > 30:
+                df=df.drop(col_name, axis = 1)
+
+        
         if config_data["is_auto_preprocess"] == False:
 
             if config_data['drop_column_name'] != []:
