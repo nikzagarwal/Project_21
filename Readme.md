@@ -5,7 +5,7 @@
 </p>
 <p align="center">
     <a href="https://curl.tech/" alt="Curl Tech">
-    	<img src="http://img.shields.io/badge/CurlTech-informational?style=plastic">
+    	<img src="https://img.shields.io/badge/CurlTech-Project21-informational?style=plastic.svg">
     </a>
 </p>
 <p align="center">
