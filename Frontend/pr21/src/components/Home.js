@@ -473,7 +473,7 @@ class Home extends Component {
                     <div className="container" id="form3">
                         <div className="goback">
                             <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > &larr; Back </button>
-                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
                             < ShowdataModal
                                 show={this.state.modalShow}
                                 onHide={() => this.setState({ modalShow: false })}
@@ -592,7 +592,7 @@ class Home extends Component {
                     {/* form6 for time series */}
                     <div className="container" id="form6">
                         <div className="goback">
-                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
                         </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">
