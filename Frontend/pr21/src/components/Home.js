@@ -319,19 +319,11 @@ class Home extends Component {
             currentmodel: val
         })
     }
-    // handleAutoPreprocess = (val) => {
-    //     var theFormItself = document.getElementById('preprocesstable');
-    //     $(theFormItself).toggle();
-    //     this.setState({
-    //         automanualpreprocess: !this.state.automanualpreprocess
-    //     })
-
-    // }
-    // handleAutoModelSelect() {
-    //     var theFormItself = document.getElementById('modellist');
-    //     $(theFormItself).toggle();
-
-    // }
+    handleManualModelDetails= (res) =>{
+        this.setState({
+            modeldetail: res.data
+        })
+    }
     handleGoForm2() {
         var theFormItself = document.getElementById('form3');
         $(theFormItself).hide();
@@ -481,7 +473,7 @@ class Home extends Component {
                     <div className="container" id="form3">
                         <div className="goback">
                             <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > &larr; Back </button>
-                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
                             < ShowdataModal
                                 show={this.state.modalShow}
                                 onHide={() => this.setState({ modalShow: false })}
@@ -594,13 +586,13 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
-                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} />
+                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} handleManualModelDetails={this.handleManualModelDetails} />
                         </div>
                     </div>
                     {/* form6 for time series */}
                     <div className="container" id="form6">
                         <div className="goback">
-                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Dample Data</button>
+                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
                         </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">

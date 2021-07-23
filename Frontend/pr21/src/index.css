@@ -614,7 +614,7 @@ input[type=text],input[type=number] ,select, textarea {
   display: none;
   position: absolute;
   background-color: #DAE3E5;
-  min-width: 120px;
+  min-width: 150px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
@@ -652,7 +652,7 @@ input[type=text],input[type=number] ,select, textarea {
   display: block;
 }
 .dropdown{
-  position:initial;
+  position:relative;
 }
 .dropdown-content2 {
   display: none;
@@ -750,7 +750,7 @@ input[type=text],input[type=number] ,select, textarea {
   width: 20px;
   height: 20px;
   margin-top: 2.5em;
-  margin-right: 0.6em;
+  margin-right: 1em;
 
 }
 .manualmodellist label{
@@ -759,6 +759,17 @@ input[type=text],input[type=number] ,select, textarea {
 }
 .manualcard{
   height:10em;
+}
+
+._checkbox
+{
+  box-shadow:  0 0  15px 0.5em #507DBC, 0 0 0.15em 0.1em currentColor;
+}
+
+.modelName{
+  background-color: #e9eef3;
+  padding: 2em;
+  border-radius: 8px;
 }
 /* For hyperparmeter modal css */
 .modal-backdrop
@@ -1062,6 +1073,21 @@ background-color: #eef1f5;
   /* background:linear-gradient(rgba(67, 34, 87, 0.336),rgba(142, 129, 153, 0.5)), url(./assets/img/bg4.jpg); */
   
 }
+.card{
+  overflow-y: auto;
+  overflow-x: auto; 
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; 
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BBD1EA;
+}
+
 .sec6card{
   /* background-image:linear-gradient(to left bottom , #090429e1,rgba(87, 6, 37, 0.87)); */
   font-family: 'Roberto',sans-serif;

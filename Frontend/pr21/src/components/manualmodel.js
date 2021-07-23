@@ -92,7 +92,7 @@ class ManualModel extends Component {
             }
 
         }
-        else{
+        else {
             const len = this.state.hyperForm.length
             for (let i = 0; i < len; i++) {
                 if (this.state.hyperForm[i].type === type) {
@@ -115,16 +115,21 @@ class ManualModel extends Component {
 
     }
     handleTrain = event => {
+        var theFormItself = document.getElementById('form5');
+        $(theFormItself).hide();
+        var theFormItself2 = document.getElementById('sec1heading');
+        $(theFormItself2).hide();
+        var theFormItself3 = document.getElementById('sec1heading2');
+        $(theFormItself3).show();
+        var theFormItself4 = document.getElementById('loader');
+        $(theFormItself4).show();
         let projectID = this.props.projectdetail.projectID
         let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.hyperForm))
         axios.post('http://localhost:8000/manual/' + userID + '/' + projectID, JSON.stringify(this.state.hyperForm))
             .then(res => {
                 console.log("SuccessfulTime", res)
-                this.setState({
-                    modeldetail: res.data
-                })
-                console.log(this.state.modeldetail)
+                this.props.handleManualModelDetails(res.data)
             },
                 (error) => { console.log(error) });
 
@@ -142,10 +147,13 @@ class ManualModel extends Component {
                         this.state.hyperForm[j].type === "Classification" ?
                             <div className="card sec6card manualcard">
 
-                                <div className="card-body manualmodellist">
-                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
-                                        <label htmlFor="automodel" className="card-model-list"> {this.state.hyperForm[j].name}</label>
+                                <div className="card-body ">
+                                    <div className="manualmodellist">
+                                    <span className="modelName"> <input type="checkbox" className="_checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
+                                        
+                                        <label htmlFor={j+"automodel"} className="card-model-list"> {this.state.hyperForm[j].name}</label>
                                     </span>
+                                    </div>
                                     <div className="manualmodelcard">
                                         <HyperModal
                                             show={this.state.modalShow}
@@ -196,7 +204,7 @@ class ManualModel extends Component {
                             <div className="card sec6card manualcard">
 
                                 <div className="card-body manualmodellist">
-                                    <span> <input type="checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
+                                    <span className="modelName"> <input type="checkbox" id={j + "automodel"} className="_checkbox" value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
                                         <label htmlFor="automodel" className="card-model-list"> {this.state.hyperForm[j].name}</label>
                                     </span>
 
