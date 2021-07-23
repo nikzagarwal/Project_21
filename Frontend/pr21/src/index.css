@@ -614,7 +614,7 @@ input[type=text],input[type=number] ,select, textarea {
   display: none;
   position: absolute;
   background-color: #DAE3E5;
-  min-width: 120px;
+  min-width: 150px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
@@ -652,7 +652,7 @@ input[type=text],input[type=number] ,select, textarea {
   display: block;
 }
 .dropdown{
-  position:initial;
+  position:relative;
 }
 .dropdown-content2 {
   display: none;
@@ -1363,4 +1363,3 @@ em{
 }
 
 /* Brain vector created by iuriimotov - www.freepik.com used in background images */
-
