@@ -37,7 +37,7 @@ from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
 
 from sse_starlette.sse import EventSourceResponse
-from sh import tail
+# from sh import tail
 import time
 import asyncio
 

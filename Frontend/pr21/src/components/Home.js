@@ -321,7 +321,7 @@ class Home extends Component {
     }
     handleManualModelDetails= (res) =>{
         this.setState({
-            modeldetail: res.data
+            modeldetail: res
         })
     }
     handleGoForm2() {

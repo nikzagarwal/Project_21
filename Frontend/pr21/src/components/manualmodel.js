@@ -128,7 +128,7 @@ class ManualModel extends Component {
         console.log(JSON.stringify(this.state.hyperForm))
         axios.post('http://localhost:8000/manual/' + userID + '/' + projectID, JSON.stringify(this.state.hyperForm))
             .then(res => {
-                console.log("SuccessfulTime", res)
+                console.log("SuccessfulManual", res)
                 this.props.handleManualModelDetails(res.data)
             },
                 (error) => { console.log(error) });

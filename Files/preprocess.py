@@ -12,6 +12,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 import os
 import yaml
+from yaml.loader import FullLoader
 from scipy import stats
 
 class Preprocess:     
@@ -19,7 +20,9 @@ class Preprocess:
         """
         This function is for preprocessing the data when the user selects manual preprocessing.                     
         """
-        config_data = yaml.safe_load(open("preprocess_config.yaml",'r'))
+        with open(config) as f:
+            config_data= yaml.load(f,Loader=FullLoader) 
+        # config_data = yaml.safe_load(open("preprocess_config.yaml",'r'))
         df = pd.read_csv(config_data["raw_data_address"])
         
         df.dropna(how='all', axis=1, inplace=True)

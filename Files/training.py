@@ -6,7 +6,6 @@ import json
 import pandas as pd
 from .libraries import *
 import yaml
-from yaml.loader import FullLoader
 from Files.hyperparameter import hyperparameter as hp
 import os 
 
@@ -72,12 +71,12 @@ class training:
         
         # bestmodel
         best_model=metrics['modelname'][0]
-        best_model_location=os.path.join(location,(str(best_model) +".pkl"))
+        best_model_location=os.path.join(picklelocation,(str(best_model) +".pkl"))
         
         return {
             "Successful":True,
             "metricsLocation":metricsLocation,
-            "pickleFolderPath": location,         #Generate a folder where all pickle files are residing
+            "pickleFolderPath": picklelocation,         #Generate a folder where all pickle files are residing
             "pickleFilePath": best_model_location,             #Best model pickle file path
             "accuracy":accuracy,                          #Accuracy of best model
             "clusterPlotLocation": "clusterPlotLocation"    #Only if it is clustering
