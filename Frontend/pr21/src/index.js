@@ -109,4 +109,7 @@ function erase() {
   }
 }
 
-
+// window.setInterval(function() {
+//   var elem = document.getElementById('terminal');
+//   elem.scrollTop = elem.scrollHeight;
+// }, 500);

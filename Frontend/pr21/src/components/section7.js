@@ -112,7 +112,7 @@ class Section7 extends Component {
             let item = []
             for (let j = i; j < i + 3 && j < len; j++) {
                 item.push(
-                    <div key={i} className="card sec7card">
+                    <div key={j} className="card sec7card">
 
                         <div className="card-body">
                             <div className="sec7h2">

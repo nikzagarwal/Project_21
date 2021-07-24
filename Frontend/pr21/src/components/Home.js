@@ -47,6 +47,7 @@ class Home extends Component {
             modelForm: "",
             numClusters: 4,
             modalShow: false,
+            openWebSocketConnection: false,
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -210,56 +211,66 @@ class Home extends Component {
         })
     }
     handleSubmit2 = event => {
-        this.setState({
-            auto: true
-        })
         event.preventDefault();
-        var theFormItself = document.getElementById('form3');
-        $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('sec1heading');
-        $(theFormItself2).hide();
-        var theFormItself3 = document.getElementById('sec1heading2');
-        $(theFormItself3).show();
-        var theFormItself4 = document.getElementById('loader');
-        $(theFormItself4).show();
-        this.setState({
-            modeldetail: {
-                "Successful": "False",
-                "dataID": 0,
-                "modelID": 0,
-                "projectID": 0,
-                "userID": 0
-            },
-        })
-        let userID = this.state.projectdetail["userID"]
-        let projectID = this.state.projectdetail["projectID"]
-        let isauto = this.state.auto
-        let target = this.state.target
-        if (target === '') {
+        setTimeout(()=>{ 
             this.setState({
-                target: Object.keys(this.state.traindata[0])[0]
+                auto: true
             })
-            target = Object.keys(this.state.traindata[0])[0]
-        }
-        let modelnumber = this.state.modelnum
-        let nulltype = this.state.nulltype
-        let clusteringType = this.state.clusteringType
-        let numClusters = this.state.numClusters
-        let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
-        console.log(JSON.stringify(data))
-
-        axios.post('http://localhost:8000/auto', JSON.stringify(data))
-            .then(res => {
-                console.log("Successful2", res)
+            event.preventDefault();
+            var theFormItself = document.getElementById('form3');
+            $(theFormItself).hide();
+            var theFormItself2 = document.getElementById('sec1heading');
+            $(theFormItself2).hide();
+            var theFormItself3 = document.getElementById('sec1heading2');
+            $(theFormItself3).show();
+            var theFormItself4 = document.getElementById('loader');
+            $(theFormItself4).show();
+            this.setState({
+                modeldetail: {
+                    "Successful": "False",
+                    "dataID": 0,
+                    "modelID": 0,
+                    "projectID": 0,
+                    "userID": 0
+                },
+            })
+            let userID = this.state.projectdetail["userID"]
+            let projectID = this.state.projectdetail["projectID"]
+            let isauto = this.state.auto
+            let target = this.state.target
+            if (target === '') {
                 this.setState({
-                    modeldetail: res.data
+                    target: Object.keys(this.state.traindata[0])[0]
                 })
-                console.log(this.state.modeldetail)
-            },
-                (error) => { console.log(error) });
-
+                target = Object.keys(this.state.traindata[0])[0]
+            }
+            let modelnumber = this.state.modelnum
+            let nulltype = this.state.nulltype
+            let clusteringType = this.state.clusteringType
+            let numClusters = this.state.numClusters
+            let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
+            console.log(JSON.stringify(data))
+    
+            axios.post('http://localhost:8000/auto', JSON.stringify(data))
+                .then(res => {
+                    console.log("Successful2", res)
+                    this.setState({
+                        modeldetail: res.data
+                    })
+                    console.log(this.state.modeldetail)
+                },
+                    (error) => { console.log(error) });
+        
+        }
+        , 1000);
+        setTimeout(()=>{ 
+        this.setState({
+            openWebSocketConnection: true
+        })},4000);
 
     }
+    
+
     handleSubmitTime = event => {
         event.preventDefault();
         var theFormItself = document.getElementById('form6');
@@ -319,7 +330,7 @@ class Home extends Component {
             currentmodel: val
         })
     }
-    handleManualModelDetails= (res) =>{
+    handleManualModelDetails = (res) => {
         this.setState({
             modeldetail: res
         })
@@ -555,7 +566,15 @@ class Home extends Component {
                         </form>
                     </div>
                     {/* loader */}
-                    <Result modelnum={this.state.modelnum} currentmodel={this.state.currentmodel} projectdetail={this.state.modeldetail} handler={this.handleCurrentModel} projectname={this.state.projectname} isauto={this.state.isauto} mtype={this.state.mtype} />
+                    <Result
+                        modelnum={this.state.modelnum}
+                        currentmodel={this.state.currentmodel}
+                        projectdetail={this.state.modeldetail}
+                        handler={this.handleCurrentModel}
+                        projectname={this.state.projectname}
+                        isauto={this.state.isauto}
+                        mtype={this.state.mtype}
+                        openWebSocketConnection={this.state.openWebSocketConnection} />
                     {/* ************************************************************************************************************************ */}
 
                     {/* form 4 for manual preprocessing */}
@@ -592,7 +611,7 @@ class Home extends Component {
                     {/* form6 for time series */}
                     <div className="container" id="form6">
                         <div className="goback">
-                        <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
                         </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">

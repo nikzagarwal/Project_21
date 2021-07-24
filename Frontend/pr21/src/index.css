@@ -678,7 +678,7 @@ input[type=text],input[type=number] ,select, textarea {
   margin-left:7em;
   width:80%;
   background-color: #507DBC;
-  height: 20em;
+  height: 32em;
   box-shadow: 5px 5px 5px 5px grey;
   /* background-color: #000; */
 }
@@ -1363,3 +1363,12 @@ em{
 }
 
 /* Brain vector created by iuriimotov - www.freepik.com used in background images */
+.terminal{
+  background-color: #000;
+  width:100%;
+  height:200px;
+  overflow: auto;
+  border-radius: 8px;
+  color: green;
+  padding:1em;
+}
