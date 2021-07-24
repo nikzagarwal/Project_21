@@ -74,5 +74,11 @@ class training:
         best_model=metrics['modelname'][0]
         best_model_location=os.path.join(location,(str(best_model) +".pkl"))
         
-        
-        return {"Successful":True,"metricsLocation":metricsLocation}
+        return {
+            "Successful":True,
+            "metricsLocation":metricsLocation,
+            "pickleFolderPath": location,         #Generate a folder where all pickle files are residing
+            "pickleFilePath": best_model_location,             #Best model pickle file path
+            "accuracy":accuracy,                          #Accuracy of best model
+            "clusterPlotLocation": "clusterPlotLocation"    #Only if it is clustering
+        }

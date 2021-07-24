@@ -67,10 +67,10 @@ class ResultsCache:
         self.pickleFolderPath=path
         self.status=False
 
-    def set_auto_mode_status(self,status):
+    def set_training_status(self,status):
         self.status=status
     
-    def get_auto_mode_status(self):
+    def get_training_status(self):
         return self.status
 
     def set_project_folder_path(self,projectFolderPath):

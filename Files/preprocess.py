@@ -19,11 +19,17 @@ class Preprocess:
         """
         This function is for preprocessing the data when the user selects manual preprocessing.                     
         """
-        config_data = yaml.safe_load(open(config,'r'))
+        config_data = yaml.safe_load(open("preprocess_config.yaml",'r'))
         df = pd.read_csv(config_data["raw_data_address"])
         
         df.dropna(how='all', axis=1, inplace=True)
 
+        
+        for col_name in df.columns:
+            if df[col_name].dtype == 'object'and df[col_name].nunique() > 30:
+                df=df.drop(col_name, axis = 1)
+
+        
         if config_data["is_auto_preprocess"] == False:
 
             if config_data['drop_column_name'] != []:
@@ -94,7 +100,14 @@ class Preprocess:
                 del config_data['encoding_type'][0]
                 for index, column in enumerate(config_data["encode_column_name"]):
                     type = config_data["encoding_type"][index]
-
+                    
+                    if config_data["target_column_name"] == column:
+                        encoder = LabelEncoder()
+                        df[column] = encoder.fit_transform(df[column])
+                        label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                        config_data['labels'] = {}
+                        config_data['labels']= [label_encoding_dict]
+            
                     if type == "Label Encodeing":
                         encoder = LabelEncoder()
                         df[column] = encoder.fit_transform(df[column])
