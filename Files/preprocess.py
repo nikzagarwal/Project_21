@@ -28,17 +28,8 @@ class Preprocess:
         df.dropna(how='all', axis=1, inplace=True)
 
         
-        for col_name in df.columns:
-            if df[col_name].dtype == 'object'and df[col_name].nunique() > 30:
-                df=df.drop(col_name, axis = 1)
-
-        
         if config_data["is_auto_preprocess"] == False:
-
-            if config_data['drop_column_name'] != []:
-                del config_data['drop_column_name'][0]
-                df=df.drop(config_data["drop_column_name"], axis = 1)
-                
+    
             if config_data['imputation_column_name'][0] != []:
                 del config_data['imputation_column_name'][0]
                 del config_data['impution_type'][0]
@@ -51,7 +42,6 @@ class Preprocess:
                         type = config_data["impution_type"][index] 
                     if type == "mean":
                         df_value = df[[column]].values
-                        print("Hi")
                         imputer = SimpleImputer(missing_values = np.nan, strategy = "mean")
                         strategy_values_list.append(df[column].mean())
                         df[[column]] = imputer.fit_transform(df_value)
@@ -76,7 +66,7 @@ class Preprocess:
                 del config_data['scaling_type'][0]
 
                 for index, column in enumerate(config_data["scaling_column_name"]):
-                    if df[column].dtype == object:
+                    if df[column].dtype == object and config_data["target_column_name"] == column:
                         pass
                     else:  
                         type = config_data["scaling_type"][index]
@@ -97,41 +87,55 @@ class Preprocess:
 
                         df[[column]] = scaled_value
             
+            if config_data['drop_column_name'] != []:
+                del config_data['drop_column_name'][0]
+                for index, column in enumerate(config_data["drop_column_name"]):
+                    if(config_data["target_column_name"] != column):
+                        df=df.drop(column, axis = 1)
             
             if config_data['encode_column_name'][0] != []:
                 del config_data['encode_column_name'][0]
                 del config_data['encoding_type'][0]
                 for index, column in enumerate(config_data["encode_column_name"]):
-                    type = config_data["encoding_type"][index]
-                    
-                    if config_data["target_column_name"] == column:
-                        encoder = LabelEncoder()
-                        df[column] = encoder.fit_transform(df[column])
-                        label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
-                        config_data['labels'] = {}
-                        config_data['labels']= [label_encoding_dict]
-            
-                    if type == "Label Encodeing":
-                        encoder = LabelEncoder()
-                        df[column] = encoder.fit_transform(df[column])
-                        label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
-                        config_data['labels'] = {}
-                        config_data['labels']= [label_encoding_dict]
+                    if column not in config_data["drop_column_name"]:
+                        
+                        type = config_data["encoding_type"][index]
+                        
+                        if config_data["target_column_name"] == column or df[column].nunique() > 30:
+                            encoder = LabelEncoder()
+                            df[column] = encoder.fit_transform(df[column])
+                            label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                            config_data['labels'] = {}
+                            config_data['labels']= [label_encoding_dict]
+                        
+                        elif df[column].dtype == 'object'and df[column].nunique() > 30:
+                            df=df.drop(column, axis = 1)
+                        
+                        elif type == "Label Encoding" :
+                            encoder = LabelEncoder()
+                            df[column] = encoder.fit_transform(df[column])
+                            label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                            config_data['labels'] = {}
+                            config_data['labels']= [label_encoding_dict]
 
-                    elif type == "One-Hot Encoding":
-                        encoder = OneHotEncoder(drop = 'first', sparse=False)
-                        df_encoded = pd.DataFrame (encoder.fit_transform(df[[column]]))
-                        df_encoded.columns = encoder.get_feature_names([column])
-                        df.drop([column] ,axis=1, inplace=True)
-                        df= pd.concat([df, df_encoded ], axis=1)
+                        elif type == "One-Hot Encoding":
+                            encoder = OneHotEncoder(drop='first', sparse=False)
+                            df_encoded = pd.DataFrame (encoder.fit_transform(df[[column]]))
+                            df_encoded.columns = encoder.get_feature_names([column])
+                            df.drop([column] ,axis=1, inplace=True)
+                            df= pd.concat([df, df_encoded ], axis=1)
             
             
         ### Default
-
+        for col_name in df.columns:
+            if df[col_name].dtype == 'object'and df[col_name].nunique() > 30:
+                df=df.drop(col_name, axis = 1)
+                
         objest_type_column_list = []
         for col_name in df.columns:
             if df[col_name].dtype == 'object':
                 objest_type_column_list.append(col_name)
+                config_data['encode_column_name'].extend([col_name])
                 config_data['encoding_type'].extend(['One-Hot Encoding'])
 
         if objest_type_column_list != []:

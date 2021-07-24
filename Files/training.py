@@ -66,12 +66,14 @@ class training:
             metrics=metrics.sort_values(['r2_score', 'mean_absolute_error'], ascending=[False, False]).reset_index()      
             accuracy=metrics['r2_score'][0]
             
+        metrics=metrics.rename(columns={"modelname":"Model"}) 
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.to_csv(metricsLocation, index=False)
         
         # bestmodel
-        best_model=metrics['modelname'][0]
+        best_model=metrics['Model'][0]
         best_model_location=os.path.join(picklelocation,(str(best_model) +".pkl"))
+        
         
         return {
             "Successful":True,

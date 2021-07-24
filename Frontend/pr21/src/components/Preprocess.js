@@ -391,7 +391,7 @@ class Preprocess extends React.Component {
                                                                 <label htmlFor={i + "encode"}>One Hot Encoding</label>
                                                             </div>
                                                             <div className="prepro">
-                                                                <input type="radio" id={key + "label"} name={key + "encodetype"} value="Label Encodeing" onChange={this.handleEncodingChange(key)} />
+                                                                <input type="radio" id={key + "label"} name={key + "encodetype"} value="Label Encoding" onChange={this.handleEncodingChange(key)} />
                                                                 <label htmlFor={i + "encode"}>Label Encoding</label>
                                                             </div>
 
@@ -501,7 +501,7 @@ class Preprocess extends React.Component {
                         <input type="text" id="nulltype" name="nulltype" onChange={this.handleNullTypeChange} placeholder="Is it NULL, NA , ? , 0 or other (specify)" required />
                     </div>
                 </div> */}
-                <div className="row">
+                {/* <div className="row">
                     <div className="col-40">
                         <label htmlFor="imbalance">Want us to check for data imbalance?</label>
                     </div>
@@ -511,7 +511,7 @@ class Preprocess extends React.Component {
                             <option value="true">Yes</option>
                         </select>
                     </div>
-                </div>
+                </div> */}
                 <div className="row">
                     <div className="col-40">
                         <label htmlFor="outlier">Check for Outliers?</label>
