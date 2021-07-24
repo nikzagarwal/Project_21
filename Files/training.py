@@ -39,7 +39,9 @@ class training:
 
         elif dataconfigfile["problem_type"]=='regression':
             metrics=pd.DataFrame(columns=['modelname','mean_absolute_error','mean_squared_error','r2_score','mean_squared_log_error'])
-
+        #create location of pickle file
+        picklelocation=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
+        os.makedirs(picklelocation)
         #creates a pandas dataframe to store the metrics of the created model
         for model in userinputconfigfile:
             if model["isSelected"]:
@@ -56,8 +58,21 @@ class training:
                 print(metricsnewrow)
                 metrics.loc[len(metrics.index)]=metricsnewrow
                 
-        #stores the metrics in the assigned folder       
+        #stores the metrics in the assigned folder
+        accuracy=''
+        if dataconfigfile["problem_type"]=='classification':
+            metrics=metrics.sort_values(['accuracy_score', 'f1_score'], ascending=[False, False]).reset_index()
+            accuracy=metrics['accuracy_score'][0]
+        else:
+            metrics=metrics.sort_values(['r2_score', 'mean_absolute_error'], ascending=[False, False]).reset_index()      
+            accuracy=metrics['r2_score'][0]
+            
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
-        metrics.to_csv(metricsLocation, index=True, index_label="modelname")
-
+        metrics.to_csv(metricsLocation, index=False)
+        
+        # bestmodel
+        best_model=metrics['modelname'][0]
+        best_model_location=os.path.join(location,(str(best_model) +".pkl"))
+        
+        
         return {"Successful":True,"metricsLocation":metricsLocation}

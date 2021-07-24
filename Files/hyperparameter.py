@@ -62,9 +62,12 @@ class hyperparameter:
         print("working on "+ modelname)
         clf.fit(x_train,y_train)
         print("model completed for " + modelname)
-        picklepath=os.path.join(dataconfig["location"],(str(modelname) +".pkl"))
+        
+        location=os.path.join(dataconfig["location"],str(dataconfig["id"])+"_model")
+        picklepath=os.path.join(location,(str(modelname) +".pkl"))
         with open(picklepath,"wb") as f:
             pickle.dump(clf,f)
+            
         prediction=clf.predict(x_test)
         metricsrow=met.calculate_metrics(modelname,model_type,prediction,y_test)
         return metricsrow
