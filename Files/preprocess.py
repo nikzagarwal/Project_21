@@ -29,7 +29,7 @@ class Preprocess:
 
         if config_data["is_auto_preprocess"] == False:
 
-            if config_data['drop_column_name'] != []:
+            if config_data['drop_column_name'] != [] and (config_data["target_column_name"] not in config_data['drop_column_name']):
                 del config_data['drop_column_name'][0]
                 df=df.drop(config_data["drop_column_name"], axis = 1)
 
@@ -141,7 +141,7 @@ class Preprocess:
         ### Default
 
         for column in df.columns:
-            if df[column].dtype == 'object'and df[column].nunique() > 30:
+            if df[column].dtype == 'object'and df[column].nunique() > 30 and config_data["target_column_name"] != column:
                 df=df.drop(column, axis = 1)
 
 
@@ -187,8 +187,9 @@ class Preprocess:
                     for j in range(i):
                         if abs(corr_matrix.iloc[i, j]) > 0.90:
                             col_corr.add(corr_matrix.columns[i])
-
-            df = df.drop(col_corr,axis=1)
+                            
+            if config_data["target_column_name"] not in col_corr:
+                df = df.drop(col_corr,axis=1)
     
 
         df.to_csv('clean_data.csv')
