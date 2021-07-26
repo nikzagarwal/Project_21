@@ -21,6 +21,7 @@ import warnings
 import pickle 
 from statsmodels.graphics.tsaplots import acf,pacf
 import pmdarima as pm
+import sys
 
 class timeseries:
     def createprophet(self,dataconfig):
@@ -78,6 +79,7 @@ class timeseries:
             freq=12
         print("frequency",freq)
         # warnings.filterwarnings("ignore")
+        sys.stdout=open("logs.log","w")
         with StepwiseContext(max_dur=15):
             model = pm.auto_arima(data, stepwise=True, error_action='ignore', seasonal=True,m=freq,trace=True)
         #metrics=met.calculate_metrics("fbprophet","Regression",testpred,testactual)
