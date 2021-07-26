@@ -9,7 +9,7 @@ from sklearn.impute import KNNImputer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder 
 
-
+from yaml.loader import FullLoader
 import os
 import yaml
 from scipy import stats
