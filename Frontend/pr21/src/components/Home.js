@@ -212,7 +212,7 @@ class Home extends Component {
     }
     handleSubmit2 = event => {
         event.preventDefault();
-        setTimeout(()=>{ 
+        setTimeout(() => {
             this.setState({
                 auto: true
             })
@@ -250,7 +250,7 @@ class Home extends Component {
             let numClusters = this.state.numClusters
             let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
             console.log(JSON.stringify(data))
-    
+
             axios.post('http://localhost:8000/auto', JSON.stringify(data))
                 .then(res => {
                     console.log("Successful2", res)
@@ -260,71 +260,81 @@ class Home extends Component {
                     console.log(this.state.modeldetail)
                 },
                     (error) => { console.log(error) });
-        
+
         }
-        , 1000);
-        setTimeout(()=>{ 
-        this.setState({
-            openWebSocketConnection: true
-        })},4000);
+            , 100);
+        setTimeout(() => {
+            this.setState({
+                openWebSocketConnection: true
+            })
+        }, 2000);
 
     }
-    
+
 
     handleSubmitTime = event => {
         event.preventDefault();
-        var theFormItself = document.getElementById('form6');
-        $(theFormItself).hide();
-        var theFormItself2 = document.getElementById('sec1heading');
-        $(theFormItself2).hide();
-        var theFormItself3 = document.getElementById('sec1heading2');
-        $(theFormItself3).show();
-        var theFormItself4 = document.getElementById('loader');
-        $(theFormItself4).show();
-        this.setState({
-            modeldetail: {
-                "Successful": "False",
-                "dataID": 0,
-                "modelID": 0,
-                "projectID": 0,
-                "userID": 0
-            },
-        })
-        let userID = this.state.projectdetail["userID"]
-        let projectID = this.state.projectdetail["projectID"]
-        let target = this.state.target
-        let dateColumn = this.state.dateColumn
-        let frequency = this.state.frequency
-        if (target === '') {
+        setTimeout(() => {
+            var theFormItself = document.getElementById('form6');
+            $(theFormItself).hide();
+            var theFormItself2 = document.getElementById('sec1heading');
+            $(theFormItself2).hide();
+            var theFormItself3 = document.getElementById('sec1heading2');
+            $(theFormItself3).show();
+            var theFormItself4 = document.getElementById('loader');
+            $(theFormItself4).show();
             this.setState({
-                target: Object.keys(this.state.traindata[0])[0]
+                modeldetail: {
+                    "Successful": "False",
+                    "dataID": 0,
+                    "modelID": 0,
+                    "projectID": 0,
+                    "userID": 0
+                },
             })
-            target = Object.keys(this.state.traindata[0])[0]
-        }
-        console.log(dateColumn)
-        if (dateColumn === '') {
-            this.setState({
-                dateColumn: Object.keys(this.state.traindata[0])[0]
-            })
-            dateColumn = Object.keys(this.state.traindata[0])[0]
-        }
-        let data = { userID, projectID, target, dateColumn, frequency }
-        console.log(JSON.stringify(data))
-
-        axios.post('http://localhost:8000/timeseries', JSON.stringify(data))
-            .then(res => {
-                console.log("SuccessfulTime", res)
+            let userID = this.state.projectdetail["userID"]
+            let projectID = this.state.projectdetail["projectID"]
+            let target = this.state.target
+            let dateColumn = this.state.dateColumn
+            let frequency = this.state.frequency
+            if (target === '') {
                 this.setState({
-                    modeldetail: res.data
+                    target: Object.keys(this.state.traindata[0])[0]
                 })
-                console.log(this.state.modeldetail)
-            },
-                (error) => { console.log(error) });
+                target = Object.keys(this.state.traindata[0])[0]
+            }
+            console.log(dateColumn)
+            if (dateColumn === '') {
+                this.setState({
+                    dateColumn: Object.keys(this.state.traindata[0])[0]
+                })
+                dateColumn = Object.keys(this.state.traindata[0])[0]
+            }
+            let data = { userID, projectID, target, dateColumn, frequency }
+            console.log(JSON.stringify(data))
 
-
+            axios.post('http://localhost:8000/timeseries', JSON.stringify(data))
+                .then(res => {
+                    console.log("SuccessfulTime", res)
+                    this.setState({
+                        modeldetail: res.data
+                    })
+                    console.log(this.state.modeldetail)
+                },
+                    (error) => { console.log(error) });
+        }, 100);
+        setTimeout(() => {
+            this.setState({
+                openWebSocketConnection: false
+            })
+        }, 5000);
 
     }
-
+    handleSocketConnection = event=>{
+        this.setState({
+            openWebSocketConnection: true
+        })
+    }
     handleCurrentModel = (val) => {
         this.setState({
             currentmodel: val
@@ -605,7 +615,12 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
-                            <ManualModel modelForm={this.state.modelForm} mtype={this.state.mtype} projectdetail={this.state.projectdetail} handleManualModelDetails={this.handleManualModelDetails} />
+                            <ManualModel 
+                            modelForm={this.state.modelForm} 
+                            mtype={this.state.mtype}
+                            projectdetail={this.state.projectdetail} 
+                            handleManualModelDetails={this.handleManualModelDetails}
+                            handleSocketConnection={this.handleSocketConnection}/>
                         </div>
                     </div>
                     {/* form6 for time series */}

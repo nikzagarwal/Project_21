@@ -70,9 +70,6 @@ class ProjectsSection6 extends Component {
                     <div className=" sec6heading">
                         <h1>Project Name:<em> {this.props.projectname}</em></h1>
                     </div>
-                    <div className=" sec6heading">
-                        <h1>Your Models</h1>
-                    </div>
                     {items}
 
                 </div>
