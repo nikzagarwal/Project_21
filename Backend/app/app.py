@@ -1,9 +1,6 @@
 import os
-import pickle
 import shutil
-from pydantic.types import Json
 from typing import List, Optional
-from starlette.responses import StreamingResponse
 import yaml
 from fastapi import FastAPI, Form, Request, WebSocket, WebSocketDisconnect
 from fastapi.datastructures import UploadFile
@@ -35,11 +32,6 @@ from Files.preprocess import Preprocess
 from Files.training import training
 from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
-
-from sse_starlette.sse import EventSourceResponse
-# from sh import tail
-import time
-import asyncio
 
 origins=settings.CORS_ORIGIN
 
@@ -686,30 +678,54 @@ async def training_status(websocket: WebSocket):
 
     for line in generatorLineLogs(open("logs.log", 'r')):
         if resultsCache.get_training_status()==True or line=="PROJECT21_TRAINING_ENDED\n":
-            websocket.close()
+            websocket.close("Logs Generating Finished")
             break
         await websocket.send_json({"logs":line})
         print(line, end='')
     print("File Reading ended")
     resultsCache.set_training_status(False)
-
-    # while (not resultsCache.get_training_status()):
-    #     try:
-    #         for line in tail_F("logs.log"):
-    #             data={
-    #                 "Successful":"False",
-    #                 "Status": "Model Running",
-    #                 "Logs": line
-    #             }
-    #             if line=="PROJECT21_TRAINING_ENDED":
-    #                 print("Closing Websocket connection")
-    #                 break
-    #             await websocket.send_json(data)
-    #     except WebSocketDisconnect:
-    #         print("Websocket connection has been disconnected...")
-    #         break
-    #     # except Exception as e:
-    #     #     print("Error: ",e)
-    #     #     # break
+    open("logs.log","w").close()    #Truncating the contents of the log file after the websocket disconnects
     print("Websocket connection closing...")
+
+@app.delete('/delete/{userID}/{projectID}')
+def delete_entire_project(userID:int,projectID:int):
+    result_user=Project21Database.find_one(settings.DB_COLLECTION_USER,{"userID":userID})
+    if result_user is not None:
+        listOfProjects=result_user["listOfProjects"]
+        try:
+            listOfProjects.remove(projectID)
+            Project21Database.update_one(settings.DB_COLLECTION_USER,{"userID":userID},{"$set":{"listOfProjects":listOfProjects}})
+            print("Successfully removed project from list of user projects")
+        except ValueError:
+            print("ProjectID is not in user's project list.")
+            # return JSONResponse({"Success":True,"Project Deletion":"Not Successful","Error":"Project Not In Projects List"})
+    
+    result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID,"belongsToUserID":userID})
+    if result_project is not None:
+        try:
+            projectFolderPath=result_project["projectFolderPath"]
+            listOfDataIDs=result_project["listOfDataIDs"]
+
+            deletedProjectDatasCount=Project21Database.delete_many(settings.DB_COLLECTION_DATA,{"belongsToUserID":userID,"belongsToProjectID":projectID})
+            print("Deleted Datas from Data Collection Count: ",deletedProjectDatasCount)
+            
+            deletedProjectModelsCount=Project21Database.delete_many(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToProjectID":projectID})
+            print("Deleted Models from Model Collection Count: ",deletedProjectModelsCount)
+
+            deletedProjectMetricsCount=Project21Database.delete_many(settings.DB_COLLECTION_METRICS,{"belongsToUserID":userID,"belongsToProjectID":projectID})
+            print("Deleted Metrics from Metrics Collection Count: ",deletedProjectMetricsCount)
+
+            deletedProjectInferencesCount=Project21Database.delete_many(settings.DB_COLLECTION_INFERENCE,{"belongsToUserID":userID,"belongsToProjectID":projectID})
+            print("Deleted Inferences from Inference Collection Count: ",deletedProjectInferencesCount)
+
+        except Exception as e:
+            print("An Error Occuered: ",e)
+            print("Could not delete the project related collections from DB")
+        
+        try:
+            shutil.rmtree(projectFolderPath)
+        except OSError as e:
+            print("An Error Occured: ", e)
+            JSONResponse({"Success":True,"DB Deletion":"Successful","Directory Deletion":"Not Successful"})
+    return JSONResponse({"Success":True,"DB Deletion":"Successful","Directory Deletion":"Successful"})
 
