@@ -149,7 +149,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
 def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
     autoFormData=dict(autoFormData)
     projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(autoFormData["projectID"],currentIDs,autoFormData,Project21Database)
-    with ("logs.log","w") as f:
+    with open("logs.log","w") as f:
         f.close()
     resultsCache.set_training_status(False)
     if(problem_type=='regression'):
@@ -445,7 +445,7 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
 @app.post('/manual/{userID}/{projectID}',tags=["Manual Mode"])
 def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
     print(configModelJSONData)
-    with ("logs.log","w") as f:
+    with open("logs.log","w") as f:
         f.close()
     resultsCache.set_training_status(False)
     result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
@@ -526,7 +526,15 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
 
 
 @app.post('/doManualInference',tags=["Manual Mode"])
-def do_manual_inference(projectID:int, modelID:int, inferenceDataFile:UploadFile=File(...)):
+def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenceDataFile:UploadFile=File(...)):
+    preprocessConfigFileLocation='/'
+    isAuto=False
+    pickleFilePath='/'
+    projectRunPath='/'
+    inferenceCleanDataLocation='/'
+    path='/'
+    newDataPath='/'
+    inferenceDataResultsPath='/'
     try:
         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
         if result_project is not None:
@@ -602,7 +610,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
         })
     except Exception as e:
         print("Could not insert into Data Collection. An Error Occured: ",e)
-    with ("logs.log","w") as f:
+    with open("logs.log","w") as f:
         f.close()
     resultsCache.set_training_status(False)
     timeseriesObj=timeseries()

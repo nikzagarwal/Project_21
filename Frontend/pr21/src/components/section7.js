@@ -186,6 +186,7 @@ class Section7 extends Component {
                             ref={this.changeChild} 
                             showRetrain={this.state.showRetrain} 
                             currentmodel={this.props.currentmodel} 
+                            isauto={this.state.projectList[this.state.currentProject].isAuto} 
                             projectdetails={this.state.currentProjectDetails} />
                         </div>
                     </div>

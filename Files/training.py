@@ -61,7 +61,7 @@ class training:
         accuracy=''
         if dataconfigfile["problem_type"]=='classification':
             metrics=metrics.sort_values(['accuracy_score', 'f1_score'], ascending=[False, False]).reset_index()
-            accuracy=metrics['accuracy_score'][0]
+            accuracy=metrics['accuracy_score'][0]*100
         else:
             metrics=metrics.sort_values(['r2_score', 'mean_absolute_error'], ascending=[False, False]).reset_index()      
             accuracy=metrics['r2_score'][0]

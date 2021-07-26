@@ -22,7 +22,7 @@ class ProjectsSection5 extends Component {
             plot: "",
             countplot: 0,
             inferenceTime: 1,
-            freq:"D"
+            freq: "D"
         };
         this.updateData = this.updateData.bind(this);
     }
@@ -96,9 +96,9 @@ class ProjectsSection5 extends Component {
             inferencefile: event.target.files[0]
         })
     }
-    handleFrequencyChange = event =>{
+    handleFrequencyChange = event => {
         this.setState({
-            freq:event.target.value
+            freq: event.target.value
         })
     }
     handleTimeInferenceChange = event => {
@@ -126,13 +126,22 @@ class ProjectsSection5 extends Component {
 
         );
         const FileDownload = require('js-file-download');
-        axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-            .then((res) => {
-                console.log("Successful", res)
-                FileDownload(res.data, 'prediction.csv');
-                alert("Prediction is Ready and Downloaded");
-            },
-                (error) => { console.log(error) });
+        if (this.props.isauto === 'Auto')
+            axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                .then((res) => {
+                    console.log("Successful Auto inference", res)
+                    FileDownload(res.data, 'prediction.csv');
+                    alert("Prediction is Ready and Downloaded");
+                },
+                    (error) => { console.log(error) });
+        else
+            axios.post('http://localhost:8000/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                .then((res) => {
+                    console.log("Successful Manual Inference", res)
+                    FileDownload(res.data, 'prediction.csv');
+                    alert("Prediction is Ready and Downloaded");
+                },
+                    (error) => { console.log(error) });
     }
     handleGetTimePrediction = event => {
         event.preventDefault();
@@ -306,7 +315,7 @@ class ProjectsSection5 extends Component {
                                                             <option value="M">Monthly</option>
                                                             <option value="Q">Quaterly</option>
                                                             <option value="Y">Yearly</option>
-                                                            </select>
+                                                        </select>
                                                     </div>
                                                 </div>
 
