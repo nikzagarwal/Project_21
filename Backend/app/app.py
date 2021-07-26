@@ -541,11 +541,7 @@ def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenc
             result_project=serialiseDict(result_project)
             preprocessConfigFileLocation=result_project["preprocessConfigFileLocation"]
             isAuto=result_project["isAuto"]
-    except Exception as e:
-        print("An Error Occured: ",e)
-        print("Could not fetch project details from project collection")
 
-    try:
         result_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
         if result_model is not None:
             result_model=serialiseDict(result_model)
@@ -560,37 +556,30 @@ def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenc
             
             with open(newDataPath,"wb") as buffer:
                 shutil.copyfileobj(inferenceDataFile.file,buffer)
+    
+            print("Performing Preprocessing of the data given")
+            inferencePreprocessObj=InferencePreprocess()
+            inferenceCleanDataLocation=inferencePreprocessObj.inference_preprocess(preprocessConfigFileLocation,path)
+            print("Preprocessing of data is done")
+            print("Performing Inference on the preprocessed inference data")
+            inference=Inference()
+            inferenceDataResultsPath=inference.inference(pickleFilePath,inferenceCleanDataLocation,path,isAuto)
+            print("Inferencing completed")
+    
+    
+            Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+                "newData": inferenceCleanDataLocation,
+                "results": inferenceDataResultsPath,
+                "belongsToUserID": currentIDs.get_current_user_id(),
+                "belongsToProjectID": projectID,
+                "belongsToModelID": modelID
+            })
+            if os.path.exists(inferenceDataResultsPath):
+                print({"Metrics Generation":"Successful"})
+                return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
     except Exception as e:
         print("An Error Occured: ",e)
-        print("Could not fetch model details from model collection")
-
-    try:
-        print("Performing Preprocessing of the data given")
-        inferencePreprocessObj=InferencePreprocess()
-        inferenceCleanDataLocation=inferencePreprocessObj.inference_preprocess(preprocessConfigFileLocation,path)
-        print("Preprocessing of data is done")
-        print("Performing Inference on the preprocessed inference data")
-        inference=Inference()
-        inferenceDataResultsPath=inference.inference(pickleFilePath,inferenceCleanDataLocation,path,isAuto)
-        print("Inferencing completed")
-    except Exception as e:
-        print("An Error Occured: ",e)
-        print("Could not preprocess and perform inference on the file")
-
-    try:
-        Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
-            "newData": inferenceCleanDataLocation,
-            "results": inferenceDataResultsPath,
-            "belongsToUserID": currentIDs.get_current_user_id(),
-            "belongsToProjectID": projectID,
-            "belongsToModelID": modelID
-        })
-        if os.path.exists(inferenceDataResultsPath):
-            print({"Metrics Generation":"Successful"})
-            return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
-    except Exception as e:
-        print("An error occured: ", e)
-        print("Unable to insert inference data into the inference Collection")
+        print("Could not do any of the above")
 
 
 @app.post('/timeseries',tags=["Timeseries"])
