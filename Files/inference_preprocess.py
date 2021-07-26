@@ -154,7 +154,7 @@ class InferencePreprocess:
         inference_clean_data_address = os.path.abspath(os.path.join(folderLocation,"inference_clean_data.csv"))
         config_data['inference_clean_data_address'] = inference_clean_data_address
 
-        with open("preprocess_config.yaml", 'w') as yaml_file:
+        with open(config, 'w') as yaml_file:
             yaml_file.write( yaml.dump(config_data, default_flow_style=False))
         
         return inference_clean_data_address
