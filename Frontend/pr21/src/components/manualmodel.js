@@ -115,6 +115,7 @@ class ManualModel extends Component {
 
     }
     handleTrain = event => {
+        setTimeout(() => {
         var theFormItself = document.getElementById('form5');
         $(theFormItself).hide();
         var theFormItself2 = document.getElementById('sec1heading');
@@ -123,6 +124,7 @@ class ManualModel extends Component {
         $(theFormItself3).show();
         var theFormItself4 = document.getElementById('loader');
         $(theFormItself4).show();
+
         let projectID = this.props.projectdetail.projectID
         let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.hyperForm))
@@ -132,7 +134,10 @@ class ManualModel extends Component {
                 this.props.handleManualModelDetails(res.data)
             },
                 (error) => { console.log(error) });
-
+        },1000)
+        setTimeout(() => {
+            this.props.handleSocketConnection()
+        }, 2000)
 
     }
     render() {
@@ -149,10 +154,10 @@ class ManualModel extends Component {
 
                                 <div className="card-body ">
                                     <div className="manualmodellist">
-                                    <span className="modelName"> <input type="checkbox" className="_checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
-                                        
-                                        <label htmlFor={j+"automodel"} className="card-model-list"> {this.state.hyperForm[j].name}</label>
-                                    </span>
+                                        <span className="modelName"> <input type="checkbox" className="_checkbox" id={j + "automodel"} value={this.state.hyperForm[j].name} onClick={this.handlemodelselection(j)} name="automodel" />
+
+                                            <label htmlFor={j + "automodel"} className="card-model-list"> {this.state.hyperForm[j].name}</label>
+                                        </span>
                                     </div>
                                     <div className="manualmodelcard">
                                         <HyperModal

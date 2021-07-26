@@ -3,34 +3,41 @@ import Section6 from './section6.js';
 import Section5 from './section5.js';
 
 class Result extends Component {
-    state = {
-        log1: [],
-        log2: [],
-        log3: [],
-        log4: [],
-        log5: [],
-        
-        counter: 0
+    constructor(props) {
+        super(props)
+        this.state = {
+            log1: [],
+            log2: [],
+            log3: [],
+            log4: [],
+            log5: [],
+            counter: 0,
+        }
     }
     OpenWebSocket = event => {
         const ws = new WebSocket("ws://localhost:8000/websocketStream")
 
         ws.onopen = () => {
             console.log("open")
+            console.log("open")
+            console.log("open")
+            console.log("open")
         }
         ws.onmessage = evt => {
-            
+
             this.setState(prevState => ({
-                log1:this.state.log2,
-                log2:this.state.log3,
-                log3:this.state.log4,
-                log4:this.state.log5,
-                log5:  evt.data
+                log1: this.state.log2,
+                log2: this.state.log3,
+                log3: this.state.log4,
+                log4: this.state.log5,
+                log5: Object.values(evt.data)
             }))
             console.log(evt.data)
         }
+        ws.onclose = () => {
+            console.log("closing socket connection")
+        }
     }
-
 
     render() {
 
@@ -51,11 +58,11 @@ class Result extends Component {
                     </div>
                     <br />
                     <div className="terminal" id="terminal">
-                        {this.state.log1}<br/>   
-                        {this.state.log2}<br/>
-                        {this.state.log3}<br/>
-                        {this.state.log4}<br/>
-                        {this.state.log5}<br/>
+                        {this.state.log1}<br />
+                        {this.state.log2}<br />
+                        {this.state.log3}<br />
+                        {this.state.log4}<br />
+                        {this.state.log5}<br />
                     </div>
 
                 </div>

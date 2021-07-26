@@ -79,9 +79,10 @@ class timeseries:
             freq=12
         print("frequency",freq)
         # warnings.filterwarnings("ignore")
-        sys.stdout=open("logs.log","w")
+        # sys.stdout=open("logs.log","a+")
         with StepwiseContext(max_dur=15):
             model = pm.auto_arima(data, stepwise=True, error_action='ignore', seasonal=True,m=freq,trace=True)
+        # sys.stdout.close()
         #metrics=met.calculate_metrics("fbprophet","Regression",testpred,testactual)
         order=model.get_params(deep=False)['order']
         seasonal=model.get_params(deep=False)['seasonal_order']
