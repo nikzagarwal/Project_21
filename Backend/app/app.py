@@ -676,18 +676,21 @@ async def training_status(websocket: WebSocket):
     print("Connecting to the Frontend...")
     await websocket.accept()
 
-    for line in generatorLineLogs(open("logs.log", 'r')):
-        if resultsCache.get_training_status()==True or line=="PROJECT21_TRAINING_ENDED\n":
-            websocket.close("Logs Generating Finished")
-            break
-        await websocket.send_json({"logs":line})
-        print(line, end='')
-    print("File Reading ended")
-    resultsCache.set_training_status(False)
-    open("logs.log","w").close()    #Truncating the contents of the log file after the websocket disconnects
-    print("Websocket connection closing...")
+    try:
+        for line in generatorLineLogs(open("logs.log", 'r')):
+            if resultsCache.get_training_status()==True or line=="PROJECT21_TRAINING_ENDED\n":
+                websocket.close("Logs Generating Finished")
+                break
+            await websocket.send_json({"logs":line})
+            # replyFromFrontend=await websocket.receive_text()
+        print("File Reading ended")
+        resultsCache.set_training_status(False)
+        open("logs.log","w").close()    #Truncating the contents of the log file after the websocket disconnects
+        print("Websocket connection closing...")
+    except WebSocketDisconnect:
+        print("Websocket connection has been disconnected...")
 
-@app.delete('/delete/{userID}/{projectID}')
+@app.delete('/deleteThisProject/{userID}/{projectID}')
 def delete_entire_project(userID:int,projectID:int):
     result_user=Project21Database.find_one(settings.DB_COLLECTION_USER,{"userID":userID})
     if result_user is not None:
@@ -698,13 +701,13 @@ def delete_entire_project(userID:int,projectID:int):
             print("Successfully removed project from list of user projects")
         except ValueError:
             print("ProjectID is not in user's project list.")
-            # return JSONResponse({"Success":True,"Project Deletion":"Not Successful","Error":"Project Not In Projects List"})
+            return JSONResponse({"Success":True,"Project Deletion":"Not Successful","Error":"Project Not In Projects List"})
     
     result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID,"belongsToUserID":userID})
     if result_project is not None:
         try:
             projectFolderPath=result_project["projectFolderPath"]
-            listOfDataIDs=result_project["listOfDataIDs"]
+            # listOfDataIDs=result_project["listOfDataIDs"]
 
             deletedProjectDatasCount=Project21Database.delete_many(settings.DB_COLLECTION_DATA,{"belongsToUserID":userID,"belongsToProjectID":projectID})
             print("Deleted Datas from Data Collection Count: ",deletedProjectDatasCount)
@@ -718,6 +721,8 @@ def delete_entire_project(userID:int,projectID:int):
             deletedProjectInferencesCount=Project21Database.delete_many(settings.DB_COLLECTION_INFERENCE,{"belongsToUserID":userID,"belongsToProjectID":projectID})
             print("Deleted Inferences from Inference Collection Count: ",deletedProjectInferencesCount)
 
+            Project21Database.delete_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+
         except Exception as e:
             print("An Error Occuered: ",e)
             print("Could not delete the project related collections from DB")
@@ -729,3 +734,31 @@ def delete_entire_project(userID:int,projectID:int):
             JSONResponse({"Success":True,"DB Deletion":"Successful","Directory Deletion":"Not Successful"})
     return JSONResponse({"Success":True,"DB Deletion":"Successful","Directory Deletion":"Successful"})
 
+
+@app.delete('/deleteThisRun/{userID}/{projectID}/{dataID}')
+def delete_run_data(userID:int,projectID:int,dataID:int):
+    result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID,"belongsToUserID":userID})
+    if result_project is not None:
+        result_project=serialiseDict(result_project)
+        listOfDataIDs=result_project["listOfDataIDs"]
+        if dataID in listOfDataIDs:
+            try:
+                Project21Database.delete_one(settings.DB_COLLECTION_DATA,{"dataID":dataID})
+                Project21Database.delete_one(settings.DB_COLLECTION_MODEL,{"dataID":dataID})    #because dataID and modelID are the same
+                Project21Database.delete_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})    #modelID and dataID are the same
+                Project21Database.delete_one(settings.DB_COLLECTION_INFERENCE,{"belongsToModelID":dataID})  #modelID and dataID are the same
+                listOfDataIDs.remove(dataID)
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{"$set":{"listOfDataIDs":listOfDataIDs}})
+                print("Deleted Data, Model, Metrics, Inference associated with this run successfully.")
+                return JSONResponse({"Success":True,"Run Deleted":"Successfully"})
+            except Exception as e:
+                print("An Error Occured: ",e)
+                print("Unable to delete the associated data, model, metrics and inference of this project's run")
+                JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":e})
+        else:
+            print("This run could not be found in the list of dataIDs of the project")
+            print("Removal of run unsuccessful")
+            return JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":"No such run exists in the project's list of dataIDs"})
+        print("Project not found in DB")
+        return(JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":"No such project exists in the DB"}))
+        
