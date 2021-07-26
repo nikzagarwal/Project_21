@@ -29,6 +29,7 @@ from Files.auto_clustering import Autoclu
 from Files.plot import plot
 from Files.inference import Inference
 from Files.preprocess import Preprocess
+from Files.inference_preprocess import InferencePreprocess
 from Files.training import training
 from Files.timeseries_preprocess import TimeseriesPreprocess
 from Files.timeseries import timeseries
@@ -148,6 +149,8 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
 def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
     autoFormData=dict(autoFormData)
     projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(autoFormData["projectID"],currentIDs,autoFormData,Project21Database)
+    with ("logs.log","w") as f:
+        f.close()
     resultsCache.set_training_status(False)
     if(problem_type=='regression'):
         automatic_model_training=AutoReg()
@@ -442,7 +445,9 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
 @app.post('/manual/{userID}/{projectID}',tags=["Manual Mode"])
 def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
     print(configModelJSONData)
-    
+    with ("logs.log","w") as f:
+        f.close()
+    resultsCache.set_training_status(False)
     result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
     if result_project is not None:
         configFileLocation=result_project["configFileLocation"]
@@ -513,7 +518,71 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                         "clusterPlotLocation":Operation["clusterPlotLocation"]
                     }
                 })
+    resultsCache.set_training_status(True)
+    with open("logs.log","a+") as f:
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": dataID})
+
+
+@app.post('/doManualInference',tags=["Manual Mode"])
+def do_manual_inference(projectID:int, modelID:int, inferenceDataFile:UploadFile=File(...)):
+    try:
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        if result_project is not None:
+            result_project=serialiseDict(result_project)
+            preprocessConfigFileLocation=result_project["preprocessConfigFileLocation"]
+            isAuto=result_project["isAuto"]
+    except Exception as e:
+        print("An Error Occured: ",e)
+        print("Could not fetch project details from project collection")
+
+    try:
+        result_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
+        if result_model is not None:
+            result_model=serialiseDict(result_model)
+            if result_model["pickleFilePath"] is not None:
+                pickleFilePath=result_model["pickleFilePath"]
+            if result_model["pickleFolderPath"] is not None:
+                projectRunPath=os.path.join(result_model["pickleFolderPath"],os.pardir)
+                path=os.path.join(projectRunPath,"inference_data")
+                if(not os.path.exists(path)):
+                    os.makedirs(path)
+                newDataPath=os.path.join(path,'inference_data_original.csv')
+            
+            with open(newDataPath,"wb") as buffer:
+                shutil.copyfileobj(inferenceDataFile.file,buffer)
+    except Exception as e:
+        print("An Error Occured: ",e)
+        print("Could not fetch model details from model collection")
+
+    try:
+        print("Performing Preprocessing of the data given")
+        inferencePreprocessObj=InferencePreprocess()
+        inferenceCleanDataLocation=inferencePreprocessObj.inference_preprocess(preprocessConfigFileLocation,path)
+        print("Preprocessing of data is done")
+        print("Performing Inference on the preprocessed inference data")
+        inference=Inference()
+        inferenceDataResultsPath=inference.inference(pickleFilePath,inferenceCleanDataLocation,path,isAuto)
+        print("Inferencing completed")
+    except Exception as e:
+        print("An Error Occured: ",e)
+        print("Could not preprocess and perform inference on the file")
+
+    try:
+        Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+            "newData": inferenceCleanDataLocation,
+            "results": inferenceDataResultsPath,
+            "belongsToUserID": currentIDs.get_current_user_id(),
+            "belongsToProjectID": projectID,
+            "belongsToModelID": modelID
+        })
+        if os.path.exists(inferenceDataResultsPath):
+            print({"Metrics Generation":"Successful"})
+            return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
+    except Exception as e:
+        print("An error occured: ", e)
+        print("Unable to insert inference data into the inference Collection")
 
 
 @app.post('/timeseries',tags=["Timeseries"])
@@ -533,7 +602,9 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
         })
     except Exception as e:
         print("Could not insert into Data Collection. An Error Occured: ",e)
-
+    with ("logs.log","w") as f:
+        f.close()
+    resultsCache.set_training_status(False)
     timeseriesObj=timeseries()
     Operation=timeseriesObj.createarima(projectConfigFileLocation)
     
@@ -596,6 +667,10 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                     })
         except Exception as e:
             print("An Error Occured: ",e)
+    resultsCache.set_training_status(True)
+    with open("logs.log","a+") as f:
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID})
 
 
@@ -685,7 +760,7 @@ async def training_status(websocket: WebSocket):
             # replyFromFrontend=await websocket.receive_text()
         print("File Reading ended")
         resultsCache.set_training_status(False)
-        open("logs.log","w").close()    #Truncating the contents of the log file after the websocket disconnects
+        # open("logs.log","w").close()    #Truncating the contents of the log file after the websocket disconnects
         print("Websocket connection closing...")
     except WebSocketDisconnect:
         print("Websocket connection has been disconnected...")
