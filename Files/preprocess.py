@@ -139,10 +139,12 @@ class Preprocess:
 
 
         ### Default
+
         for column in df.columns:
             if df[column].dtype == 'object'and df[column].nunique() > 30:
                 df=df.drop(column, axis = 1)
-                
+
+
         for col_name in df.columns:
             if df[col_name].dtype == 'object':
                 df.replace(to_replace = np.nan ,value ="No data")
@@ -153,7 +155,6 @@ class Preprocess:
         if df[config_data["target_column_name"]].dtype == 'object':
             encoder = LabelEncoder()
             df[config_data["target_column_name"]] = encoder.fit_transform(df[config_data["target_column_name"]])
-            print(encoder.classes_)
             label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
             config_data['labels'] = label_encoding_dict
 
