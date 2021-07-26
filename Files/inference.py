@@ -24,7 +24,8 @@ class Inference:
         
         else:
             data=pd.read_csv(newDataLocation)
-            clf=pickle.load(open(pickleFileLocation,"r"))
+            print(pickleFileLocation)
+            clf=pickle.load(open(pickleFileLocation,"rb"))
             predictions=clf.predict(data)
             results=pd.DataFrame(data)
             results["predictions"]=predictions

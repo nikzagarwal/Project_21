@@ -107,11 +107,11 @@ class Preprocess:
                     encoding_type = config_data["encoding_type"][index]
 
                     if df[column].dtype == 'object'and df[column].nunique() > 30:
-                        df=df.drop(column, axis = 1)
+                        df.drop(column, axis = 1,inplace=True)
 
 
                     if config_data["target_column_name"] == column and df[column].dtype == 'object':
-                        config_data["encoding_type"][index] = "Label Encodeing"
+                        config_data["encoding_type"][index] = "Label Encoding"
                         encoder = LabelEncoder()
                         df[column] = encoder.fit_transform(df[column])
                         label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
@@ -126,7 +126,7 @@ class Preprocess:
                         pass
 
 
-                    elif encoding_type == "Label Encodeing":
+                    elif encoding_type == "Label Encoding":
                         encoder = LabelEncoder()
                         df[column] = encoder.fit_transform(df[column])
 
@@ -142,7 +142,7 @@ class Preprocess:
 
         for column in df.columns:
             if df[column].dtype == 'object'and df[column].nunique() > 30 and config_data["target_column_name"] != column:
-                df=df.drop(column, axis = 1)
+                df.drop(column, axis = 1,inplace=True)
 
 
         for col_name in df.columns:
@@ -159,15 +159,15 @@ class Preprocess:
             config_data['labels'] = label_encoding_dict
 
 
-        objest_type_column_list = []
+        object_type_column_list = []
         for column in df.columns:
             if df[column].dtype == 'object':
-                objest_type_column_list.append(column)
+                object_type_column_list.append(column)
                 config_data['encode_column_name'].extend([column])
                 config_data['encoding_type'].extend(['One-Hot Encoding'])
 
-        if objest_type_column_list != []:
-            for column in objest_type_column_list:
+        if object_type_column_list != []:
+            for column in object_type_column_list:
                 encoder = OneHotEncoder(drop = 'first', sparse=False)
                 df_encoded = pd.DataFrame (encoder.fit_transform(df[[column]]))
                 df_encoded.columns = encoder.get_feature_names([column])
@@ -175,7 +175,7 @@ class Preprocess:
                 df= pd.concat([df, df_encoded ], axis=1)
 
 
-
+        
         if config_data["Remove_outlier"] == True:
             z = np.abs(stats.zscore(df))
             df = df[(z < 3).all(axis=1)]
@@ -189,9 +189,9 @@ class Preprocess:
                             col_corr.add(corr_matrix.columns[i])
                             
             if config_data["target_column_name"] not in col_corr:
-                df = df.drop(col_corr,axis=1)
+                df.drop(col_corr,axis=1,inplace=True)
     
-
+        print("df3",df)
         df.to_csv('clean_data.csv')
         shutil.move("clean_data.csv",folderLocation)
         clean_data_address = os.path.abspath(os.path.join(folderLocation,"clean_data.csv"))
