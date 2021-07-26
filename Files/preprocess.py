@@ -137,6 +137,14 @@ class Preprocess:
                 if df[column].dtype == 'object'and df[column].nunique() > 30:
                     df=df.drop(column, axis = 1)
 
+            if df[config_data["target_column_name"]].dtype == 'object':
+                print("lc")
+                encoder = LabelEncoder()
+                df[config_data["target_column_name"]] = encoder.fit_transform(df[config_data["target_column_name"]])
+                print(encoder.classes_)
+                label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                config_data['labels'] = label_encoding_dict
+
 
             objest_type_column_list = []
             for column in df.columns:
