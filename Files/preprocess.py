@@ -138,7 +138,6 @@ class Preprocess:
                     df=df.drop(column, axis = 1)
 
             if df[config_data["target_column_name"]].dtype == 'object':
-                print("lc")
                 encoder = LabelEncoder()
                 df[config_data["target_column_name"]] = encoder.fit_transform(df[config_data["target_column_name"]])
                 print(encoder.classes_)
@@ -167,7 +166,6 @@ class Preprocess:
                     z = np.abs(stats.zscore(df))
                     df = df[(z < 3).all(axis=1)]
 
-                # Here we are selecting the column which are having more then 70 correlation.
                 if config_data["feature_selection"] == True:
                     col_corr = set()
                     corr_matrix = df.corr()
