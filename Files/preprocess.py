@@ -42,6 +42,8 @@ class Preprocess:
                     for index, column in enumerate(config_data["imputation_column_name"]):
                         if df[column].dtype == object:
                             impution_type = "most_frequent"
+                            config_data["impution_type"][index] = "most_frequent"
+                            
 
                         else:
                             impution_type = config_data["impution_type"][index] 
@@ -114,9 +116,13 @@ class Preprocess:
                             df[column] = encoder.fit_transform(df[column])
                             label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
                             config_data['labels'] = label_encoding_dict
-
-                            
+                                                
                         elif config_data["target_column_name"] == column and df[column].dtype != 'object':
+                            pass
+                        
+                        elif df[column].dtype != 'object'and df[column].nunique() > 30:
+                            del config_data['encode_column_name'][0]
+                            del config_data['encoding_type'][0]
                             pass
 
 
@@ -136,6 +142,13 @@ class Preprocess:
             for column in df.columns:
                 if df[column].dtype == 'object'and df[column].nunique() > 30:
                     df=df.drop(column, axis = 1)
+                    
+            for col_name in df.columns:
+                if df[col_name].dtype == 'object':
+                    df.replace(to_replace = np.nan ,value ="No data")
+                else:
+                    df.replace(to_replace = np.nan ,value =0)
+
 
             if df[config_data["target_column_name"]].dtype == 'object':
                 encoder = LabelEncoder()

@@ -22,11 +22,9 @@ impution_type:
 - ""
 
 mean_median_mode_values:
--
-
-na_notation : 
 - ""
 
+na_notation : np.nan
 
 # For feature scaling.
 scaling_column_name: 
@@ -34,6 +32,7 @@ scaling_column_name:
 scaling_type: 
 - ""
 scaling_values:
+- ""
 
 # For feature scaling.
 encode_column_name: 
@@ -41,6 +40,7 @@ encode_column_name:
 encoding_type: 
 - ""
 labels:
+- ""
 
 Remove_outlier: True
 
