@@ -68,43 +68,38 @@ class InferencePreprocess:
                 df[[column]] = scaled_value
             
 
-            if config_data['encode_column_name'][0] != []:
-                for index, column in enumerate(config_data["encode_column_name"]):
-                    encoding_type = config_data["encoding_type"][index]
+        if config_data['encode_column_name'][0] != []:
+            for index, column in enumerate(config_data["encode_column_name"]):
+                encoding_type = config_data["encoding_type"][index]
 
-                    if df[column].dtype == 'object'and df[column].nunique() > 30:
-                        df=df.drop(column, axis = 1)
+                if df[column].dtype == 'object'and df[column].nunique() > 30:
+                    df=df.drop(column, axis = 1)
 
-
-                    if config_data["target_column_name"] == column and df[column].dtype == 'object':
-                        config_data["encoding_type"][index] = "Label Encodeing"
-                        encoder = LabelEncoder()
-                        df[column] = encoder.fit_transform(df[column])
-                        label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
-                        config_data['labels'] = label_encoding_dict
-                        
-                    elif df[column].dtype != 'object'and df[column].nunique() > 30:
-                        pass
-                                        
+                if config_data["target_column_name"] == column and df[column].dtype == 'object':
+                    config_data["encoding_type"][index] = "Label Encodeing"
+                    encoder = LabelEncoder()
+                    df[column] = encoder.fit_transform(df[column])
+                    label_encoding_dict = dict(zip(encoder.classes_, range(len(encoder.classes_))))
+                    config_data['labels'] = label_encoding_dict
                     
-                    elif config_data["target_column_name"] == column and df[column].dtype != 'object':
-                        pass
-
-
-                    elif encoding_type == "Label Encodeing":
-                        encoder = LabelEncoder()
-                        df[column] = encoder.fit_transform(df[column])
-
-                    elif encoding_type == "One-Hot Encoding":
-                        print("oc"+column)
-
-                        print(df[column].nunique())
-                        encoder = OneHotEncoder(drop = 'first', sparse=False)
-                        df_encoded = pd.DataFrame (encoder.fit_transform(df[[column]]))
-                        df_encoded.columns = encoder.get_feature_names([column])
-                        df.drop([column] ,axis=1, inplace=True)
-                        df= pd.concat([df, df_encoded ], axis=1)
+                elif df[column].dtype != 'object'and df[column].nunique() > 30:
+                    pass          
                 
+                elif config_data["target_column_name"] == column and df[column].dtype != 'object':
+                    pass
+
+
+                elif encoding_type == "Label Encodeing":
+                    encoder = LabelEncoder()
+                    df[column] = encoder.fit_transform(df[column])
+
+                elif encoding_type == "One-Hot Encoding":
+                    encoder = OneHotEncoder(drop = 'first', sparse=False)
+                    df_encoded = pd.DataFrame (encoder.fit_transform(df[[column]]))
+                    df_encoded.columns = encoder.get_feature_names([column])
+                    df.drop([column] ,axis=1, inplace=True)
+                    df= pd.concat([df, df_encoded ], axis=1)
+            
 
         ### Default    
 
