@@ -36,11 +36,11 @@ class InferencePreprocess:
                         imputer = KNNImputer(n_neighbors = 4, weights = "uniform",missing_values = np.nan)
                         df[[column]] = imputer.fit_transform(df_value)
 
-                    if config_data["impution_type"][index] != 'knn':
+                    elif config_data["impution_type"][index] != 'knn':
                         replace_value = config_data["mean_median_mode_values"][index] 
                         df[column].replace(to_replace = np.nan, value = replace_value)
 
-        if config_data['scaling_column_name'][0] != []:
+        if config_data['scaling_column_name']!= []:
             for index, column in enumerate(config_data["scaling_column_name"]):
                 if column not in config_data['drop_column_name']:
                     scaling_type = config_data["scaling_type"][index]                
@@ -66,6 +66,8 @@ class InferencePreprocess:
                 for index, column in enumerate(config_data["encode_column_name"]):
                     if column not in config_data['drop_column_name']:
                         encoding_type = config_data["encoding_type"][index]
+                        
+                        
                         if encoding_type == "Label Encoding":
                             for i in range(len(config_data['labels'])):
                                 df[column].astype(str)
