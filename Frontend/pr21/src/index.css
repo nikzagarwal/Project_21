@@ -1262,6 +1262,15 @@ table {
  font-weight: 600;
  font-family: 'Roberto',sans-serif;
 }
+.fa-trash{
+  color: rgba(255, 0, 0, 0.61);
+  font-size: xx-large;
+  float: right;
+  padding: 0.4em 0.3em 0.4em 0.2em;
+}
+.fa-trash:hover{
+  color: red;
+}
 em{
   font-style: normal;
 	color: #0c6ef8da;
@@ -1364,11 +1373,12 @@ em{
 
 /* Brain vector created by iuriimotov - www.freepik.com used in background images */
 .terminal{
-  background-color: #fff;
+  background-color: #000;
   width:100%;
   height:200px;
   overflow: auto;
   border-radius: 8px;
-  color: #052450;
+  color: green;
   padding:1em;
 }
+
