@@ -128,13 +128,22 @@ class Section5 extends Component {
 
         );
         const FileDownload = require('js-file-download');
-        axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
-            .then((res) => {
-                console.log("Successful", res)
-                FileDownload(res.data, 'prediction.csv');
-                alert("Prediction is Ready and Downloaded");
-            },
-                (error) => { console.log(error) });
+        if (this.props.isauto === 'Auto')
+            axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                .then((res) => {
+                    console.log("Successful", res)
+                    FileDownload(res.data, 'prediction.csv');
+                    alert("Prediction is Ready and Downloaded");
+                },
+                    (error) => { console.log(error) });
+        else
+            axios.post('http://localhost:8000/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                .then((res) => {
+                    console.log("Successful Manual Inference", res)
+                    FileDownload(res.data, 'prediction.csv');
+                    alert("Prediction is Ready and Downloaded");
+                },
+                    (error) => { console.log(error) });
     }
     handleGetTimePrediction = event => {
         event.preventDefault();

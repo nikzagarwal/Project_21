@@ -258,6 +258,9 @@ class Home extends Component {
                         modeldetail: res.data
                     })
                     console.log(this.state.modeldetail)
+                    this.setState({
+                        openWebSocketConnection: false
+                    })
                 },
                     (error) => { console.log(error) });
 
@@ -267,7 +270,7 @@ class Home extends Component {
             this.setState({
                 openWebSocketConnection: true
             })
-        }, 2000);
+        }, 1000);
 
     }
 
@@ -320,19 +323,21 @@ class Home extends Component {
                         modeldetail: res.data
                     })
                     console.log(this.state.modeldetail)
+                    this.setState({
+                        openWebSocketConnection: false
+                    })
                 },
                     (error) => { console.log(error) });
         }, 100);
         setTimeout(() => {
             this.setState({
-                openWebSocketConnection: false
+                openWebSocketConnection: true
             })
-        }, 5000);
-
+        }, 1000);
     }
-    handleSocketConnection = event=>{
+    handleSocketConnection = event => {
         this.setState({
-            openWebSocketConnection: true
+            openWebSocketConnection: !this.state.openWebSocketConnection
         })
     }
     handleCurrentModel = (val) => {
@@ -615,12 +620,12 @@ class Home extends Component {
                             </div>
                             <h1>Models</h1>
                             <p>Preprocessing is being done. Now, select models and their hyperparameters</p> */}
-                            <ManualModel 
-                            modelForm={this.state.modelForm} 
-                            mtype={this.state.mtype}
-                            projectdetail={this.state.projectdetail} 
-                            handleManualModelDetails={this.handleManualModelDetails}
-                            handleSocketConnection={this.handleSocketConnection}/>
+                            <ManualModel
+                                modelForm={this.state.modelForm}
+                                mtype={this.state.mtype}
+                                projectdetail={this.state.projectdetail}
+                                handleManualModelDetails={this.handleManualModelDetails}
+                                handleSocketConnection={this.handleSocketConnection} />
                         </div>
                     </div>
                     {/* form6 for time series */}

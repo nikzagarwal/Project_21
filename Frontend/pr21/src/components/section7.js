@@ -24,7 +24,7 @@ class Section7 extends Component {
                     "target": "NONE",
                     "modelType": "NONE",
                     "listOfDataIDs": [13235, 65526],
-                    "accuracies":[97,89],
+                    "accuracies": [97, 89],
                     "isAuto": true
                 },
             },
@@ -47,18 +47,18 @@ class Section7 extends Component {
             });
 
     }
-    handleRefreshProject=event=>{
+    handleRefreshProject = event => {
         axios.get('http://localhost:8000/getAllProjects?userID=101')
-        .then((response) => {
-            console.log(response.data)
-            if (response.data.length !== 0) {
-                this.setState({
-                    projectList: response.data,
-                    emptyProject: false
-                });
+            .then((response) => {
+                console.log(response.data)
+                if (response.data.length !== 0) {
+                    this.setState({
+                        projectList: response.data,
+                        emptyProject: false
+                    });
 
-            }
-        });
+                }
+            });
     }
     handleProjectResult = event => {
         this.setState(
@@ -102,6 +102,20 @@ class Section7 extends Component {
         this.changeChild.current.method()
         // this.setState({ reset: 1});
     }
+    handleDeleteProject=(val) => event => {
+        let projectID=this.state.projectList[val].projectID
+        let userID=101
+        var answer = window.confirm("Confirm Delete Project?");
+        if (answer) {
+            axios.delete('http://localhost:8000/deleteThisProject/' +userID+'/'+ projectID)
+            .then((response) => {
+                this.handleRefreshProject()
+            })
+        }
+        else {
+            console.log("No")
+        }
+    }
     render() {
         const items = []
         let len = Object.keys(this.state.projectList).length;
@@ -116,8 +130,9 @@ class Section7 extends Component {
 
                         <div className="card-body">
                             <div className="sec7h2">
-                                
-                                <h2 className="card-title sec7text">{this.state.projectList[j].projectName}</h2>
+                                <i class="fa fa-trash"  onClick={this.handleDeleteProject(j)}></i>
+                                <h2 className="card-title sec7text">{this.state.projectList[j].projectName} </h2>
+
                             </div>
                             <div className="sec7h5">
                                 <table className="projecttable">
@@ -156,7 +171,7 @@ class Section7 extends Component {
                 <div className="section7" id="section7">
                     <div className="projectDetails" id="projectDetails">
                         <div className=" sec7heading">
-                        <button className="btn btn-primary " onClick={this.handleRefreshProject}  >Refresh</button>
+                            <button className="btn btn-primary " onClick={this.handleRefreshProject}  >Refresh</button>
 
                             <h2>List of all your Projects</h2>
                         </div>
@@ -171,23 +186,23 @@ class Section7 extends Component {
 
                         </div>
                         <div id="sec6">
-                            < ProjectsSection6 
-                            handler={this.props.handler} 
-                            handleModelDetails={this.handleModelDetails} 
-                            modelnum={this.state.projectList[this.state.currentProject].listOfDataIDs.length} 
-                            isauto={this.state.projectList[this.state.currentProject].isAuto} 
-                            projectname={this.state.projectList[this.state.currentProject].projectName} 
-                            Accuracies={this.state.projectList[this.state.currentProject].accuracies} 
-                            currentproject={this.state.currentProject} 
-                            mtype={this.state.projectList[this.state.currentProject].modelType}/>
+                            < ProjectsSection6
+                                handler={this.props.handler}
+                                handleModelDetails={this.handleModelDetails}
+                                modelnum={this.state.projectList[this.state.currentProject].listOfDataIDs.length}
+                                isauto={this.state.projectList[this.state.currentProject].isAuto}
+                                projectname={this.state.projectList[this.state.currentProject].projectName}
+                                Accuracies={this.state.projectList[this.state.currentProject].accuracies}
+                                currentproject={this.state.currentProject}
+                                mtype={this.state.projectList[this.state.currentProject].modelType} />
                         </div>
                         <div id="sec5">
-                            < ProjectsSection5 
-                            ref={this.changeChild} 
-                            showRetrain={this.state.showRetrain} 
-                            currentmodel={this.props.currentmodel} 
-                            isauto={this.state.projectList[this.state.currentProject].isAuto} 
-                            projectdetails={this.state.currentProjectDetails} />
+                            < ProjectsSection5
+                                ref={this.changeChild}
+                                showRetrain={this.state.showRetrain}
+                                currentmodel={this.props.currentmodel}
+                                isauto={this.state.projectList[this.state.currentProject].isAuto}
+                                projectdetails={this.state.currentProjectDetails} />
                         </div>
                     </div>
                 </div>
