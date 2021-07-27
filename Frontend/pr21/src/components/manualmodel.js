@@ -132,12 +132,13 @@ class ManualModel extends Component {
             .then(res => {
                 console.log("SuccessfulManual", res)
                 this.props.handleManualModelDetails(res.data)
+                this.props.handleSocketConnection()
             },
                 (error) => { console.log(error) });
-        },1000)
+        },100)
         setTimeout(() => {
             this.props.handleSocketConnection()
-        }, 2000)
+        }, 1000)
 
     }
     render() {

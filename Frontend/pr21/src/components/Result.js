@@ -12,40 +12,41 @@ class Result extends Component {
             log4: [],
             log5: [],
             counter: 0,
+            WS:""
         }
     }
     OpenWebSocket = event => {
         const ws = new WebSocket("ws://localhost:8000/websocketStream")
-
         ws.onopen = () => {
             console.log("open")
-            console.log("open")
-            console.log("open")
-            console.log("open")
+            this.setState({
+                counter: 2,
+                WS:ws
+            })
         }
         ws.onmessage = evt => {
 
-            this.setState(prevState => ({
+            this.setState({
                 log1: this.state.log2,
                 log2: this.state.log3,
                 log3: this.state.log4,
                 log4: this.state.log5,
-                log5: Object.values(evt.data)
-            }))
+                log5: Object.values(Object.values(evt.data))
+            })
             console.log(evt.data)
         }
         ws.onclose = () => {
-            console.log("closing socket connection")
+            console.log("closing socket connection ="+this.state.counter)
+            this.setState({
+                counter: this.state.counter+1
+            })
+            ws.close();
         }
     }
-
     render() {
 
         if (this.props.projectdetail["Successful"] === "False") {
             if (this.props.openWebSocketConnection === true && this.state.counter === 0) {
-                this.setState({
-                    counter: 2
-                })
                 this.OpenWebSocket()
             }
             return (
@@ -72,7 +73,7 @@ class Result extends Component {
             return (
                 <div>
                     <Section6 modelnum={this.props.modelnum} handler={this.props.handler} projectname={this.props.projectname} isauto={this.props.isauto} />
-                    <Section5 currentmodel={this.props.currentmodel} projectdetails={this.props.projectdetail} mtype={this.props.mtype} />
+                    <Section5 currentmodel={this.props.currentmodel} projectdetails={this.props.projectdetail} mtype={this.props.mtype} isauto={this.props.isauto} />
                 </div>
             );
         }
