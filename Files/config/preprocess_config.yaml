@@ -8,7 +8,8 @@ frequency: ""
 
 
 # User specified target column.
-target_column_name: ""
+target_column_name: 
+- ""
 
 
 # For droping empty rows and columns
@@ -41,7 +42,8 @@ encoding_type:
 - ""
 labels:
 - ""
-
+corr_col:
+- ""
 Remove_outlier: True
 
 feature_selection: True
