@@ -26,6 +26,7 @@ class Preprocess:
         df = pd.read_csv(config_data["raw_data_address"])
         df.dropna(how='all', axis=1, inplace=True)
 
+        label_list = []
         if config_data["is_auto_preprocess"] == False:
 
             if config_data['drop_column_name'] != []:
@@ -35,6 +36,7 @@ class Preprocess:
                         df=df.drop(column, axis = 1)
                     else:
                         del config_data['drop_column_name'][0]
+
 
             if config_data['imputation_column_name'] != []:
                 del config_data['imputation_column_name'][0]
@@ -72,6 +74,7 @@ class Preprocess:
 
                 if strategy_values_list != []:
                     config_data['mean_median_mode_values'] = list(map(str, strategy_values_list))    
+            
 
             if config_data['scaling_column_name'] != []:
                 del config_data['scaling_column_name'][0]
@@ -103,7 +106,7 @@ class Preprocess:
             if config_data['encode_column_name'][0] != []:
                 del config_data['encode_column_name'][0]
                 del config_data['encoding_type'][0]
-                label_list = []
+                
 
                 for index, column in enumerate(config_data["encode_column_name"]):
                     encoding_type = config_data["encoding_type"][index]
@@ -141,6 +144,7 @@ class Preprocess:
                         df_encoded.columns = encoder.get_feature_names([column])
                         df.drop([column] ,axis=1, inplace=True)
                         df= pd.concat([df, df_encoded ], axis=1)
+        
 
         ### Default
         for column in df.columns:
@@ -148,13 +152,8 @@ class Preprocess:
                 df.drop(column, axis = 1,inplace=True)
                 config_data['drop_column_name'].extend([column])
 
-        for col_name in df.columns:
-            if df[col_name].dtype == 'object':
-                df.replace(to_replace = np.nan ,value ="No data")
-            else:
-                df.replace(to_replace = np.nan ,value =0)
-
         if df[config_data["target_column_name"]].dtype == 'object':
+            column=config_data["target_column_name"]
             df[column].astype(str)
             encoder = LabelEncoder()
             df[column] = encoder.fit_transform(df[column])
@@ -176,22 +175,26 @@ class Preprocess:
                 df_encoded.columns = encoder.get_feature_names([column])
                 df.drop([column] ,axis=1, inplace=True)
                 df= pd.concat([df, df_encoded ], axis=1)
+                
+        df = df.fillna(0)
 
-        if config_data["Remove_outlier"] == True:
-            z = np.abs(stats.zscore(df))
-            df = df[(z < 3).all(axis=1)]
+        # if config_data["Remove_outlier"] == True:
+        #     z = np.abs(stats.zscore(df))
+        #     df = df[(z < 3).all(axis=1)]
+            
 
-        if config_data["feature_selection"] == True:
-            col_corr = set()
-            corr_matrix = df.corr()
-            for i in range(len(corr_matrix.columns)):
-                    for j in range(i):
-                        if abs(corr_matrix.iloc[i, j]) > 0.90:
-                            col_corr.add(corr_matrix.columns[i])
-            df = df.drop(col_corr,axis=1)
-            config_data['corr_col'] = list(col_corr)
-                            
-                            
+        # if config_data["feature_selection"] == True:
+        #     col_corr = set()
+        #     corr_matrix = df.corr()
+        #     for i in range(len(corr_matrix.columns)):
+        #             for j in range(i):
+        #                 if abs(corr_matrix.iloc[i, j]) > 0.90:
+        #                     col_corr.add(corr_matrix.columns[i])
+        #     df = df.drop(col_corr,axis=1)
+        #     config_data['corr_col'] = list(col_corr)
+        
+        config_data['final_columns']=list(df.columns)
+                        
         df.to_csv('clean_data.csv')
         shutil.move("clean_data.csv",folderLocation)
         clean_data_address = os.path.abspath(os.path.join(folderLocation,"clean_data.csv"))
