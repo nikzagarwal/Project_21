@@ -324,14 +324,14 @@ class Home extends Component {
                     })
                     console.log(this.state.modeldetail)
                     this.setState({
-                        openWebSocketConnection: false
+                        openWebSocketConnection: true
                     })
                 },
                     (error) => { console.log(error) });
         }, 100);
         setTimeout(() => {
             this.setState({
-                openWebSocketConnection: true
+                openWebSocketConnection: false
             })
         }, 1000);
     }
@@ -587,7 +587,7 @@ class Home extends Component {
                         projectdetail={this.state.modeldetail}
                         handler={this.handleCurrentModel}
                         projectname={this.state.projectname}
-                        isauto={this.state.isauto}
+                        isauto={this.state.auto}
                         mtype={this.state.mtype}
                         openWebSocketConnection={this.state.openWebSocketConnection} />
                     {/* ************************************************************************************************************************ */}

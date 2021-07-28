@@ -11,7 +11,7 @@ class Section6 extends Component {
         $(theFormItself2).show();
         this.props.handler(event.target.value);
 
-        
+
 
     }
     render() {
@@ -41,51 +41,52 @@ class Section6 extends Component {
             )
 
         }
-        if (this.props.isauto === false) {
-            return (
-                <div className="section6" id="section6">
+        // console.log("sec6"+this.props.isauto)
+        // if (this.props.isauto === false) {
+        //     return (
+        //         <div className="section6" id="section6">
 
-                    
-                    <div className=" sec6heading">
-                        <h2>Project Name: <em> {this.props.projectname} </em></h2>
-                    </div>
-                    <div className=" sec6heading">
-                        <h2>Your Models</h2>
-                    </div>
-                    {items}
 
+        //             <div className=" sec6heading">
+        //                 <h2>Project Name: <em> {this.props.projectname} </em></h2>
+        //             </div>
+        //             <div className=" sec6heading">
+        //                 <h2>Your Models</h2>
+        //             </div>
+        //             {items}
+
+        //         </div>
+        //     );
+        // }
+        // else {
+        return (
+            <div className="section6 " id="section6">
+
+
+                <div className=" sec6heading">
+                    <h1>Project Name: {this.props.projectname}</h1>
                 </div>
-            );
-        }
-        else {
-            return (
-                <div className="section6 " id="section6">
 
-                    
-                    <div className=" sec6heading">
-                        <h1>Project Name: {this.props.projectname}</h1>
+
+                <div className="card sec6autocard">
+
+                    <div className="card-body">
+                        <h2 className="card-title">Top Model</h2>
+                        <h4 className="card-text cardp">See Details For:
+                            <li>Metrics</li>
+                            <li>Plots</li>
+                            <li>Clean Data</li>
+                            <li>Pickle File</li>
+                            <li>Inferencing New Data</li>
+                        </h4>
+                        <button value={1} onClick={this.handleModelResult} className="btn sec6btn btn-primary">See Details</button>
                     </div>
-                   
-
-                    <div className="card sec6autocard">
-
-                        <div className="card-body">
-                            <h2 className="card-title">Top Model</h2>
-                            <h4 className="card-text cardp">See Details For:
-                                <li>Metrics</li>
-                                <li>Plots</li>
-                                <li>Clean Data</li>
-                                <li>Pickle File</li>
-                                <li>Inferencing New Data</li>
-                            </h4>
-                            <button value={1} onClick={this.handleModelResult} className="btn sec6btn btn-primary">See Details</button>
-                        </div>
-                    </div>
-
                 </div>
-            );
-        }
+
+            </div>
+        );
     }
 }
+
 
 export default Section6;

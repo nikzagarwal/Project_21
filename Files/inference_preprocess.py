@@ -13,6 +13,7 @@ from yaml.loader import FullLoader
 import os
 import yaml
 from scipy import stats
+import random
 
 class InferencePreprocess:     
     def inference_preprocess(self,config,folderLocation,inference_data_address):
@@ -24,11 +25,11 @@ class InferencePreprocess:
         
         df.dropna(how='all', axis=1, inplace=True)
 
-        if config_data['drop_column_name'] != []:
+        if config_data['drop_column_name'] != [] and config_data['drop_column_name']!='':
             df=df.drop(config_data["drop_column_name"], axis = 1)
 
             
-        if config_data['imputation_column_name']!= []:
+        if config_data['imputation_column_name']!= [] and config_data['imputation_column_name']!= '':
             for index, column in enumerate(config_data["imputation_column_name"]):
                 if column not in config_data['drop_column_name']:
                     if config_data["impution_type"][index] =='knn':
@@ -40,7 +41,7 @@ class InferencePreprocess:
                         replace_value = config_data["mean_median_mode_values"][index] 
                         df[column].replace(to_replace = np.nan, value = replace_value)
 
-        if config_data['scaling_column_name']!= []:
+        if config_data['scaling_column_name']!= [] and config_data['scaling_column_name']!= '':
             for index, column in enumerate(config_data["scaling_column_name"]):
                 if column not in config_data['drop_column_name']:
                     scaling_type = config_data["scaling_type"][index]                
@@ -62,7 +63,7 @@ class InferencePreprocess:
                     df[[column]] = scaled_value
                 
             
-            if config_data['encode_column_name'] != []:
+            if config_data['encode_column_name'] != [] and config_data['encode_column_name']!= '':
                 for index, column in enumerate(config_data["encode_column_name"]):
                     if column not in config_data['drop_column_name']:
                         encoding_type = config_data["encoding_type"][index]
@@ -93,9 +94,10 @@ class InferencePreprocess:
             
             df=df.drop(config_data["corr_col"], axis = 1)
 
-        df.to_csv('inference_clean_data.csv')
-        shutil.move("inference_clean_data.csv",folderLocation)
-        inference_clean_data_address = os.path.abspath(os.path.join(folderLocation,"inference_clean_data.csv"))
+        ran=random.randint(100,999)
+        df.to_csv('inference_clean_data'+str(ran)+'.csv')
+        shutil.move('inference_clean_data'+str(ran)+'.csv',folderLocation)
+        inference_clean_data_address = os.path.abspath(os.path.join(folderLocation,'inference_clean_data'+str(ran)+'.csv'))
         config_data['inference_clean_data_address'] = inference_clean_data_address
 
         with open(config, 'w') as yaml_file:
