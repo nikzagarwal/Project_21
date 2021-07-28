@@ -26,6 +26,8 @@ class Preprocess:
         df = pd.read_csv(config_data["raw_data_address"])
         df.dropna(how='all', axis=1, inplace=True)
 
+        print("df0", df)
+
         if config_data["is_auto_preprocess"] == False:
 
             if config_data['drop_column_name'] != []:
@@ -35,6 +37,8 @@ class Preprocess:
                         df=df.drop(column, axis = 1)
                     else:
                         del config_data['drop_column_name'][0]
+
+            print("df1", df)
 
             if config_data['imputation_column_name'] != []:
                 del config_data['imputation_column_name'][0]
@@ -72,6 +76,8 @@ class Preprocess:
 
                 if strategy_values_list != []:
                     config_data['mean_median_mode_values'] = list(map(str, strategy_values_list))    
+            
+            print("df2", df)
 
             if config_data['scaling_column_name'] != []:
                 del config_data['scaling_column_name'][0]
@@ -99,6 +105,7 @@ class Preprocess:
                         config_data['scaling_values'] = scaled_value_list
                         df[[column]] = scaled_value
 
+            print("df3", df)
 
             if config_data['encode_column_name'][0] != []:
                 del config_data['encode_column_name'][0]
@@ -141,6 +148,10 @@ class Preprocess:
                         df_encoded.columns = encoder.get_feature_names([column])
                         df.drop([column] ,axis=1, inplace=True)
                         df= pd.concat([df, df_encoded ], axis=1)
+        
+        
+        
+        print("df4", df)
 
         ### Default
         for column in df.columns:
@@ -176,10 +187,14 @@ class Preprocess:
                 df_encoded.columns = encoder.get_feature_names([column])
                 df.drop([column] ,axis=1, inplace=True)
                 df= pd.concat([df, df_encoded ], axis=1)
+        
+        print("df5", df)
 
-        if config_data["Remove_outlier"] == True:
-            z = np.abs(stats.zscore(df))
-            df = df[(z < 3).all(axis=1)]
+        # if config_data["Remove_outlier"] == True:
+        #     z = np.abs(stats.zscore(df))
+        #     df = df[(z < 3).all(axis=1)]
+            
+        print("df6", df)
 
         if config_data["feature_selection"] == True:
             col_corr = set()
@@ -190,7 +205,7 @@ class Preprocess:
                             col_corr.add(corr_matrix.columns[i])
             df = df.drop(col_corr,axis=1)
             config_data['corr_col'] = list(col_corr)
-                            
+
                             
         df.to_csv('clean_data.csv')
         shutil.move("clean_data.csv",folderLocation)
