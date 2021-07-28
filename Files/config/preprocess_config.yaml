@@ -44,9 +44,9 @@ labels:
 - ""
 corr_col:
 - ""
-Remove_outlier: True
+Remove_outlier: False
 
-feature_selection: True
+feature_selection: False
 
 data_imbalance: False
 

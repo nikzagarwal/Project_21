@@ -512,7 +512,7 @@ class Preprocess extends React.Component {
                         </select>
                     </div>
                 </div> */}
-                <div className="row">
+                {/* <div className="row">
                     <div className="col-40">
                         <label htmlFor="outlier">Check for Outliers?</label>
                     </div>
@@ -522,8 +522,8 @@ class Preprocess extends React.Component {
                             <option value="false">No</option>
                         </select>
                     </div>
-                </div>
-                <div className="row">
+                </div> */}
+                {/* <div className="row">
                     <div className="col-40">
                         <label htmlFor="featureeng">Want us to perform feature engineering?</label>
                     </div>
@@ -533,7 +533,7 @@ class Preprocess extends React.Component {
                             <option value="false">No</option>
                         </select>
                     </div>
-                </div>
+                </div> */}
                 <button className="preprocessbtn btn btn-secondary" onClick={this.handlePreProcess} >Preprocess</button>
             </div>
         );

@@ -25,7 +25,8 @@ class Preprocess:
 
         df = pd.read_csv(config_data["raw_data_address"])
         df.dropna(how='all', axis=1, inplace=True)
-
+        label_list = []
+        
         if config_data["is_auto_preprocess"] == False:
 
             if config_data['drop_column_name'] != []:
@@ -103,7 +104,7 @@ class Preprocess:
             if config_data['encode_column_name'][0] != []:
                 del config_data['encode_column_name'][0]
                 del config_data['encoding_type'][0]
-                label_list = []
+                
 
                 for index, column in enumerate(config_data["encode_column_name"]):
                     encoding_type = config_data["encoding_type"][index]
@@ -141,19 +142,19 @@ class Preprocess:
                         df_encoded.columns = encoder.get_feature_names([column])
                         df.drop([column] ,axis=1, inplace=True)
                         df= pd.concat([df, df_encoded ], axis=1)
-
+        
         ### Default
         for column in df.columns:
             if df[column].dtype == 'object'and df[column].nunique() > 30 and config_data["target_column_name"] != column:
                 df.drop(column, axis = 1,inplace=True)
                 config_data['drop_column_name'].extend([column])
-
+        
         for col_name in df.columns:
             if df[col_name].dtype == 'object':
                 df.replace(to_replace = np.nan ,value ="No data")
             else:
                 df.replace(to_replace = np.nan ,value =0)
-
+        
         if df[config_data["target_column_name"]].dtype == 'object':
             df[column].astype(str)
             encoder = LabelEncoder()
@@ -176,20 +177,20 @@ class Preprocess:
                 df_encoded.columns = encoder.get_feature_names([column])
                 df.drop([column] ,axis=1, inplace=True)
                 df= pd.concat([df, df_encoded ], axis=1)
+        
+        # if config_data["Remove_outlier"] == True:
+        #     z = np.abs(stats.zscore(df))
+        #     df = df[(z < 3).all(axis=1)]
 
-        if config_data["Remove_outlier"] == True:
-            z = np.abs(stats.zscore(df))
-            df = df[(z < 3).all(axis=1)]
-
-        if config_data["feature_selection"] == True:
-            col_corr = set()
-            corr_matrix = df.corr()
-            for i in range(len(corr_matrix.columns)):
-                    for j in range(i):
-                        if abs(corr_matrix.iloc[i, j]) > 0.90:
-                            col_corr.add(corr_matrix.columns[i])
-            df = df.drop(col_corr,axis=1)
-            config_data['corr_col'] = list(col_corr)
+        # if config_data["feature_selection"] == True:
+        #     col_corr = set()
+        #     corr_matrix = df.corr()
+        #     for i in range(len(corr_matrix.columns)):
+        #             for j in range(i):
+        #                 if abs(corr_matrix.iloc[i, j]) > 0.90:
+        #                     col_corr.add(corr_matrix.columns[i])
+        #     df = df.drop(col_corr,axis=1)
+        #     config_data['corr_col'] = list(col_corr)
                             
                             
         df.to_csv('clean_data.csv')

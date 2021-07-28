@@ -72,8 +72,16 @@ class Result extends Component {
         else {
             return (
                 <div>
-                    <Section6 modelnum={this.props.modelnum} handler={this.props.handler} projectname={this.props.projectname} isauto={this.props.isauto} />
-                    <Section5 currentmodel={this.props.currentmodel} projectdetails={this.props.projectdetail} mtype={this.props.mtype} isauto={this.props.isauto} />
+                    <Section6 
+                    modelnum={this.props.modelnum} 
+                    handler={this.props.handler} 
+                    projectname={this.props.projectname} 
+                    isauto={this.props.isauto} />
+                    <Section5 
+                    currentmodel={this.props.currentmodel} 
+                    projectdetails={this.props.projectdetail}
+                    mtype={this.props.mtype} 
+                    isauto={this.props.isauto} />
                 </div>
             );
         }
