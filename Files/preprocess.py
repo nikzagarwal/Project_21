@@ -159,12 +159,6 @@ class Preprocess:
                 df.drop(column, axis = 1,inplace=True)
                 config_data['drop_column_name'].extend([column])
 
-        for col_name in df.columns:
-            if df[col_name].dtype == 'object':
-                df.replace(to_replace = np.nan ,value ="No data")
-            else:
-                df.replace(to_replace = np.nan ,value =0)
-
         if df[config_data["target_column_name"]].dtype == 'object':
             df[column].astype(str)
             encoder = LabelEncoder()
@@ -187,7 +181,9 @@ class Preprocess:
                 df_encoded.columns = encoder.get_feature_names([column])
                 df.drop([column] ,axis=1, inplace=True)
                 df= pd.concat([df, df_encoded ], axis=1)
-        
+                
+        df = df.fillna(0)
+
         print("df5", df)
 
         # if config_data["Remove_outlier"] == True:
@@ -205,7 +201,8 @@ class Preprocess:
                             col_corr.add(corr_matrix.columns[i])
             df = df.drop(col_corr,axis=1)
             config_data['corr_col'] = list(col_corr)
-
+        
+        print("df6", df)
                             
         df.to_csv('clean_data.csv')
         shutil.move("clean_data.csv",folderLocation)
