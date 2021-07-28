@@ -128,7 +128,7 @@ class Section5 extends Component {
 
         );
         const FileDownload = require('js-file-download');
-        if (this.props.isauto === 'Auto')
+        if (this.props.isauto === true)
             axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
                     console.log("Successful", res)
