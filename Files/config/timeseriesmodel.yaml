@@ -1,0 +1,217 @@
+ - name: KNeighborsRegressor
+   isSelected: false
+   type: Regression
+   datatype: Tabular
+   complexity: ML
+   hyper:
+    - name: n_neighbors
+      value: 5
+      type: int
+      vary: true
+      ischanged: false
+      options: null
+      range:
+         type: linear
+         min: 3
+         max: 50
+         num_samp: 10
+    - name: leaf_size
+      value: 30
+      type: int
+      vary: true
+      ischanged: false
+      options: null
+      range:
+          type: linear
+          min: 10
+          max: 300
+          num_samp: 10
+    - name: algorithm
+      value: auto
+      ischanged: false
+      type: option
+      vary: false
+      options:
+        - ball_tree
+        - auto
+        - kd_tree
+        - brute
+      range: null
+
+ - name: RandomForestRegressor
+   isSelected: false
+   type: Regression
+   datatype: Tabular
+   complexity: ML
+   hyper:
+    - name: criterion
+      value: mse
+      ischanged: false
+      vary: false
+      type: option
+      options: 
+        - mae # Mean Absolute Error (MAE)
+        - mse # Mean Squared Error (MSE)
+      range: null
+    - name: n_estimators
+      value: 100
+      ischanged: false
+      type: int
+      options: null
+      vary: true
+      range:
+        type: linear
+        min: 10
+        max: 700
+        num_samp: 10
+    -  name: max_depth
+       value: null
+       ischanged: false
+       type: int
+       options: null
+       vary: true
+       range:
+        type: linear
+        min: 5
+        max: 100
+        num_samp: 10
+    - name: min_samples_split
+      value: 2
+      ischanged: false
+      type: int # either int or float
+      options: null
+      vary: true
+      range:
+        type: linear
+        min: 5
+        max: 100
+        num_samp: 10
+
+ - name: DecisionTreeRegressor
+   isSelected: false
+   type: Regression
+   datatype: Tabular
+   complexity: ML
+   hyper:
+    - name: criterion
+      value: mse
+      ischanged: false
+      vary: false
+      type: option
+      options:
+        - friedman mse
+        - poisson
+        - mse
+        - mae
+      range: null
+    - name: max_depth
+      value: null
+      ischanged: false
+      type: int # either option bool or number
+      options: null
+      vary: true
+      range:
+        min: 10
+        max: 100
+        num_samp: 10
+        type: linear
+    - name: min_samples_split
+      value: 2
+      ischanged: false
+      type: int # either int or float
+      options: null
+      vary: true
+      range:
+        min: 0
+        max: 300
+        num_samp: 10 
+        type: linear
+
+ - name: XGBRegressor
+   isSelected: false
+   type: Regression
+   datatype: Tabular
+   complexity: ML
+   hyper :
+    - name: verbosity
+      type: option
+      vary: true
+      value: 1
+      ischanged: false
+      options:
+        - 0 # 0 indicates silent
+        - 1 # 1 indicates warning
+        - 2 # 2 indicates info
+        - 3 # 3 indicates debug
+      range:
+         min: 0
+         max: 3
+    - name: booster
+      value: gblinear
+      ischanged: false
+      vary: false
+      type: option
+      options:
+        - gblinear
+      range: null
+    - name: updater # choice of algorithm to fit linear model
+      value: shotgun
+      ischanged: false
+      vary: True
+      type: option
+      options:
+        - shotgun
+        - coord_descent
+      range: null
+
+ - name: LinearRegression
+   isSelected: false
+   type: Regression
+   data_type: Tabular
+   complexity: ML
+   hyper:
+    - name: fit_intercept
+      vary: true
+      value: true
+      ischanged: false
+      type: bool # either option, bool or number
+      options: null
+      range: null
+ # Hyperparameter tuning for SupportVector Regressor(SVR)
+ - name: SVR
+   isSelected: false
+   type: Regression
+   data_type: Tabular
+   complexity: ML
+   hyper:
+    - name: C
+      vary: true
+      value: 1.0
+      ischanged: false
+      type: float # either option, bool or number
+      options: null
+      range: 
+         min: 1.0e-3
+         max: 1.0e+1
+         num_samp: 5
+         type: log # can be log or linear
+    - name: kernel
+      vary: false
+      value: rbf
+      ischanged: false
+      type: option # either option, bool or number
+      options:
+        - linear
+        - poly
+        - rbf
+        - sigmoid
+      range: null
+    - name: gamma
+      vary: true
+      value: scale
+      ischanged: false
+      type: option # either option, bool or number
+      options:
+        - auto
+        - scale
+      range: null
