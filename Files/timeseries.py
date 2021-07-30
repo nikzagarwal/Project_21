@@ -85,6 +85,13 @@ class timeseries:
         else:
             freq=12
         print("frequency",freq)
+        with open("logs.log","a+") as f:
+            f.write("Frequency="+str(freq)+"\n")
+            f.write("Creating Arima models\n")
+            f.write("Please wait trying different models...\n")
+            f.write("Trained on several models\n")
+            f.write("Selecting best model\n")
+            f.close()
         # warnings.filterwarnings("ignore")
         # sys.stdout=open("logs.log","a+")
         with StepwiseContext(max_dur=15):

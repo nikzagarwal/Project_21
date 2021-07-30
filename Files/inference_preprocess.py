@@ -26,7 +26,7 @@ class InferencePreprocess:
         df.dropna(how='all', axis=1, inplace=True)
 
         
-
+        df.fillna(df.dtypes.replace({'float64': 0.0, 'O': 'NULL'}), downcast='infer', inplace=True)
 
         if config_data['drop_column_name']!=[] and config_data['drop_column_name'][0] == '':
             del config_data['drop_column_name'][0]
@@ -80,7 +80,7 @@ class InferencePreprocess:
 
         if config_data['encode_column_name'] != []:
             for index, column in enumerate(config_data["encode_column_name"]):
-                if column not in config_data['drop_column_name']:
+                if column not in config_data['drop_column_name'] and column != config_data['target_column_name']:
                     encoding_type = config_data["encoding_type"][index]
                     
                     

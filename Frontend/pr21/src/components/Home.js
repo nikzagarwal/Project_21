@@ -270,7 +270,7 @@ class Home extends Component {
             this.setState({
                 openWebSocketConnection: true
             })
-        }, 1000);
+        }, 2000);
 
     }
 
@@ -331,7 +331,7 @@ class Home extends Component {
         }, 100);
         setTimeout(() => {
             this.setState({
-                openWebSocketConnection: false
+                openWebSocketConnection: true
             })
         }, 1000);
     }
@@ -549,7 +549,7 @@ class Home extends Component {
                                                 <label htmlFor="num_clusters">Number of clusters <span className="ibtn">i <span id="idesc">K=4 works good most of times</span></span></label>
                                             </div>
                                             <div className="col-60" >
-                                                <input type="number" id="num_clusters" name="num_clusters" onChange={this.handleCLusterNumberChange} placeholder="Enter K" />
+                                                <input type="number" id="num_clusters" name="num_clusters" onChange={this.handleCLusterNumberChange} placeholder="Enter K" required/>
                                             </div>
                                         </div>
                                     </div>

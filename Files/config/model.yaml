@@ -190,8 +190,7 @@
       vary: false
       type: option
       options:
-        - friedman mse
-        - poisson
+        - friedman_mse
         - mse
         - mae
       range: null
