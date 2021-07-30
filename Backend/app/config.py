@@ -10,6 +10,9 @@ class ServerSettings(BaseSettings):
     PORT: int = 8000
     CORS_ORIGIN=[
     "http://localhost:3000",        #For Cross Origin Requests to be allowed as React runs on port 3000
+    "https://localhost:3000",
+    "http://localhost:5000",
+    "https://localhost:5000"
     ]
 
 class DatabaseSettings(BaseSettings):
