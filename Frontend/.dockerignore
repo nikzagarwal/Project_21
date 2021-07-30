@@ -1,0 +1,9 @@
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
+
+# All files created during `npm run build`.
+build
+node_modules
