@@ -147,6 +147,7 @@ class Preprocess:
         
 
         ### Default
+        df.fillna(df.dtypes.replace({'float64': 0.0, 'O': 'NULL'}), downcast='infer', inplace=True)
         for column in df.columns:
             if df[column].dtype == 'object'and df[column].nunique() > 30 and config_data["target_column_name"] != column:
                 df.drop(column, axis = 1,inplace=True)
@@ -176,7 +177,7 @@ class Preprocess:
                 df.drop([column] ,axis=1, inplace=True)
                 df= pd.concat([df, df_encoded ], axis=1)
                 
-        df = df.fillna(0)
+        
 
         # if config_data["Remove_outlier"] == True:
         #     z = np.abs(stats.zscore(df))

@@ -25,7 +25,11 @@ import sys
 import numpy as np
 from Files.hyperparameter import hyperparameter as hp
 from Files.training import training as train
-
+import plotly.express as px
+import plotly.graph_objects as go
+import random
+from Files.autoreg import auto as auto
+from pycaret.regression import *
 class timeseries:
     def createprophet(self,dataconfig):
         with open(dataconfig) as f:
@@ -81,6 +85,13 @@ class timeseries:
         else:
             freq=12
         print("frequency",freq)
+        with open("logs.log","a+") as f:
+            f.write("Frequency="+str(freq)+"\n")
+            f.write("Creating Arima models\n")
+            f.write("Please wait trying different models...\n")
+            f.write("Trained on several models\n")
+            f.write("Selecting best model\n")
+            f.close()
         # warnings.filterwarnings("ignore")
         # sys.stdout=open("logs.log","a+")
         with StepwiseContext(max_dur=15):
@@ -294,4 +305,135 @@ class timeseries:
         train.train(self,userinputconfig,dataconfig,preprocessconfig,'timeseries.csv')
 
         return indexes,freq
-    
+
+    def rftimeseriespreprocess(self,data):  
+        length=len(data)
+        y=data['y']
+        trend_1=[0]*length
+        trend_2=[0]*length
+        period7_seasonality=[0]*length
+        period12_seasonality=[0]*length
+        period30_seasonality=[0]*length
+        period52_seasonality=[0]*length
+        period365_seasonality=[0]*length
+        for i in range(2,length):
+            trend_1[i]=y[i-1]-y[i-2]
+            if i > 3:
+                trend_2[i]=(trend_1[i-1]-trend_1[i-2])
+            if i > 6:
+                period7_seasonality[i]=(y[i-7])
+            if i > 11:
+                period12_seasonality[i]=(y[i-12])
+            if i > 29:
+                period30_seasonality[i]=(y[i-30])
+            if i > 51:
+                period52_seasonality[i]=(y[i-52])
+            if i > 364:
+                period365_seasonality[i]=(y[i-365])
+        data['trend_1']=trend_1
+        data['trend_2']=trend_2
+        data['period7_seasonality']=period7_seasonality
+        data['period12_seasonality']=period12_seasonality
+        data['period30_seasonality']=period30_seasonality
+        data['period52_seasonality']=period52_seasonality
+        data['period365_seasonality']=period365_seasonality
+        indexes=data['ds'][0]
+        data.reset_index(drop=True, inplace=True)
+        try:
+            data.drop(['ds'],inplace=True,axis=1)
+        except:
+            pass
+        print(data)
+        data.to_csv('timeseries.csv',index=0)
+
+        return indexes
+    def rfinference(self,days,pickleFileLocation,dataPathLocation,indexes,freq):
+
+        df=pd.read_csv(dataPathLocation)
+        #df2=df.drop(['y'],inplace=True,axis=1)
+        for i in range(days):
+            index=len(df)
+            trend_1=df.iloc[-1]['y']-df.iloc[-2]['y']
+            trend_2=df.iloc[-1]['trend_1']-df.iloc[-2]['trend_1']
+            try:
+                period7_seasonality=df.iloc[-7]['y']
+            except:
+                period7_seasonality=0
+            try:
+                period12_seasonality=df.iloc[-12]['y']
+            except:
+                period12_seasonality=0
+            try:
+                period30_seasonality=df.iloc[-30]['y']
+            except:
+                period30_seasonality=0
+            try:
+                period52_seasonality=df.iloc[-52]['y']
+            except:
+                period52_seasonality=0
+            try:
+                period365_seasonality=df.iloc[-365]['y']
+            except:
+                period365_seasonality=0
+            x=np.array([trend_1, trend_2, period7_seasonality,
+            period12_seasonality, period30_seasonality, period52_seasonality,
+            period365_seasonality])
+            print('x shape preev',x.shape)
+            model=load_model(pickleFileLocation)
+            x=x.reshape(1,7)
+            print('x_shape',x.shape)
+            
+            x=pd.DataFrame(x,columns=list(df.columns)[1:])
+            
+            y=model.predict(x)
+            print('y is ',y)
+            x=[y[0], trend_1, trend_2, period7_seasonality,
+            period12_seasonality, period30_seasonality, period52_seasonality,
+            period365_seasonality]
+
+            df.loc[len(df.index)] =x
+            print('last row',df.iloc[-1])
+
+
+        new_index=pd.date_range(start=indexes,periods=len(df.index),freq=freq)
+        df.index=new_index
+
+        return df
+
+    def timeseriesmanualrf(self,dataconfig):
+        with open(dataconfig) as f:
+            dataconfigfile= yaml.load(f,Loader=FullLoader)
+
+        datalocation=dataconfigfile['data']
+
+        freq=dataconfigfile['frequency']
+        data=pd.read_csv(datalocation)
+        print(data)
+        indexes=self.rftimeseriespreprocess(self,data)
+        print(indexes)
+        dataconfigfile['raw_data_address']='timeseries.csv'
+        dataconfigfile['indexes']=indexes
+        print('creating new yaml')
+
+        newpath=os.path.join(dataconfigfile['location'],"newconfig.yaml")
+        print(newpath)
+        with open(newpath, 'w') as f:
+            f.write(yaml.safe_dump(dataconfigfile))
+        print('starting training')
+        auto(newpath)
+
+        return indexes,freq
+    def plotinferencerf(self,df,storeLocation,days,freq):
+        data_original=pd.read_csv('timeseries.csv')
+        data=df
+        fig = go.Figure()
+        index_of_fc = pd.date_range(start =df.index[0], periods = len(data_original),freq=freq)
+        ran=random.randint(100,999)
+        fig.add_trace(go.Scatter(x=df.index,y=df.y,name="predictions"))
+        fig.add_trace(go.Scatter(x=index_of_fc,y=data_original.y,name="actual"))
+        
+        # fig=go.Figure(data=go.Scatter(x=predictions.index,y=predictions.predictions))
+        fig.write_html(os.path.join(storeLocation,"inference.html"))
+
+        return os.path.join(storeLocation,"inference.html")
+        

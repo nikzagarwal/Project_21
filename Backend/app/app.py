@@ -587,6 +587,13 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     print(timeseriesFormData)
     timeseriesFormData=dict(timeseriesFormData)
     projectConfigFileLocation, projectFolderPath, dataID, projectType = generate_project_timeseries_config_file(timeseriesFormData["projectID"],currentIDs,timeseriesFormData,Project21Database)
+    with open("logs.log","w") as f:
+        f.write("Time series Initiated\n")
+        f.write("Please wait setting up...\n")
+        f.write("Setting up Completed...\n")
+        f.write("Preprocessing the given data\n")
+        f.write("Preprocessing is done\n")
+        f.close()
     timeseriesPreprocessObj=TimeseriesPreprocess()
     cleanDataPath=timeseriesPreprocessObj.preprocess(projectConfigFileLocation,projectFolderPath)
     try:
@@ -599,7 +606,11 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
         })
     except Exception as e:
         print("Could not insert into Data Collection. An Error Occured: ",e)
-    with open("logs.log","w") as f:
+    
+    with open("logs.log","a+") as f:
+        f.write("Starting training on different models\n")
+        f.write("Please wait setting up...\n")
+        f.write("Setting up Completed...\n")
         f.close()
     resultsCache.set_training_status(False)
     timeseriesObj=timeseries()
