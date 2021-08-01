@@ -34,10 +34,10 @@ class training:
         
         
         if dataconfigfile["problem_type"]=='classification':
-            metrics=pd.DataFrame(columns = ['modelname','accuracy_score','recall_score','precision_score','f1_score','cohen_kappa_score','matthews_corrcoef'])
+            metrics=pd.DataFrame(columns = ['modelname','Accuracy','Recall','Prec.','F1','Kappa'])
 
         elif dataconfigfile["problem_type"]=='regression':
-            metrics=pd.DataFrame(columns=['modelname','mean_absolute_error','mean_squared_error','r2_score','mean_squared_log_error'])
+            metrics=pd.DataFrame(columns=['modelname','MAE','MSE',"RMSE",'R2','RMSLE',"AUC"])
         #create location of pickle file
         picklelocation=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
         os.makedirs(picklelocation)

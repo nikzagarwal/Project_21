@@ -347,6 +347,7 @@ class timeseries:
         data.to_csv('timeseries.csv',index=0)
 
         return indexes
+        
     def rfinference(self,days,pickleFileLocation,dataPathLocation,indexes,freq):
 
         df=pd.read_csv(dataPathLocation)
