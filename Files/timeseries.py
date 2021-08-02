@@ -28,7 +28,7 @@ from Files.training import training as train
 import plotly.express as px
 import plotly.graph_objects as go
 import random
-from Files.autoreg import auto as auto
+from Files.autoreg import AutoReg as auto
 from pycaret.regression import *
 class timeseries:
     def createprophet(self,dataconfig):
