@@ -34,13 +34,16 @@ class Metrics extends React.Component {
                                         </thead>
                                         <tbody>
                                             {metricdata.map((data, i) => (
-                                                i < 4 ? (
+                                                i < 3 ? (
 
 
                                                     <tr>
                                                         {Object.keys(data).map((key, j) =>
                                                             j < 7 ? (
-                                                                <td>{data[key]}</td>) : null
+                                                                j === 0 ?
+                                                                    <td>{i + 1}</td> :
+                                                                    <td>{data[key]}</td>
+                                                            ) : null
                                                         )}
 
                                                     </tr>
