@@ -10,14 +10,14 @@ from .libraries import *
 import sys
 from Files.metrics import Metrics as met
 class hyperparameter:
-    def optimize(model_str,modelname,userinputconfig,data,dataconfig,target_column):
+    def optimize(model_str,modelname,userinputconfig,datapath,dataconfig,target_column):
         """
         This function in takes the string consisting of the name and the hyperparameters of the model and uses eval function to create the model.
         Keylist is the dictionary consisting of the infomation about the user input ('subject to further changes')
         Name is the name of the model selected (subject to future changes)
         """
 
-        data=pd.read_csv(data)
+        data=pd.read_csv(datapath)
         ydata=data[target_column]
         data.drop([target_column],inplace=True,axis=1)
         xdata=data

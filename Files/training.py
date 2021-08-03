@@ -8,6 +8,10 @@ from .libraries import *
 import yaml
 from Files.hyperparameter import hyperparameter as hp
 import os 
+import pickle
+import random
+import plotly.express as px
+import plotly.graph_objects as go
 
 class training:
 
@@ -28,7 +32,7 @@ class training:
         test_ratio=preprocessconfigfile["split_ratio_test"] #input given the the user usually 0.3 by default
 
         # data=dataconfigfile["clean_data"] 
-        data=cleanDataPath
+        datapath=cleanDataPath
 
         target_column=preprocessconfigfile["target_column_name"]
         
@@ -53,7 +57,7 @@ class training:
                         hypers.append(feature["name"]+"="+ str(feature["value"]))
                 model_str=model["name"] + "(" + ", ".join(hypers) + ")"
 
-                metricsnewrow=hp.optimize(model_str,model["name"],userinputconfig,data,dataconfig,target_column)
+                metricsnewrow=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column)
                 print(metricsnewrow)
                 metrics.loc[len(metrics.index)]=metricsnewrow
                 
@@ -80,6 +84,25 @@ class training:
             "metricsLocation":metricsLocation,
             "pickleFolderPath": picklelocation,         #Generate a folder where all pickle files are residing
             "pickleFilePath": best_model_location,             #Best model pickle file path
-            "accuracy":accuracy,                          #Accuracy of best model
+            "accuracy":accuracy,                         #Accuracy of best model
+            "cleanDataPath":cleanDataPath,
             "clusterPlotLocation": "clusterPlotLocation"    #Only if it is clustering
         }
+
+    def model_plot(self,pickleFileLocation,cleandatapath,target_column,plotLocation):
+        clf=pickle.load(open(pickleFileLocation,"rb"))
+        data=pd.read_csv(cleandatapath)
+        y=data[target_column]
+        data.drop([target_column],inplace=True,axis=1)
+        x=data
+        y_pred=clf.predict(x)
+        fig = go.Figure()
+        ran=random.randint(100,999)
+        fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
+        fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
+        
+        plotlocation=os.path.join(plotLocation,"plot.html")
+        with open(plotlocation, 'a') as f:
+            f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
+        f.close()
+        return plotlocation
