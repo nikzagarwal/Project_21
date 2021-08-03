@@ -5,7 +5,9 @@ import joblib
 import shutil
 import yaml
 from yaml.loader import SafeLoader
-
+import random
+import plotly.express as px
+import plotly.graph_objects as go
 class AutoReg:
     def auto_setup(self,config):   
         """
@@ -24,9 +26,11 @@ class AutoReg:
         reg1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train')    
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
-        clean_data_address = os.path.join(config["location"],"clean_data.csv")
-
-        return clean_data_address     
+        Y_train= get_config('X_train') 
+        Y_train.to_csv(os.path.join(config["location"],'y_data.csv'), index=False)
+        clean_data_address = os.path.join(config["location"],"clean_data_address.csv")
+        y_data = os.path.join(config["location"],"y_data.csv")
+        return clean_data_address,y_data     
 
 
     def top_models_auto(self,config,n=3):
@@ -84,27 +88,22 @@ class AutoReg:
         return location, os.path.join(location,name)
 
     
-    def model_plot(self,model_array,config):
-        config=yaml.load(open(config),Loader=SafeLoader)
-        if config["problem_type"]=="classification":
-            feature_list=["feature","auc","pr","confusion_matrix","error","learning"]
-            for i in range(len(model_array)):
-                location=os.path.join(config["location"],str(config["id"]),"_model",str(i))
-                os.makedirs(location) ## creates a folder by the name configid_model(number) at the specified location
-                os.makedirs(os.path.join(location,"plots")) ## creates a subfolder named plots to store all the plots inside it
-                plot_list=list(plot_model(model_array[i],feature,save=True) for feature in feature_list)
-                for f in plot_list:
-                    shutil.move(f, os.path.join(location,"plots"))
 
-        if config["problem_type"]=="regression":
-            feature_list=["feature","residuals","cooks","vc","error","learning"]
-            for i in range(len(model_array)):
-                location=os.path.join(config["location"],str(config["id"])+"_model"+str(i))
-                os.makedirs(location)
-                os.makedirs(os.path.join(location,"plots"))
-                plot_list=list(plot_model(model_array[i],feature,save=True) for feature in feature_list)
-                for f in plot_list:
-                    shutil.move(f, os.path.join(location,"plots"))
+    def model_plot(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
+        clf=load_model(pickleFileLocation)
+        y=pd.read_csv(y_datapath)
+        x=pd.read_csv(cleandatapath)
+        y_pred=clf.predict(x)
+        fig = go.Figure()
+        ran=random.randint(100,999)
+        fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
+        fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
+        
+        plotlocation=os.path.join(plotLocation,"plot.html")
+        with open(plotlocation, 'a') as f:
+            f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
+        f.close()
+        return plotlocation
         
 
     
@@ -112,7 +111,7 @@ class AutoReg:
     def auto(self,config):
         try:
             config2=yaml.load(open(config),Loader=SafeLoader)
-            cleanDataPath=self.auto_setup(config)
+            cleanDataPath,y_data=self.auto_setup(config)
             model, metricsLocation, accuracy=self.top_models_auto(config,config2["n"])
             tunedmodel=self.model_tune(model)
 
@@ -120,7 +119,7 @@ class AutoReg:
             print("Tuned List: ",tunedmodel)
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(tunedmodel,config)
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy}
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy,"model":str(model),"y_data":y_data}
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}
