@@ -12,6 +12,7 @@ import Section7 from './section7.js';
 // import Section5 from './section5.js';
 // import Section6 from './section6.js';
 import ShowdataModal from './showdataModal.js';
+import ShowPlotModal from './showPlotModal.js';
 import Papa from 'papaparse';
 
 class Home extends Component {
@@ -47,7 +48,9 @@ class Home extends Component {
             modelForm: "",
             numClusters: 4,
             modalShow: false,
+            modalShow2: false,
             openWebSocketConnection: false,
+            plot:""
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -366,6 +369,27 @@ class Home extends Component {
             modalShow: true
         })
     }
+    handleShowPlot = event => {
+        var projectid = this.state.projectdetail.projectID
+        console.log(projectid)
+        const FileDownload = require('js-file-download');
+        axios.get('http://localhost:8000/getPlots/' + projectid)
+            .then((response) => {
+                console.log(response)
+                this.setState({ plot: response.data });
+                var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
+                if (answer) {
+                    FileDownload(response.data, 'plot.html');
+                }
+                else {
+                    console.log("plots not downloaded")
+                }
+            });
+
+        this.setState({
+            modalShow2: true
+        })
+    }
     handleNewProject() {
         window.location.reload();
         // var theFormItself = document.getElementById('form2');
@@ -500,11 +524,16 @@ class Home extends Component {
                         <div className="goback">
                             <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > &larr; Back </button>
                             <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
+                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>See EDA Plot</button>
                             < ShowdataModal
                                 show={this.state.modalShow}
                                 onHide={() => this.setState({ modalShow: false })}
                                 rawdata={this.state.traindata}
                             />
+                            <ShowPlotModal
+                                show={this.state.modalShow2}
+                                onHide={() => this.setState({ modalShow2: false })}
+                                plot={this.state.plot} />
                         </div>
                         <form onSubmit={this.handleSubmit2}>
                             <div className="createform">
@@ -549,7 +578,7 @@ class Home extends Component {
                                                 <label htmlFor="num_clusters">Number of clusters <span className="ibtn">i <span id="idesc">K=4 works good most of times</span></span></label>
                                             </div>
                                             <div className="col-60" >
-                                                <input type="number" id="num_clusters" name="num_clusters" onChange={this.handleCLusterNumberChange} placeholder="Enter K" required/>
+                                                <input type="number" id="num_clusters" name="num_clusters" onChange={this.handleCLusterNumberChange} placeholder="Enter K" required />
                                             </div>
                                         </div>
                                     </div>
@@ -632,6 +661,7 @@ class Home extends Component {
                     <div className="container" id="form6">
                         <div className="goback">
                             <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
+                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>See EDA Plot</button>
                         </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">

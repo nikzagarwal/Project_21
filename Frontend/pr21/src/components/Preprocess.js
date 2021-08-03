@@ -378,12 +378,12 @@ class Preprocess extends React.Component {
                                                 <div className="dropdown-content">
                                                     <div className="prepro">
                                                         <input type="checkbox" id={key + "drop"} name={i + "drop"} value={key} onChange={this.handleDropChange} />
-                                                        <label htmlFor={i + "drop"}>Drop Column</label>
+                                                        <label htmlFor={i + "drop"}>Drop Column <span className="ibtn">i <span id="idesc">Drop The column you think is irrelevant</span></span></label>
                                                     </div>
 
                                                     <div className="prepro ">
                                                         <input type="checkbox" id={key + "encode"} name={key + "encode"} value={key} onChange={this.handleEncodingRemove} />
-                                                        <label htmlFor={i + "encode"}>Encode Column <span className="fa fa-caret-right"> </span></label>
+                                                        <label htmlFor={i + "encode"}>Encode Column <span className="fa fa-caret-right"> </span> <span className="ibtn">i <span id="idesc">If coulmn in nor integer type then encode it</span></span></label>
                                                         {/* <label>Encode Column  </label>   */}
                                                         <div className="dropdown-content2 " >
                                                             <div className="prepro">
@@ -399,7 +399,7 @@ class Preprocess extends React.Component {
                                                     </div>
                                                     <div className="prepro">
                                                         <input type="checkbox" id={key + "scale"} name={key + "scale"} value={key} onChange={this.handleScalingRemove} />
-                                                        <label htmlFor={i + "scale"}>Scale Column <span className="fa fa-caret-right"> </span></label>
+                                                        <label htmlFor={i + "scale"}>Scale Column <span className="fa fa-caret-right"></span><span className="ibtn">i <span id="idesc">Scale the column to bring it on same range as others</span></span> </label>
 
                                                         {/* <label>Scale Column  <span className="fa fa-caret-right"> </span></label> */}
                                                         <div className="dropdown-content2">
@@ -416,7 +416,7 @@ class Preprocess extends React.Component {
                                                     </div>
                                                     <div className="prepro">
                                                         <input type="checkbox" id={key + "impute"} name={key + "impute"} value={key} onChange={this.handleImputationRemove} />
-                                                        <label htmlFor={i + "impute"}>Imputation <span className="fa fa-caret-right"> </span></label>
+                                                        <label htmlFor={i + "impute"}>Imputation <span className="fa fa-caret-right"> </span> <span className="ibtn">i <span id="idesc">Select how you want to handle null values for particular column</span></span></label>
 
                                                         {/* <label>Imputation  <span className="fa fa-caret-right"> </span></label> */}
                                                         <div className="dropdown-content2">

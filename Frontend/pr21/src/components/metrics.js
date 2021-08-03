@@ -17,6 +17,9 @@ class Metrics extends React.Component {
 
         else {
             const metricdata = Object.values(this.props.data);
+            const dicReg = ["Top models", "Name of Model", "Mean Absolute error", "Mean Square error", "Root mean square error", "R2 Score, 1 being best", "Root mean square logarathmic error"]
+            const dicClassi = ["Top models", "Name of Model","Accuracy of model", "Area under the Roc Curve", "True positive/ (True positive+False negative)", "True positive/ (True positive+False positive)", "2*Precision*Recall/(Precision+Recall)"]
+            
             if (this.props.mtype !== "clustering") {
                 return (
                     <div>
@@ -28,19 +31,28 @@ class Metrics extends React.Component {
                                             <tr>
                                                 {Object.keys(data).map((key, i) =>
                                                     i < 7 ? (
-                                                        <th>{key}</th>) : null
+                                                        <th>{key}
+                                                            {this.props.mtype === "regression" ?
+                                                                <span className="ibtn"> i <span id="idesc">{dicReg[i]}</span></span>
+                                                                : 
+                                                                <span className="ibtn"> i <span id="idesc">{dicClassi[i]}</span></span>
+                                                            }
+                                                        </th>) : null
                                                 )}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {metricdata.map((data, i) => (
-                                                i < 4 ? (
+                                                i < 3 ? (
 
 
                                                     <tr>
                                                         {Object.keys(data).map((key, j) =>
                                                             j < 7 ? (
-                                                                <td>{data[key]}</td>) : null
+                                                                j === 0 ?
+                                                                    <td>{i + 1}</td> :
+                                                                    <td>{data[key]}</td>
+                                                            ) : null
                                                         )}
 
                                                     </tr>
@@ -98,7 +110,7 @@ class Metrics extends React.Component {
                                                 < tr >
                                                     {Object.keys(data2).map((key, i) => (
                                                         i > 0 ?
-                                                            <th>{key}</th> : null
+                                                            <th> {key}</th> : null
                                                     ))}
                                                 </tr>
                                             </thead>

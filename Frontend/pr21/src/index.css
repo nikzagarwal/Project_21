@@ -21,19 +21,18 @@ code {
 .ibtn{
   background-color: #04080F;
   border-radius: 5em;
-  font-size: small;
-  /* font-family: 'Times New Roman', Times, serif; */
+  font-size: x-small;
   font-family: 'Roboto', sans-serif;
-  padding: 0 6px 0 6px;
+  padding: 0 4px 0 4px;
   color: #fff;
   vertical-align: super;
 }
 #idesc{
   position: absolute;
-  background-color: #DAE3E5;
-  color:#04080F;
+  background-color: #fff;
+  color:red;
   display: none;
-  margin: 5px;
+  margin: 10px;
   font-size: 15px;
   border-radius: 8px;
   padding: 5px;
@@ -530,6 +529,11 @@ input[type=text],input[type=number] ,select, textarea {
   float: none;
   margin:0 auto;
 }
+.Eda{
+  float: none;
+  margin-left: 1em;
+
+}
 /* ****************************************************************************************** */
 /* For form 3 */
 #form3
@@ -614,7 +618,7 @@ input[type=text],input[type=number] ,select, textarea {
   display: none;
   position: absolute;
   background-color: #DAE3E5;
-  min-width: 150px;
+  min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
@@ -1035,6 +1039,32 @@ color: #fff;
 }
 .flex-column { 
   max-width : 260px;
+}
+#mySidenav {
+  position: relative;
+  /* left: -80px; */
+  transition: 0.3s;
+  padding:10px;
+  width:200px;
+  height:40px;
+  text-decoration: none;
+  font-size: 20px;
+  float: right;
+  color: white;
+  border-radius: 5px 5px 5px 5px;
+  background-color: #507DBC;
+  overflow: hidden;
+  text-align: center;
+}
+.sidenav p{
+  margin: 0.5em;
+  font-size: smaller;
+  background-color: #A1C6EA;
+}
+
+#mySidenav:hover{
+  width:200px;
+  height :fit-content
 }
 
 /* ************************************************************************************************************************ */
