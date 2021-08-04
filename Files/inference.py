@@ -14,6 +14,8 @@ class Inference:
             results=predict_model(clf,data=data)
 
             csvresults=results.to_csv()
+            df = pd.read_csv(csvresults)
+            df.to_csv(csvresults, index=False)
             ran=random.randint(100,999)
             inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
             inference=open(inferenceDataResultsPath,"w+")
@@ -31,6 +33,8 @@ class Inference:
             results["predictions"]=predictions
 
             csvresults=results.to_csv()
+            df = pd.read_csv(csvresults)
+            df.to_csv(csvresults, index=False)
             ran=random.randint(100,999)
             inferenceDataResultsPath=os.path.join(storeLocation,"inference"+str(ran)+".csv")
             inference=open(inferenceDataResultsPath,"w+")
