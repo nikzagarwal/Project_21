@@ -50,6 +50,12 @@ class Settings(CommonSettings,ServerSettings,DatabaseSettings):
     CONFIG_PREPROCESS_YAML_FILE: str =os.path.abspath(os.path.join(os.getcwd(),'Files','config','preprocess_config.yaml'))
     CONFIG_MODEL_YAML_FILE: str=os.path.abspath(os.path.join(os.getcwd(),'Files','config','model.yaml'))
     DATA_TEMP_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Database','TempFiles'))
+
+    SAMPLE_DATASET_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Files','testDataset'))
+    SAMPLE_DATASET_TIMESERIES: str = os.path.join(SAMPLE_DATASET_FOLDER,'ice_cream.csv')
+    SAMPLE_DATASET_CLUSTERING: str = os.path.join(SAMPLE_DATASET_FOLDER,'jewellery.csv')
+    SAMPLE_DATASET_CLASSIFICATION: str = os.path.join(SAMPLE_DATASET_FOLDER,'Iris.csv')
+    SAMPLE_DATASET_REGRESSION: str = os.path.join(SAMPLE_DATASET_FOLDER,'cardata.csv')
     pass
 
 settings=Settings()

@@ -22,7 +22,7 @@ from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
 from Backend.app.schemas import AutoFormData, Project, TimeseriesFormData, PreprocessJSONFormData, ModelHyperParametersJSON
-from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles
+from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles, generate_random_id
 from Files.auto import Auto
 from Files.autoreg import AutoReg
 from Files.auto_clustering import Autoclu
@@ -164,6 +164,11 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
         
     if Operation["Successful"]:
         try:
+            print("Model String Representation: ",Operation["model"])
+            print("Y Data Address: ", Operation["y_data"])
+        except Exception as e:
+            print("Some error above: ",e)
+        try:
             Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
                 "dataID": dataID,
                 "cleanDataPath": Operation["cleanDataPath"],
@@ -178,6 +183,8 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
                 "modelType": problem_type,
                 "pickleFolderPath": Operation["pickleFolderPath"],
                 "pickleFilePath": Operation["pickleFilePath"],
+                "modelStringRepresentation": Operation["model"],
+                "yDataAddress": Operation["y_data"],
                 "belongsToUserID": autoFormData["userID"],
                 "belongsToProjectID": autoFormData["projectID"],
                 "belongsToDataID": dataID
@@ -228,6 +235,7 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
                     })
         except Exception as e:
             print("An Error occured: ",e)
+            print({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
             return JSONResponse({"Auto": "Success", "Database Insertion":"Failure", "Project Collection Updation": "Unsuccessful"})
         currentIDs.set_current_data_id(dataID)
         currentIDs.set_current_model_id(dataID)
@@ -466,10 +474,10 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
 
     trainingObj=training()
     Operation = trainingObj.train(modelsConfigFileLocation,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
-    
+    modelID=generate_random_id()
     if Operation["Successful"]:
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
-                "modelID": dataID,
+                "modelID": modelID,
                 "modelName": "Default Name",
                 "modelType": result_project["projectType"],
                 "pickleFolderPath": Operation["pickleFolderPath"],
@@ -483,7 +491,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
                     "belongsToUserID": userID,
                     "belongsToProjectID": projectID,
-                    "belongsToModelID": dataID,
+                    "belongsToModelID": modelID,
                     "addressOfMetricsFile": Operation["metricsLocation"],
                     "accuracy": Operation["accuracy"]
                 })
@@ -491,7 +499,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
                     "belongsToUserID": userID,
                     "belongsToProjectID": projectID,
-                    "belongsToModelID": dataID,
+                    "belongsToModelID": modelID,
                     "addressOfMetricsFile": Operation["metricsLocation"],
                 })
             if result_project["listOfDataIDs"] is not None:
@@ -522,7 +530,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
     with open("logs.log","a+") as f:
         f.write("\nPROJECT21_TRAINING_ENDED\n")
         f.write("\nPROJECT21_TRAINING_ENDED\n")
-    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": dataID})
+    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": modelID})
 
 
 @app.post('/doManualInference',tags=["Manual Mode"])
@@ -844,4 +852,45 @@ def delete_run_data(userID:int,projectID:int,dataID:int):
             return JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":"No such run exists in the project's list of dataIDs"})
         print("Project not found in DB")
         return(JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":"No such project exists in the DB"}))
-        
+
+    
+# @app.get('/sampleDatas')
+# def get_sample_data():
+#     def getListOfTestDataFiles(dirName):
+#         listOfFiles = os.listdir(dirName)
+#         allFiles = []
+#         for path in listOfFiles:
+#             fullPath = os.path.join(dirName, path)
+#             if os.path.isdir(fullPath):
+#                 allFiles = allFiles + getListOfTestDataFiles(fullPath)
+#             else:
+#                 allFiles.append(fullPath)
+#         return allFiles
+
+#     sampleDatas=[]
+#     for item in getListOfTestDataFiles(settings.SAMPLE_DATASET_FOLDER):
+#         sampleDataTemplate={
+#             "filename": os.path.basename(item),
+#             "filepath": item
+#         }
+#         sampleDatas.append(sampleDataTemplate)
+
+#     return sampleDatas
+
+@app.get('/sampleData')
+def get_sample_data_file(filename:str):
+    switcher = {
+        'Iris': settings.SAMPLE_DATASET_CLASSIFICATION,
+        'Cardata': settings.SAMPLE_DATASET_REGRESSION,
+        'Icecream': settings.SAMPLE_DATASET_TIMESERIES,
+        'Jewellery': settings.SAMPLE_DATASET_CLUSTERING
+    }
+    filepath=switcher.get(filename,"nofile")
+    if os.path.isfile(filepath):
+        try:
+            return FileResponse(filepath,media_type="text/csv", filename="sampleDataset.csv")
+        except Exception as e:
+            print("An Error Occured: ",e)
+            return JSONResponse({"Success": False})
+    else:
+        return JSONResponse({"Success":False})
