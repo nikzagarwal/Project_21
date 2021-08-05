@@ -8,8 +8,13 @@ COPY /Backend/ /Backend/Backend/
 COPY /Files/ /Backend/Files/
 COPY ["__init__.py","api.py","requirements.txt","./Backend/"]
 
-WORKDIR /Backend/ 
+# Tell Python to not generate .pyc
+ENV PYTHONDONTWRITEBYTECODE 1
 
+# Turn off buffering => This ensures that python output is sent straight to the terminal 
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /Backend/ 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
