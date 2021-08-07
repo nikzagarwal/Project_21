@@ -25,12 +25,12 @@ class Auto:
         
         clf1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train') 
-        Y_train = get_config('Y_train')   
+        Y_train = get_config('y_train') 
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
         Y_train.to_csv(os.path.join(config["location"],'y_data.csv'), index=False)
         clean_data_address = os.path.join(config["location"],"clean_data.csv")
         y_data_address = os.path.join(config["location"],"y_data.csv")
-        return clean_data_address , y_data_address    
+        return clean_data_address , y_data_address
 
 
     def top_models_auto(self,config,n=3):
@@ -77,6 +77,7 @@ class Auto:
         os.makedirs(location) ## creates a folder by the name configid_model(number) at the specified location
         # os.makedirs(os.path.join(location,"plots")) ## creates a subfolder named plots to store all the plots inside it
         name=str(config["experimentname"])+str(config["id"])+"_model"
+        
         save_model(model,name)
         shutil.move(name+'.pkl',location) ##moves  the pkl to the respective folders at the specified location 
         # shutil.move('clean_data.csv',os.path.join(config["location"],"data"))
@@ -87,17 +88,29 @@ class Auto:
         #     ## folder name is of the form ex:"01_model1" 
         return location, os.path.join(location,name)
 
-    
-    def model_plot(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
+
+    def model_plot_classification(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
         clf=load_model(pickleFileLocation)
         y=pd.read_csv(y_datapath)
         x=pd.read_csv(cleandatapath)
         y_pred=clf.predict(x)
         fig = go.Figure()
         ran=random.randint(100,999)
-        fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
-        fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
         
+        fig.add_trace(go.Scatter(x=list(x.index),y=y.iloc[:,-1],name="actual",mode='markers',marker=dict(
+                color='LightSkyBlue',
+                size=20,
+                line=dict(
+                    color='MediumPurple',
+                    width=12
+                ))))
+        fig.add_trace(go.Scatter(x=list(x.index),y=y_pred,name="predictions",mode='markers',marker=dict(
+                color='Orange',
+                size=5,
+                line=dict(
+                    color='Orange',
+                    width=12
+                ))))
         plotlocation=os.path.join(plotLocation,"plot.html")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
@@ -111,12 +124,12 @@ class Auto:
             cleanDataPath,y_data=self.auto_setup(config)
             model, metricsLocation, accuracy=self.top_models_auto(config,config2["n"])
             tunedmodel=self.model_tune(model)
-
+            params=tunedmodel.get_params()
             print("Model List:",model)
             print("Tuned List: ",tunedmodel)
             # self.model_plot(tunedmodel,config)
             pickleFolderPath,pickleFilePath=self.model_save(tunedmodel,config)
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy,"model":str(model),"y_data":y_data}
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy,"hyperparams":params,"y_data":y_data}
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}

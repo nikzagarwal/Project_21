@@ -41,7 +41,7 @@ def get_project_type(projectID,Project21Database):
 #         print("An Error Occured While Retreiving projectID from the Project Collection")
 
 def merge_project_path(projectName):
-    projectPath = projectName+"_"+"%0.16d"%random.randint(0,9999999999999999)
+    projectPath = projectName+"_"+"%0.6d"%random.randint(0,999999)
     return projectPath
 
 def create_project_id(Project21Database):

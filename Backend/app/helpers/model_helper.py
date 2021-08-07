@@ -3,7 +3,7 @@ from Backend.app.config import settings
 import random
 
 def create_model_id(Project21Database):
-    id = random.randint(10000,99999)
+    id = random.randint(1000,9999)
     result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":id})
     if result:
         id=create_model_id()

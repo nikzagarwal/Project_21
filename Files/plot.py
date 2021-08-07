@@ -5,10 +5,9 @@ import pandas as pd
 from pandas_profiling import ProfileReport
 
 
-def plot(config):
-    config=yaml.load(open(config),Loader=SafeLoader)
-    df = pd.read_csv(config["raw_data_address"])
-    plotFileLocation=os.path.join(config["location"],"plot.html")
+def plot(raw_data_address,folderLocation):
+    df = pd.read_csv(raw_data_address)
+    plotFileLocation=os.path.join(folderLocation,"plot.html")
     if(os.path.exists(plotFileLocation)):
         return plotFileLocation
     else:

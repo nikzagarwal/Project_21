@@ -89,22 +89,22 @@ class AutoReg:
 
     
 
-    def model_plot(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
+    def model_plot_regression(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
         clf=load_model(pickleFileLocation)
-        y=pd.read_csv(y_datapath)
+        y_actual=pd.read_csv(y_datapath)
         x=pd.read_csv(cleandatapath)
         y_pred=clf.predict(x)
         fig = go.Figure()
         ran=random.randint(100,999)
-        fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
-        fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
-        
+        fig.add_trace(go.Scatter(x=list(x.index),y=y_actual.iloc[:,-1],name="actual"))
+        fig.add_trace(go.Scatter(x=list(x.index),y=y_pred,name="predictions"))
+        print(y_pred)
         plotlocation=os.path.join(plotLocation,"plot.html")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
         f.close()
+
         return plotlocation
-        
 
     
 
