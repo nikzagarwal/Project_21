@@ -28,6 +28,7 @@ class training:
             userinputconfigfile=yaml.load(file,Loader=FullLoader) #modified version of model universe for each run
         models=[]
         ans=[]
+        hyperparams={}
 
         test_ratio=preprocessconfigfile["split_ratio_test"] #input given the the user usually 0.3 by default
 
@@ -57,7 +58,7 @@ class training:
                         hypers.append(feature["name"]+"="+ str(feature["value"]))
                 model_str=model["name"] + "(" + ", ".join(hypers) + ")"
 
-                metricsnewrow=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column)
+                metricsnewrow, hyperparams=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column,hyperparams)
                 print(metricsnewrow)
                 metrics.loc[len(metrics.index)]=metricsnewrow
                 
@@ -78,7 +79,7 @@ class training:
         best_model=metrics['Model'][0]
         best_model_location=os.path.join(picklelocation,(str(best_model) +".pkl"))
         
-        
+        hyper=hyperparams[best_model]
         return {
             "Successful":True,
             "metricsLocation":metricsLocation,
@@ -86,7 +87,8 @@ class training:
             "pickleFilePath": best_model_location,             #Best model pickle file path
             "accuracy":accuracy,                         #Accuracy of best model
             "cleanDataPath":cleanDataPath,
-            "clusterPlotLocation": "clusterPlotLocation"    #Only if it is clustering
+            "clusterPlotLocation": "clusterPlotLocation",    #Only if it is clustering
+            "hyperparams":hyper
         }
 
     def model_plot(self,pickleFileLocation,cleandatapath,target_column,plotLocation):
