@@ -193,6 +193,7 @@ class Section7 extends Component {
                                 isauto={this.state.projectList[this.state.currentProject].isAuto}
                                 projectname={this.state.projectList[this.state.currentProject].projectName}
                                 Accuracies={this.state.projectList[this.state.currentProject].accuracies}
+                                hyperparams={this.state.projectList[this.state.currentProject].listOfHyperparams}
                                 currentproject={this.state.currentProject}
                                 mtype={this.state.projectList[this.state.currentProject].modelType} />
                         </div>
@@ -202,7 +203,9 @@ class Section7 extends Component {
                                 showRetrain={this.state.showRetrain}
                                 currentmodel={this.props.currentmodel}
                                 isauto={this.state.projectList[this.state.currentProject].isAuto}
-                                projectdetails={this.state.currentProjectDetails} />
+                                projectdetails={this.state.currentProjectDetails}
+                                hyperparams={this.state.projectList[this.state.currentProject].listOfHyperparams}
+                                 />
                         </div>
                     </div>
                 </div>

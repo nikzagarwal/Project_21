@@ -35,7 +35,9 @@ class Home extends Component {
                 "dataID": 0,
                 "modelID": 0,
                 "projectID": 0,
-                "userID": 0
+                "userID": 0,
+                "Accuracy":0,
+                "hyperparams":0
             },
             projectdetail: {
                 "projectID": 0,
@@ -50,10 +52,11 @@ class Home extends Component {
             modalShow: false,
             modalShow2: false,
             openWebSocketConnection: false,
-            plot:""
+            plot: ""
         }
         this.updateData = this.updateData.bind(this);
     }
+    
     handleProjectNameChange = event => {
         this.setState({
             projectname: event.target.value
@@ -135,7 +138,7 @@ class Home extends Component {
 
         // console.log(this.state.traindata)
 
-        axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful1", res);
                 this.setState({
@@ -373,7 +376,7 @@ class Home extends Component {
         var projectid = this.state.projectdetail.projectID
         console.log(projectid)
         const FileDownload = require('js-file-download');
-        axios.get('http://localhost:8000/getPlots/' + projectid)
+        axios.get('http://'+address+':8000/getEDAPlot/' + projectid)
             .then((response) => {
                 console.log(response)
                 this.setState({ plot: response.data });
@@ -392,25 +395,15 @@ class Home extends Component {
     }
     handleNewProject() {
         window.location.reload();
-        // var theFormItself = document.getElementById('form2');
-        // $(theFormItself).hide();
-        // var theFormItself2 = document.getElementById('form3');
-        // $(theFormItself2).hide();
-        // var theFormItself3 = document.getElementById('form4');
-        // $(theFormItself3).hide();
-        // var theFormItself4 = document.getElementById('form5');
-        // $(theFormItself4).hide();
-        // var theFormItself5 = document.getElementById('loader');
-        // $(theFormItself5).hide();
-        // var theFormItself6 = document.getElementById('section6');
-        // $(theFormItself6).hide();
-        // var theFormItself7 = document.getElementById('section5');
-        // $(theFormItself7).hide()
-        // var theFormItself9 = document.getElementById('form6');
-        // $(theFormItself9).hide();
-        // var theFormItself8 = document.getElementById('form1');
-        // $(theFormItself8).show();
-
+        // console.log(process.env)
+    }
+    componentDidMount(){
+        let address=""
+        if(process.env.REACT_APP_BACKEND_CONTAINER_NAME)
+            address=process.env.REACT_APP_BACKEND_CONTAINER_NAME
+        else
+            address="localhost"
+        console.log(address)
     }
 
     render() {

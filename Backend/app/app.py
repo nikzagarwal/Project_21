@@ -356,7 +356,7 @@ def get_plots(projectID:int):
         print("An Error Occured: ",e)
         return JSONResponse({"Plots": "Not generated"})
 
-@app.get('/getEDAPlot')
+@app.get('/getEDAPlot/{projectID}')
 def get_EDA_plot(projectID:int):
     try:
         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})

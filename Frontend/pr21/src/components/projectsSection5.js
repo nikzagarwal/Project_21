@@ -65,8 +65,6 @@ class ProjectsSection5 extends Component {
                     alert("File is big so it is downloaded");
                 }
             });
-
-
     }
     handlePlot = event => {
         const FileDownload = require('js-file-download');
@@ -182,13 +180,23 @@ class ProjectsSection5 extends Component {
     }
 
     render() {
+        var b =String(Object.values(this.props.hyperparams[this.props.currentmodel-1]));
+        var a =Object.keys(this.props.hyperparams[this.props.currentmodel-1]);
+        b=b.split(",")
         return (
 
             <div className="section5 " id="projectsection5">
-                 <div id="mySidenav" class="sidenav">
-                    <h5>Hyperparamters</h5>
-                    {/* <p>{this.props.hyperparameters</p> */}
-                    <p>Work in progress...</p>
+                <div id="mySidenav" class="sidenav">
+
+                    <h5>Hyperparameters</h5>
+
+                    {a.map((data,i) => (
+                        <div>
+                            
+                        <p>{data} = {b[i]===""?"null":b[i]}</p>
+                        </div>
+                    ))}
+                    
                 </div>
                 <div className="goback">
                     <button className="backbtn btn btn-secondary" onClick={this.handleGoBack}  > &larr; Models </button>
@@ -198,7 +206,7 @@ class ProjectsSection5 extends Component {
                 <div className="sec5heading">
                     <h1>Results </h1>
                 </div>
-               
+
 
                 <div className="container">
                     {/* <!-- Nav tabs --> */}
