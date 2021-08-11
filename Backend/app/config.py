@@ -3,7 +3,7 @@ import os
 
 class CommonSettings(BaseSettings):
     APP_NAME: str = "Project 21"
-    DEBUG_MODE: bool= True           #Debug Mode
+    DEBUG_MODE: bool= False           #Debug Mode
 
 class ServerSettings(BaseSettings):
     if 'FRONTEND_CONTAINER_NAME' in os.environ:         #FRONTEND_CONTAINER_NAME is set in the environment section of the docker-compose file

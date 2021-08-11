@@ -2,7 +2,9 @@ import os
 import re
 import shutil
 from typing import List, Optional
+from pymongo.errors import InvalidDocument
 import yaml
+import numpy as np
 from fastapi import FastAPI, Form, Request, WebSocket, WebSocketDisconnect
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +25,7 @@ from Backend.app.helpers.data_helper import get_clean_data_path
 from Backend.app.helpers.metrics_helper import get_metrics
 from Backend.app.helpers.model_helper import create_model_id, get_pickle_file_path
 from Backend.app.schemas import AutoFormData, Project, TimeseriesFormData, PreprocessJSONFormData, ModelHyperParametersJSON
-from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles, generate_random_id
+from Backend.utils import generate_project_folder, generate_project_auto_config_file, generate_project_manual_config_file, generate_project_timeseries_config_file, convertFile, deleteTempFiles, generate_random_id, encodeDictionary
 from Files.auto import Auto
 from Files.autoreg import AutoReg
 from Files.auto_clustering import Autoclu
@@ -114,6 +116,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
                 "listOfDataIDs":[],
                 "configFileLocation": None,
                 "plotsPath": None,
+                "edaPlotPath": None,
                 "projectType": mtype,
                 "target":None,
                 "isAuto": None,
@@ -167,6 +170,8 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
     if Operation["Successful"]:
         try:
             print("Hyperparams: ",Operation["hyperparams"])
+            newHyperparams=encodeDictionary(Operation["hyperparams"])
+            print("New Hyperparams: ",newHyperparams)
             print("Y Data Address: ", Operation["y_data"])
         except Exception as e:
             print("Some error above: ",e)
@@ -180,17 +185,25 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
                 "belongsToProjectID": autoFormData["projectID"]
             })
             currentIDs.set_current_data_id(dataID)
+        except Exception as e:
+            print("An Error Occured: ",e)
+            print("Could not insert into Data Collection")
+        try:
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
                 "modelID": dataID,
                 "modelName": "Default Name",
                 "modelType": problem_type,
                 "pickleFolderPath": Operation["pickleFolderPath"],
                 "pickleFilePath": Operation["pickleFilePath"],
-                "hyperparams": Operation["hyperparams"],
+                "hyperparams": newHyperparams,
                 "belongsToUserID": autoFormData["userID"],
                 "belongsToProjectID": autoFormData["projectID"],
                 "belongsToDataID": dataID
             })
+        except Exception as e:
+            print("An Error Occured: ",e)
+            print("Could not insert into Model DB")
+        try:
             if problem_type!='clustering':                
                 Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
                     "belongsToUserID": autoFormData["userID"],
@@ -257,7 +270,7 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
             "projectID": autoFormData["projectID"],
             "dataID":dataID,
             "modelID": dataID,
-            "hyperparams":Operation["hyperparams"]
+            "hyperparams":newHyperparams
         })
     else:
         return JSONResponse({"Successful":"False"})
@@ -362,11 +375,19 @@ def get_EDA_plot(projectID:int):
         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
         if result is not None:
             result=serialiseDict(result)
-            if result["plotsPath"] is not None:
-                return FileResponse(result["plotsPath"],media_type="text/html",filename="plot.html")
+            if result["edaPlotPath"] is not None:
+                return FileResponse(result["edaPlotPath"],media_type="text/html",filename="plot.html")
             else:
                 plotFilePath=plot(result["rawDataPath"],result["projectFolderPath"])
-                return FileResponse(plotFilePath,media_type="text/html",filename="plot.html")
+                try:
+                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                        "$set": {
+                            "edaPlotPath": plotFilePath
+                        }
+                    })
+                    return FileResponse(plotFilePath,media_type="text/html",filename="plot.html")
+                except Exception as e:
+                    print("An Error Occured: ",e)
     except Exception as e:
         print("An Error Occured: ",e)
         return JSONResponse({"Plots": "Not generated"})

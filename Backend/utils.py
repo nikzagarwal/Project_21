@@ -1,6 +1,7 @@
 from datetime import time
 import os, stat
 import random
+import numpy as np
 import shutil
 import yaml
 import pandas as pd
@@ -14,6 +15,14 @@ def generate_random_id():
     Generates a 5 digit random number from 10000 to 99999
     """
     return random.randint(10000,99999)
+
+def encodeDictionary(dictionaryToConvert):
+    newDictionary={}
+    for k,v in dictionaryToConvert.items():
+        if isinstance(v,np.int64):
+            v=int(v)
+        newDictionary[k]=v
+        return newDictionary
 
 def convertFile(trainFile):
     tempDataFilePath=settings.DATA_TEMP_FOLDER
