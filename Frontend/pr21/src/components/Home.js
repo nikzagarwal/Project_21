@@ -52,7 +52,8 @@ class Home extends Component {
             modalShow: false,
             modalShow2: false,
             openWebSocketConnection: false,
-            plot: ""
+            plot: "",
+            address:"",
         }
         this.updateData = this.updateData.bind(this);
     }
@@ -68,7 +69,7 @@ class Home extends Component {
             "train",
             event.target.files[0]
         );
-        axios.post('http://localhost:8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+this.state.address+':8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((response) => {
                 console.log("Successful1", response);
                 Papa.parse(response.data, {
@@ -138,7 +139,7 @@ class Home extends Component {
 
         // console.log(this.state.traindata)
 
-        axios.post('http://'+address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+this.state.address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful1", res);
                 this.setState({
@@ -162,7 +163,7 @@ class Home extends Component {
             auto: false
         })
 
-        axios.get('http://localhost:8000/getPreprocessParam')
+        axios.get('http://'+this.state.address+':8000/getPreprocessParam')
             .then((response) => {
                 console.log(response);
                 this.setState({
@@ -257,7 +258,7 @@ class Home extends Component {
             let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
             console.log(JSON.stringify(data))
 
-            axios.post('http://localhost:8000/auto', JSON.stringify(data))
+            axios.post('http://'+this.state.address+':8000/auto', JSON.stringify(data))
                 .then(res => {
                     console.log("Successful2", res)
                     this.setState({
@@ -322,7 +323,7 @@ class Home extends Component {
             let data = { userID, projectID, target, dateColumn, frequency }
             console.log(JSON.stringify(data))
 
-            axios.post('http://localhost:8000/timeseries', JSON.stringify(data))
+            axios.post('http://'+this.state.address+':8000/timeseries', JSON.stringify(data))
                 .then(res => {
                     console.log("SuccessfulTime", res)
                     this.setState({
@@ -376,7 +377,7 @@ class Home extends Component {
         var projectid = this.state.projectdetail.projectID
         console.log(projectid)
         const FileDownload = require('js-file-download');
-        axios.get('http://'+address+':8000/getEDAPlot/' + projectid)
+        axios.get('http://'+this.state.address+':8000/getEDAPlot/' + projectid)
             .then((response) => {
                 console.log(response)
                 this.setState({ plot: response.data });
@@ -398,12 +399,15 @@ class Home extends Component {
         // console.log(process.env)
     }
     componentDidMount(){
-        let address=""
+        let add=""
         if(process.env.REACT_APP_BACKEND_CONTAINER_NAME)
-            address=process.env.REACT_APP_BACKEND_CONTAINER_NAME
+            add=process.env.REACT_APP_BACKEND_CONTAINER_NAME
         else
-            address="localhost"
-        console.log(address)
+            add="localhost"
+        console.log(add)
+        this.setState({
+            address: add
+        })
     }
 
     render() {
