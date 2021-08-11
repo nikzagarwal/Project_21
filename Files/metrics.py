@@ -9,7 +9,7 @@ class Metrics:
 
 
         if model_type=="Classification":
-            criterias=["accuracy_score","recall_score","precision_score","f1_score","cohen_kappa_score","matthews_corrcoef"]
+            criterias=["accuracy_score","recall_score","precision_score","f1_score","cohen_kappa_score"]
         #metrics.loc[len(metrics.index)]=[modelname,accuracy_score(y,prediction),recall_score(y,prediction),precision_score(y,prediction),f1_score(y,prediction),cohen_kappa_score(y,prediction),matthews_corrcoef(y,prediction)]
 
         elif model_type=="Regression":
@@ -18,7 +18,10 @@ class Metrics:
         metricsnewrow=[modelname]
         for criteria in criterias:
             try:
-                if criteria != "mean_squared_error":
+                if criteria=="mean_squared_log_error":
+                    metricsnewrow.append((round(eval(criteria+"(y,prediction)"),2))**0.5)
+
+                elif criteria != "mean_squared_error":
                     metricsnewrow.append(round(eval(criteria+"(y,prediction)"),2))
                 else:
                     mse=round(eval(criteria+"(y,prediction)"),2)
