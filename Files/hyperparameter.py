@@ -60,10 +60,11 @@ class hyperparameter:
         model=eval(model_str)
         sys.stdout=open("logs.log","a+")
         clf=RandomizedSearchCV(model, params,verbose=51,n_jobs=-1)
-        hyperparams[model_str]=clf.best_params_
+        
         x_train,x_test,y_train,y_test=train_test_split(xdata,ydata,test_size=0.2)
         print("working on "+ modelname)
         clf.fit(x_train,y_train)
+        hyperparams[model_str]=clf.best_params_
         print("model completed for " + modelname)
         
         location=os.path.join(dataconfig["location"],str(dataconfig["id"])+"_model")

@@ -114,12 +114,12 @@ class AutoReg:
             cleanDataPath,y_data=self.auto_setup(config)
             model, metricsLocation, accuracy=self.top_models_auto(config,config2["n"])
             tunedmodel=self.model_tune(model)
-
+            params=tunedmodel.get_params()
             print("Model List:",model)
             print("Tuned List: ",tunedmodel)
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(tunedmodel,config)
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy,"model":str(model),"y_data":y_data}
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":metricsLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, "accuracy":accuracy,"hyperparams":params,"y_data":y_data}
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}
