@@ -192,7 +192,7 @@ class Section5 extends Component {
 
             <div className="section5 " id="section5">
                  <div id="mySidenav" class="sidenav">
-                    <h5>Hyperparamters</h5>
+                    <h5>Hyperparameters</h5>
                     {/* <p>{this.props.hyperparameters</p> */}
                     <p>Work in progress...</p>
                 </div>

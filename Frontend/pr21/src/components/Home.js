@@ -35,7 +35,9 @@ class Home extends Component {
                 "dataID": 0,
                 "modelID": 0,
                 "projectID": 0,
-                "userID": 0
+                "userID": 0,
+                "Accuracy":0,
+                "hyperparams":0
             },
             projectdetail: {
                 "projectID": 0,
@@ -50,10 +52,12 @@ class Home extends Component {
             modalShow: false,
             modalShow2: false,
             openWebSocketConnection: false,
-            plot:""
+            plot: "",
+            address:"",
         }
         this.updateData = this.updateData.bind(this);
     }
+    
     handleProjectNameChange = event => {
         this.setState({
             projectname: event.target.value
@@ -65,7 +69,7 @@ class Home extends Component {
             "train",
             event.target.files[0]
         );
-        axios.post('http://localhost:8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+this.state.address+':8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((response) => {
                 console.log("Successful1", response);
                 Papa.parse(response.data, {
@@ -135,7 +139,7 @@ class Home extends Component {
 
         // console.log(this.state.traindata)
 
-        axios.post('http://localhost:8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+this.state.address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful1", res);
                 this.setState({
@@ -159,7 +163,7 @@ class Home extends Component {
             auto: false
         })
 
-        axios.get('http://localhost:8000/getPreprocessParam')
+        axios.get('http://'+this.state.address+':8000/getPreprocessParam')
             .then((response) => {
                 console.log(response);
                 this.setState({
@@ -254,7 +258,7 @@ class Home extends Component {
             let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
             console.log(JSON.stringify(data))
 
-            axios.post('http://localhost:8000/auto', JSON.stringify(data))
+            axios.post('http://'+this.state.address+':8000/auto', JSON.stringify(data))
                 .then(res => {
                     console.log("Successful2", res)
                     this.setState({
@@ -319,7 +323,7 @@ class Home extends Component {
             let data = { userID, projectID, target, dateColumn, frequency }
             console.log(JSON.stringify(data))
 
-            axios.post('http://localhost:8000/timeseries', JSON.stringify(data))
+            axios.post('http://'+this.state.address+':8000/timeseries', JSON.stringify(data))
                 .then(res => {
                     console.log("SuccessfulTime", res)
                     this.setState({
@@ -373,7 +377,7 @@ class Home extends Component {
         var projectid = this.state.projectdetail.projectID
         console.log(projectid)
         const FileDownload = require('js-file-download');
-        axios.get('http://localhost:8000/getPlots/' + projectid)
+        axios.get('http://'+this.state.address+':8000/getEDAPlot/' + projectid)
             .then((response) => {
                 console.log(response)
                 this.setState({ plot: response.data });
@@ -392,25 +396,18 @@ class Home extends Component {
     }
     handleNewProject() {
         window.location.reload();
-        // var theFormItself = document.getElementById('form2');
-        // $(theFormItself).hide();
-        // var theFormItself2 = document.getElementById('form3');
-        // $(theFormItself2).hide();
-        // var theFormItself3 = document.getElementById('form4');
-        // $(theFormItself3).hide();
-        // var theFormItself4 = document.getElementById('form5');
-        // $(theFormItself4).hide();
-        // var theFormItself5 = document.getElementById('loader');
-        // $(theFormItself5).hide();
-        // var theFormItself6 = document.getElementById('section6');
-        // $(theFormItself6).hide();
-        // var theFormItself7 = document.getElementById('section5');
-        // $(theFormItself7).hide()
-        // var theFormItself9 = document.getElementById('form6');
-        // $(theFormItself9).hide();
-        // var theFormItself8 = document.getElementById('form1');
-        // $(theFormItself8).show();
-
+        // console.log(process.env)
+    }
+    componentDidMount(){
+        let add=""
+        if(process.env.REACT_APP_BACKEND_CONTAINER_NAME)
+            add=process.env.REACT_APP_BACKEND_CONTAINER_NAME
+        else
+            add="localhost"
+        console.log(add)
+        this.setState({
+            address: add
+        })
     }
 
     render() {
