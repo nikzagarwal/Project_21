@@ -28,7 +28,7 @@ from Files.training import training as train
 import plotly.express as px
 import plotly.graph_objects as go
 import random
-from Files.autoreg import AutoReg as auto
+from Files.autoreg import AutoReg
 from pycaret.regression import *
 class timeseries:
     def createprophet(self,dataconfig):
@@ -187,111 +187,111 @@ class timeseries:
 
         return os.path.join(storeLocation,"inference.html")
 
-    def rftimeseriespreprocess(self,data):  
-        length=len(data)
-        y=data['y']
-        trend_1=[0]*length
-        trend_2=[0]*length
-        period7_seasonality=[0]*length
-        period12_seasonality=[0]*length
-        period30_seasonality=[0]*length
-        period52_seasonality=[0]*length
-        period365_seasonality=[0]*length
-        for i in range(2,length):
-            trend_1[i]=y[i-1]-y[i-2]
-            if i > 3:
-                trend_2[i]=(trend_1[i-1]-trend_1[i-2])
-            if i > 6:
-                period7_seasonality[i]=(y[i-7])
-            if i > 11:
-                period12_seasonality[i]=(y[i-12])
-            if i > 29:
-                period30_seasonality[i]=(y[i-30])
-            if i > 51:
-                period52_seasonality[i]=(y[i-52])
-            if i > 364:
-                period365_seasonality[i]=(y[i-365])
-        data['trend_1']=trend_1
-        data['trend_2']=trend_2
-        data['period7_seasonality']=period7_seasonality
-        data['period12_seasonality']=period12_seasonality
-        data['period30_seasonality']=period30_seasonality
-        data['period52_seasonality']=period52_seasonality
-        data['period365_seasonality']=period365_seasonality
-        indexes=data.ds[0]
-        data.reset_index(drop=True, inplace=True)
-        try:
-            data.drop(['ds'],inplace=True,axis=1)
-        except:
-            pass
-        print(data)
-        data.to_csv('timeseries.csv',index_label=False)
-        return indexes
+    # def rftimeseriespreprocess(self,data):  
+    #     length=len(data)
+    #     y=data['y']
+    #     trend_1=[0]*length
+    #     trend_2=[0]*length
+    #     period7_seasonality=[0]*length
+    #     period12_seasonality=[0]*length
+    #     period30_seasonality=[0]*length
+    #     period52_seasonality=[0]*length
+    #     period365_seasonality=[0]*length
+    #     for i in range(2,length):
+    #         trend_1[i]=y[i-1]-y[i-2]
+    #         if i > 3:
+    #             trend_2[i]=(trend_1[i-1]-trend_1[i-2])
+    #         if i > 6:
+    #             period7_seasonality[i]=(y[i-7])
+    #         if i > 11:
+    #             period12_seasonality[i]=(y[i-12])
+    #         if i > 29:
+    #             period30_seasonality[i]=(y[i-30])
+    #         if i > 51:
+    #             period52_seasonality[i]=(y[i-52])
+    #         if i > 364:
+    #             period365_seasonality[i]=(y[i-365])
+    #     data['trend_1']=trend_1
+    #     data['trend_2']=trend_2
+    #     data['period7_seasonality']=period7_seasonality
+    #     data['period12_seasonality']=period12_seasonality
+    #     data['period30_seasonality']=period30_seasonality
+    #     data['period52_seasonality']=period52_seasonality
+    #     data['period365_seasonality']=period365_seasonality
+    #     indexes=data.ds[0]                                    #check data.ds[0] or data['ds'][0]
+    #     data.reset_index(drop=True, inplace=True)
+    #     try:
+    #         data.drop(['ds'],inplace=True,axis=1)
+    #     except:
+    #         pass
+    #     print(data)
+    #     data.to_csv('timeseries.csv',index_label=False)
+    #     return indexes
 
-    def rfinference(self,days,modelpath,indexes,freq,dataconfig):
+    # def rfinference(self,days,modelpath,indexes,freq,dataconfig):
 
-        with open(dataconfig) as f:
-            dataconfigfile= yaml.load(f,Loader=FullLoader)
-        df=pd.read_csv('timeseries.csv')
-        #df2=df.drop(['y'],inplace=True,axis=1)
-        for i in range(days):
-            index=len(df)
-            trend_1=df.iloc[-1]['y']-df.iloc[-2]['y']
-            trend_2=df.iloc[-1]['trend_1']-df.iloc[-2]['trend_1']
-            try:
-                period7_seasonality=df.iloc[-7]['y']
-            except:
-                period7_seasonality=0
-            try:
-                period12_seasonality=df.iloc[-12]['y']
-            except:
-                period12_seasonality=0
-            try:
-                period30_seasonality=df.iloc[-30]['y']
-            except:
-                period30_seasonality=0
-            try:
-                period52_seasonality=df.iloc[-52]['y']
-            except:
-                period52_seasonality=0
-            try:
-                period365_seasonality=df.iloc[-365]['y']
-            except:
-                period365_seasonality=0
-            x=np.array([ trend_1, trend_2, period7_seasonality,
-            period12_seasonality, period30_seasonality, period52_seasonality,
-            period365_seasonality])
-            model=pickle.load(open(modelpath,"rb"))
-            x=x.reshape(1,8)
-            print('x_shape',x.shape)
-            x=pd.DataFrame(x)
-            y=model.predict(x)
-            print('y is ',y)
-            x=[y[0], trend_1, trend_2, period7_seasonality,
-            period12_seasonality, period30_seasonality, period52_seasonality,
-            period365_seasonality]
+    #     with open(dataconfig) as f:
+    #         dataconfigfile= yaml.load(f,Loader=FullLoader)
+    #     df=pd.read_csv('timeseries.csv')
+    #     #df2=df.drop(['y'],inplace=True,axis=1)
+    #     for i in range(days):
+    #         index=len(df)
+    #         trend_1=df.iloc[-1]['y']-df.iloc[-2]['y']
+    #         trend_2=df.iloc[-1]['trend_1']-df.iloc[-2]['trend_1']
+    #         try:
+    #             period7_seasonality=df.iloc[-7]['y']
+    #         except:
+    #             period7_seasonality=0
+    #         try:
+    #             period12_seasonality=df.iloc[-12]['y']
+    #         except:
+    #             period12_seasonality=0
+    #         try:
+    #             period30_seasonality=df.iloc[-30]['y']
+    #         except:
+    #             period30_seasonality=0
+    #         try:
+    #             period52_seasonality=df.iloc[-52]['y']
+    #         except:
+    #             period52_seasonality=0
+    #         try:
+    #             period365_seasonality=df.iloc[-365]['y']
+    #         except:
+    #             period365_seasonality=0
+    #         x=np.array([ trend_1, trend_2, period7_seasonality,
+    #         period12_seasonality, period30_seasonality, period52_seasonality,
+    #         period365_seasonality])
+    #         model=pickle.load(open(modelpath,"rb"))
+    #         x=x.reshape(1,8)
+    #         print('x_shape',x.shape)
+    #         x=pd.DataFrame(x)
+    #         y=model.predict(x)
+    #         print('y is ',y)
+    #         x=[y[0], trend_1, trend_2, period7_seasonality,
+    #         period12_seasonality, period30_seasonality, period52_seasonality,
+    #         period365_seasonality]
             
-            df.loc[len(df.index)] =x
-            print('last row',df.iloc[-1])
+    #         df.loc[len(df.index)] =x
+    #         print('last row',df.iloc[-1])
         
         
-        new_index=pd.date_range(start=indexes,periods=len(df.index),freq=freq)
-        df.index=new_index
-        inferencelocation=os.path.join(str(dataconfigfile['location']),'inference.csv')
-        df.to_csv(inferencelocation,index_label=False)
-        return inferencelocation
+    #     new_index=pd.date_range(start=indexes,periods=len(df.index),freq=freq)
+    #     df.index=new_index
+    #     inferencelocation=os.path.join(str(dataconfigfile['location']),'inference.csv')
+    #     df.to_csv(inferencelocation,index_label=False)
+    #     return inferencelocation
         
-    def plotinferencerf(self,inferencelocation,storeLocation,):
-        data_original=pd.read_csv('timeseries.csv')
-        data=pd.read_csv(inferencelocation)
-        fig = go.Figure()
-        ran=random.randint(100,999)
-        fig.add_trace(go.Scatter(x=data_original.index,y=data_original.y,name="actual"))
-        fig.add_trace(go.Scatter(x=data.index,y=data.y,name="predictions"))
-        # fig=go.Figure(data=go.Scatter(x=predictions.index,y=predictions.predictions))
-        fig.write_html(os.path.join(storeLocation,"inference.html"))
+    # def plotinferencerf(self,inferencelocation,storeLocation,):
+    #     data_original=pd.read_csv('timeseries.csv')
+    #     data=pd.read_csv(inferencelocation)
+    #     fig = go.Figure()
+    #     ran=random.randint(100,999)
+    #     fig.add_trace(go.Scatter(x=data_original.index,y=data_original.y,name="actual"))
+    #     fig.add_trace(go.Scatter(x=data.index,y=data.y,name="predictions"))
+    #     # fig=go.Figure(data=go.Scatter(x=predictions.index,y=predictions.predictions))
+    #     fig.write_html(os.path.join(storeLocation,"inference.html"))
 
-        return os.path.join(storeLocation,"inference.html")
+    #     return os.path.join(storeLocation,"inference.html")
 
 
     def timeseriesmanual(self,userinputconfig,dataconfig,preprocessconfig):
@@ -421,9 +421,11 @@ class timeseries:
         with open(newpath, 'w') as f:
             f.write(yaml.safe_dump(dataconfigfile))
         print('starting training')
-        auto(newpath)
+        AutoRegObj=AutoReg()
+        Operation=AutoRegObj.auto(newpath)
 
-        return indexes,freq
+        return indexes,freq, Operation
+    
     def plotinferencerf(self,df,storeLocation,days,freq):
         data_original=pd.read_csv('timeseries.csv')
         data=df

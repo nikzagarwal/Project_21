@@ -3,7 +3,7 @@ import os
 
 class CommonSettings(BaseSettings):
     APP_NAME: str = "Project 21"
-    DEBUG_MODE: bool= False           #Debug Mode
+    DEBUG_MODE: bool= True           #Debug Mode
 
 class ServerSettings(BaseSettings):
     if 'FRONTEND_CONTAINER_NAME' in os.environ:         #FRONTEND_CONTAINER_NAME is set in the environment section of the docker-compose file
@@ -49,6 +49,7 @@ class Settings(CommonSettings,ServerSettings,DatabaseSettings):
     CONFIG_YAML_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Files','config'))
     CONFIG_PREPROCESS_YAML_FILE: str =os.path.abspath(os.path.join(os.getcwd(),'Files','config','preprocess_config.yaml'))
     CONFIG_MODEL_YAML_FILE: str=os.path.abspath(os.path.join(os.getcwd(),'Files','config','model.yaml'))
+    CONFIG_TIMESERIES_MANUAL_FILE: str=os.path.abspath(os.path.join(os.getcwd(),'Files','config','timeseriesmanualconfig.yaml'))
     DATA_TEMP_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Database','TempFiles'))
 
     SAMPLE_DATASET_FOLDER: str = os.path.abspath(os.path.join(os.getcwd(),'Files','testDataset'))
