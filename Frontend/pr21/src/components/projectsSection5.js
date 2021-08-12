@@ -15,6 +15,7 @@ class ProjectsSection5 extends Component {
             data: "",
             inferencefile: undefined,
             plot: "",
+            plot2:"",
             countplot: 0,
             inferenceTime: 1,
             freq: "D"
@@ -87,7 +88,7 @@ class ProjectsSection5 extends Component {
         const projectid = this.props.projectdetails["projectID"];
         axios.get('http://'+window.address+':8000/getEDAPlot/' + projectid)
             .then((response) => {
-                this.setState({ plot: response.data });
+                this.setState({ plot2: response.data });
                 var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
                 if (answer) {
                     FileDownload(response.data, 'edaplot.html');
@@ -277,7 +278,7 @@ class ProjectsSection5 extends Component {
 
                             <div className="container">
                                 <div className="d-flex flex-row justify-content-center flex-wrap">
-                                    <Plots plot={this.state.plot} />
+                                    <Plots plot={this.state.plot2} />
                                 </div>
                             </div>
                         </div>

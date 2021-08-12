@@ -26,9 +26,9 @@ class AutoReg:
         reg1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train')    
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
-        Y_train= get_config('X_train') 
+        Y_train= get_config('y_train') 
         Y_train.to_csv(os.path.join(config["location"],'y_data.csv'), index=False)
-        clean_data_address = os.path.join(config["location"],"clean_data_address.csv")
+        clean_data_address = os.path.join(config["location"],"clean_data.csv")
         y_data = os.path.join(config["location"],"y_data.csv")
         return clean_data_address,y_data     
 
