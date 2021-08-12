@@ -14,6 +14,8 @@ import Section7 from './section7.js';
 import ShowdataModal from './showdataModal.js';
 import ShowPlotModal from './showPlotModal.js';
 import Papa from 'papaparse';
+import LoginModal from './loginModal.js';
+
 
 class Home extends Component {
     constructor(props) {
@@ -51,6 +53,7 @@ class Home extends Component {
             numClusters: 4,
             modalShow: false,
             modalShow2: false,
+            modalShow3:false,
             openWebSocketConnection: false,
             plot: "",
             address:"",
@@ -69,7 +72,7 @@ class Home extends Component {
             "train",
             event.target.files[0]
         );
-        axios.post('http://'+this.state.address+':8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+window.address+':8000/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((response) => {
                 console.log("Successful1", response);
                 Papa.parse(response.data, {
@@ -139,7 +142,7 @@ class Home extends Component {
 
         // console.log(this.state.traindata)
 
-        axios.post('http://'+this.state.address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+window.address+':8000/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful1", res);
                 this.setState({
@@ -163,7 +166,7 @@ class Home extends Component {
             auto: false
         })
 
-        axios.get('http://'+this.state.address+':8000/getPreprocessParam')
+        axios.get('http://'+window.address+':8000/getPreprocessParam')
             .then((response) => {
                 console.log(response);
                 this.setState({
@@ -258,7 +261,7 @@ class Home extends Component {
             let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
             console.log(JSON.stringify(data))
 
-            axios.post('http://'+this.state.address+':8000/auto', JSON.stringify(data))
+            axios.post('http://'+window.address+':8000/auto', JSON.stringify(data))
                 .then(res => {
                     console.log("Successful2", res)
                     this.setState({
@@ -323,7 +326,7 @@ class Home extends Component {
             let data = { userID, projectID, target, dateColumn, frequency }
             console.log(JSON.stringify(data))
 
-            axios.post('http://'+this.state.address+':8000/timeseries', JSON.stringify(data))
+            axios.post('http://'+window.address+':8000/timeseries', JSON.stringify(data))
                 .then(res => {
                     console.log("SuccessfulTime", res)
                     this.setState({
@@ -377,7 +380,7 @@ class Home extends Component {
         var projectid = this.state.projectdetail.projectID
         console.log(projectid)
         const FileDownload = require('js-file-download');
-        axios.get('http://'+this.state.address+':8000/getEDAPlot/' + projectid)
+        axios.get('http://'+window.address+':8000/getEDAPlot/' + projectid)
             .then((response) => {
                 console.log(response)
                 this.setState({ plot: response.data });
@@ -399,21 +402,16 @@ class Home extends Component {
         // console.log(process.env)
     }
     componentDidMount(){
-        let add=""
-        if(process.env.REACT_APP_BACKEND_CONTAINER_NAME)
-            add=process.env.REACT_APP_BACKEND_CONTAINER_NAME
-        else
-            add="localhost"
-        console.log(add)
-        this.setState({
-            address: add
-        })
+        console.log(window.address)
     }
 
     render() {
         return (
             <div>
-
+                 < LoginModal
+                                show={this.state.modalShow3}
+                                onHide={() => this.setState({ modalShow3: false })}
+                            />
                 {/* ************************************************************************************************************************ */}
 
                 {/* Section1 */}
@@ -520,8 +518,8 @@ class Home extends Component {
                     <div className="container" id="form3">
                         <div className="goback">
                             <button className="btn btn-primary backbtn " onClick={this.handleGoForm2}  > &larr; Back </button>
-                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
-                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>See EDA Plot</button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>Sample Data</button>
+                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>Exploratory Data Analysis</button>
                             < ShowdataModal
                                 show={this.state.modalShow}
                                 onHide={() => this.setState({ modalShow: false })}
@@ -657,8 +655,8 @@ class Home extends Component {
                     {/* form6 for time series */}
                     <div className="container" id="form6">
                         <div className="goback">
-                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>See Sample Data</button>
-                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>See EDA Plot</button>
+                            <button className="btn btn-primary sampleData" id="sampleData" onClick={this.handleSampleData}>Sample Data</button>
+                            <button className="btn btn-primary Eda" id="EDA" onClick={this.handleShowPlot}>Exploratory Data Analysis</button>
                         </div>
                         <form onSubmit={this.handleSubmitTime}>
                             <div className="createform">

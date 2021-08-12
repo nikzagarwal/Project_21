@@ -56,7 +56,7 @@ class Section5 extends Component {
         const projectid = this.props.projectdetails["projectID"];
         const modelid = this.props.projectdetails["modelID"];
         const FileDownload = require('js-file-download');
-        axios.get('http://localhost:8000/getMetrics/' + projectid + "/" + modelid)
+        axios.get('http://'+window.address+':8000/getMetrics/' + projectid + "/" + modelid)
             .then((response) => {
                 console.log(response)
                 console.log(response.data);
@@ -76,7 +76,7 @@ class Section5 extends Component {
         const FileDownload = require('js-file-download');
         const projectid = this.props.projectdetails["projectID"];
         if (this.state.countplot === 0) {
-            axios.get('http://localhost:8000/getPlots/' + projectid)
+            axios.get('http://'+window.address+':8000/getPlots/' + projectid)
                 .then((response) => {
                     // console.log(response);
                     this.setState({ plot: response.data });
@@ -91,7 +91,22 @@ class Section5 extends Component {
             this.setState({ countplot: 1 })
         }
     }
-
+    handleEdaPlot = event => {
+        const FileDownload = require('js-file-download');
+        const projectid = this.props.projectdetails["projectID"];
+        axios.get('http://'+window.address+':8000/getEDAPlot/' + projectid)
+            .then((response) => {
+                this.setState({ plot: response.data });
+                var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
+                if (answer) {
+                    FileDownload(response.data, 'edaplot.html');
+                }
+                else {
+                    console.log("plots not downloaded")
+                }
+            });
+        this.setState({ countplot: 1 })
+    }
 
     handleInferenceChange = event => {
         this.setState({
@@ -130,7 +145,7 @@ class Section5 extends Component {
         const FileDownload = require('js-file-download');
         console.log(this.props.isauto)
         if (this.props.isauto === true)
-            axios.post('http://localhost:8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            axios.post('http://'+window.address+':8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
                     console.log("Successful", res)
                     FileDownload(res.data, 'prediction.csv');
@@ -138,7 +153,7 @@ class Section5 extends Component {
                 },
                     (error) => { console.log(error) });
         else
-            axios.post('http://localhost:8000/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            axios.post('http://'+window.address+':8000/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
                     console.log("Successful Manual Inference", res)
                     FileDownload(res.data, 'prediction.csv');
@@ -171,12 +186,12 @@ class Section5 extends Component {
         );
         console.log(this.state.inferenceTime)
         const FileDownload = require('js-file-download');
-        axios.post('http://localhost:8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('http://'+window.address+':8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful", res)
                 FileDownload(res.data, 'prediction.csv');
                 alert("Prediction is Ready and Downloaded");
-                axios.post('http://localhost:8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                axios.post('http://'+window.address+':8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                     .then((res) => {
                         console.log("Successful", res)
                         FileDownload(res.data, 'predictionplot.html');
@@ -188,13 +203,30 @@ class Section5 extends Component {
 
     }
     render() {
+        var b = String(Object.values(this.props.projectdetails.hyperparams));
+        var a = Object.keys(this.props.projectdetails.hyperparams);
+        b = b.split(",")
         return (
 
             <div className="section5 " id="section5">
-                 <div id="mySidenav" class="sidenav">
+                <div id="mySidenav" className="sidenav">
                     <h5>Hyperparameters</h5>
-                    {/* <p>{this.props.hyperparameters</p> */}
-                    <p>Work in progress...</p>
+                    <table className="hypertable ">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Values</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {a.map((data, i) => (
+                                <tr>
+                                    <td>{data} </td>
+                                    <td> {b[i] === "" ? "null" : b[i]}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
                 <div className="goback">
                     <button className="backbtn btn btn-secondary" onClick={this.handleGoBack}  > &larr; Models </button>
@@ -228,6 +260,9 @@ class Section5 extends Component {
                         <li className="nav-item" role="presentation">
                             <button className="nav-link tabbtn" id="Inference-tab" data-bs-toggle="tab" data-bs-target="#inference" type="button" role="tab" aria-controls="Inference" aria-selected="false">Inference</button>
                         </li>
+                        <li className="nav-item" role="presentation">
+                            <button className="nav-link tabbtn " id="edaplot-tab" onClick={this.handleEdaPlot} data-bs-toggle="tab" data-bs-target="#edaplot" type="button" role="tab" aria-controls="EDAPlot" aria-selected="false">EDA Plots</button>
+                        </li>
                     </ul>
 
                     {/* <!-- Tab panes --> */}
@@ -248,9 +283,14 @@ class Section5 extends Component {
                             <div className="container">
                                 <div className="d-flex flex-row justify-content-center flex-wrap">
                                     <Plots plot={this.state.plot} />
-                                    {/* <div className="d-flex flex-column plot" >
-                                         <img src="3" className="img-fluid" alt=" Plot3 not for this model " />*/}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="tab-pane" id="edaplot" role="tabpanel" aria-labelledby="edaplot-tab">
 
+                            <div className="container">
+                                <div className="d-flex flex-row justify-content-center flex-wrap">
+                                    <Plots plot={this.state.plot} />
                                 </div>
                             </div>
                         </div>

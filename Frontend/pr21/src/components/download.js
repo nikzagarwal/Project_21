@@ -7,7 +7,7 @@ class Download extends Component {
     event.preventDefault();
     const FileDownload = require('js-file-download');
     const dataid=this.props.projectdetails["dataID"];
-    axios.get('http://localhost:8000/downloadClean/'+dataid)
+    axios.get('http://'+window.address+':8000/downloadClean/'+dataid)
       .then((response) => {
         console.log(response)
         FileDownload(response.data, 'cleandata.csv');
@@ -17,7 +17,7 @@ class Download extends Component {
     event.preventDefault();
     const FileDownload = require('js-file-download');
     const modelid=this.props.projectdetails["modelID"];
-    axios.get('http://localhost:8000/downloadPickle/'+modelid)
+    axios.get('http://'+window.address+':8000/downloadPickle/'+modelid)
       .then((response) => {
         FileDownload(response.data, 'pickledmodel.pkl');
       });
