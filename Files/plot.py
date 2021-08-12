@@ -7,7 +7,7 @@ from pandas_profiling import ProfileReport
 
 def plot(raw_data_address,folderLocation):
     df = pd.read_csv(raw_data_address)
-    plotFileLocation=os.path.join(folderLocation,"plot.html")
+    plotFileLocation=os.path.join(folderLocation,"edaplot.html")
     if(os.path.exists(plotFileLocation)):
         return plotFileLocation
     else:

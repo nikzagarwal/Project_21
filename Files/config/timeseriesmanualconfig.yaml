@@ -1,0 +1,12 @@
+id: 1
+raw_data_address: /
+frequency: M
+data: /
+indexes: 
+  -
+target_col_name: y
+problem_type: timeseries
+experimentname: projectname
+location: /
+na_value: NA
+n: 1

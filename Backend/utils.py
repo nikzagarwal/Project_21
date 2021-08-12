@@ -1,6 +1,7 @@
 from datetime import time
-import os
+import os, stat
 import random
+import numpy as np
 import shutil
 import yaml
 import pandas as pd
@@ -15,6 +16,14 @@ def generate_random_id():
     """
     return random.randint(10000,99999)
 
+def encodeDictionary(dictionaryToConvert):
+    newDictionary={}
+    for k,v in dictionaryToConvert.items():
+        if isinstance(v,np.int64):
+            v=int(v)
+        newDictionary[k]=v
+        return newDictionary
+
 def convertFile(trainFile):
     tempDataFilePath=settings.DATA_TEMP_FOLDER
     if(not os.path.exists(tempDataFilePath)):
@@ -26,7 +35,7 @@ def convertFile(trainFile):
 
     with open(originalFilePath,"wb") as buffer:
         shutil.copyfileobj(trainFile.file,buffer)
-    
+    # os.chmod(originalFilePath,stat.S_IRWXO) #Permission to Read, Write, Execute file by others
     if extension=='.json':
         df=pd.read_json(originalFilePath)
     elif extension=='.csv':
@@ -174,6 +183,37 @@ def generate_project_manual_config_file(projectID,preprocessJSONFormData,Project
 
 def generate_project_timeseries_config_file(projectID,currentIDs,timeseriesFormData,Project21Database):
     user_yaml=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
+
+    random_id=generate_random_id()
+    user_yaml["id"]=random_id
+    user_yaml["raw_data_address"]=get_raw_data_path(projectID,Project21Database)
+    user_yaml["target_column_name"]=timeseriesFormData["target"]
+    user_yaml["date_index"]=timeseriesFormData["dateColumn"]
+    user_yaml["frequency"]=timeseriesFormData["frequency"]
+    
+    try:
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        result_project=serialiseDict(result_project)
+        if result_project is not None:
+            user_yaml["location"]=os.path.join(result_project["projectFolderPath"],'run'+str(random_id))
+            user_yaml["experimentname"]=result_project["projectName"]
+        else:
+            user_yaml["location"]='/'
+            user_yaml["experimentname"]='default'
+    except Exception as e:
+        print("Unable to Update User's Project's Config File. An Error Occured: ",e)
+    
+    if(not os.path.exists(user_yaml["location"])):
+        os.makedirs(user_yaml["location"])
+    with open(os.path.join(user_yaml["location"],"preprocess_config.yaml"), "w") as f:
+        yaml.dump(user_yaml,f)
+        f.close()
+    
+    return os.path.join(user_yaml["location"],'preprocess_config.yaml'), user_yaml["location"],random_id, result_project["projectType"]
+
+
+def generate_project_timeseries_rf_config_file(projectID,currentIDs,timeseriesFormData,Project21Database):
+    user_yaml=yaml.load(open(settings.CONFIG_TIMESERIES_MANUAL_FILE),Loader=SafeLoader)
 
     random_id=generate_random_id()
     user_yaml["id"]=random_id
