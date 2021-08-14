@@ -344,9 +344,10 @@ class timeseries:
         except:
             pass
         print(data)
-        data.to_csv('timeseries.csv',index=0)
+        clean_data_path=os.path.abspath(os.path.join(os.getcwd(),'timeseries.csv'))
+        data.to_csv(clean_data_path,index=0)
 
-        return indexes
+        return indexes, clean_data_path
         
     def rfinference(self,days,pickleFileLocation,dataPathLocation,indexes,freq):
 
@@ -405,26 +406,28 @@ class timeseries:
         with open(dataconfig) as f:
             dataconfigfile= yaml.load(f,Loader=FullLoader)
 
-        datalocation=dataconfigfile['data']
+        datalocation=dataconfigfile['clean_data_address']
 
         freq=dataconfigfile['frequency']
         data=pd.read_csv(datalocation)
         print(data)
-        indexes=self.rftimeseriespreprocess(self,data)
+        indexes, clean_data_path=self.rftimeseriespreprocess(data)
         print(indexes)
-        dataconfigfile['raw_data_address']='timeseries.csv'
+        # dataconfigfile['raw_data_address']='timeseries.csv'
         dataconfigfile['indexes']=indexes
-        print('creating new yaml')
+        print('updating yaml file')
 
-        newpath=os.path.join(dataconfigfile['location'],"newconfig.yaml")
-        print(newpath)
-        with open(newpath, 'w') as f:
+        # newpath=os.path.join(dataconfigfile['location'],"newconfig.yaml")
+        # newpath=os.path.join(dataconfig)
+        # print(newpath)
+        with open(dataconfig, 'w') as f:
             f.write(yaml.safe_dump(dataconfigfile))
+
         print('starting training')
         AutoRegObj=AutoReg()
-        Operation=AutoRegObj.auto(newpath)
+        Operation=AutoRegObj.auto(dataconfig)
 
-        return indexes,freq, Operation
+        return indexes,freq, Operation, clean_data_path
     
     def plotinferencerf(self,df,storeLocation,days,freq):
         data_original=pd.read_csv('timeseries.csv')

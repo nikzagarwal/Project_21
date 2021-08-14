@@ -3,7 +3,7 @@ version: '3'
 services: 
     mongodb:
         image: mongo
-        container_name: Project21-mongo
+        container_name: project21-mongo
         restart: unless-stopped
         command: mongod
         ports:
@@ -15,14 +15,14 @@ services:
             - backend
     
     backend-server:
-        container_name: Project21-backend
+        container_name: project21-backend
         build: 
             context: ./
             dockerfile: Dockerfile
         environment: 
-            MONGO_CONTAINER_NAME: 'Project21-mongo'
-            FRONTEND_CONTAINER_NAME: 'Project21-frontend'
-            BACKEND_CONTAINER_NAME: 'Project21-backend'
+            MONGO_CONTAINER_NAME: 'project21-mongo'
+            FRONTEND_CONTAINER_NAME: 'project21-frontend'
+            BACKEND_CONTAINER_NAME: 'project21-backend'
         ports: 
             - "8000:8000"
         volumes: 
@@ -34,13 +34,13 @@ services:
             - mongodb
 
     frontend-server:
-        container_name: Project21-frontend
+        container_name: project21-frontend
         build: 
             context: Frontend/
             dockerfile: Dockerfile
         environment: 
-            REACT_APP_FRONTEND_CONTAINER_NAME: 'Project21-frontend'
-            REACT_APP_BACKEND_CONTAINER_NAME: 'Project21-backend'
+            REACT_APP_FRONTEND_CONTAINER_NAME: 'project21-frontend'
+            REACT_APP_BACKEND_CONTAINER_NAME: 'project21-backend'
         tty: true
         ports: 
             - "3000:3000"
