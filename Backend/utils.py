@@ -187,9 +187,11 @@ def generate_project_timeseries_config_file(projectID,currentIDs,timeseriesFormD
     random_id=generate_random_id()
     user_yaml["id"]=random_id
     user_yaml["raw_data_address"]=get_raw_data_path(projectID,Project21Database)
-    user_yaml["target_column_name"]=timeseriesFormData["target"]
+    user_yaml["target_col_name"]=timeseriesFormData["target"]
     user_yaml["date_index"]=timeseriesFormData["dateColumn"]
     user_yaml["frequency"]=timeseriesFormData["frequency"]
+    user_yaml["n"]=1
+    
     
     try:
         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})

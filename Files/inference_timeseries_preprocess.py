@@ -38,7 +38,7 @@ class InferenceTimeseriesPreprocess:
             df= pd.concat([df, df_encoded ], axis=1)                 
             
             
-        df.rename(columns = {config_data['data_index_column']:'ds', config_data['target_column_name']:'y'}, inplace = True)
+        df.rename(columns = {config_data['data_index_column']:'ds', config_data['target_col_name']:'y'}, inplace = True)
 
         index_column = df.pop("ds")
         df.insert(0, "ds", index_column)

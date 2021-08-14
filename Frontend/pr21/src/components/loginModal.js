@@ -29,7 +29,7 @@ class LoginModal extends Component {
         axios.post('http://' + window.address + ':8000/login', JSON.stringify(data))
             .then((res) => {
                 console.log("Successful1", res);
-                if (res.success = 'True')
+                if (res.success = true)
                     this.props.onHide()
                 else {
                     window.reload();
