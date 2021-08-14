@@ -1,3 +1,4 @@
+from operator import index
 import os
 import re
 import shutil
@@ -176,15 +177,25 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
         except Exception as e:
             print("Some error above: ",e)
         try:
-            Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
-                "dataID": dataID,
-                "cleanDataPath": Operation["cleanDataPath"],
-                "yDataAddress": Operation["y_data"],
-                "target": autoFormData["target"],
-                "belongsToUserID": currentIDs.get_current_user_id(),
-                "belongsToProjectID": autoFormData["projectID"]
-            })
-            currentIDs.set_current_data_id(dataID)
+            if problem_type=="clustering":
+                Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+                    "dataID": dataID,
+                    "cleanDataPath": Operation["cleanDataPath"],
+                    "target": autoFormData["target"],
+                    "belongsToUserID": currentIDs.get_current_user_id(),
+                    "belongsToProjectID": autoFormData["projectID"]
+                })
+                currentIDs.set_current_data_id(dataID)
+            else:
+                Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+                    "dataID": dataID,
+                    "cleanDataPath": Operation["cleanDataPath"],
+                    "yDataAddress": Operation["y_data"],
+                    "target": autoFormData["target"],
+                    "belongsToUserID": currentIDs.get_current_user_id(),
+                    "belongsToProjectID": autoFormData["projectID"]
+                })
+                currentIDs.set_current_data_id(dataID)
         except Exception as e:
             print("An Error Occured: ",e)
             print("Could not insert into Data Collection")
@@ -687,7 +698,7 @@ def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenc
     #     print("An Error Occured: ",e)
     #     print("Could not do any of the above")
 
-
+# Old Timeseries API - working
 # @app.post('/timeseries',tags=["Timeseries"])
 # def timeseries_training(timeseriesFormData: TimeseriesFormData):
 #     print(timeseriesFormData)
@@ -817,6 +828,8 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
             "dataID": dataID,
             "cleanDataPath": newCleanDataPath,
             "yDataAddress": Operation["y_data"],
+            "indexes": indexes,
+            "frequency": freq,
             "target": timeseriesFormData["target"],
             "belongsToUserID": timeseriesFormData["userID"],
             "belongsToProjectID": timeseriesFormData["projectID"]
@@ -899,6 +912,44 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
         f.write("\nPROJECT21_TRAINING_ENDED\n")
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":Operation["hyperparams"]})
 
+# Timeseries Inference Old API - Working
+# @app.post('/doTimeseriesInference',tags=["Timeseries"])
+# def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+    
+#     pickleFilePath='/'
+#     path='/'
+#     inferenceDataResultsPath='/'
+#     # try:
+#     result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
+#     if result is not None:
+#         result=serialiseDict(result)
+#         if result["pickleFilePath"] is not None:
+#             pickleFilePath=result["pickleFilePath"]
+#         if result["pickleFolderPath"] is not None:
+#             projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
+#             path=os.path.join(projectRunPath,"inference_data")
+#             if(not os.path.exists(path)):
+#                 os.makedirs(path)
+        
+#         inference=timeseries()
+#         inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
+        
+#         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+#             "inferenceTime": inferenceTime,
+#             "results": inferenceDataResultsPath,
+#             "inferenceFolderPath": path,
+#             "belongsToUserID": currentIDs.get_current_user_id(),
+#             "belongsToProjectID": projectID,
+#             "belongsToModelID": modelID
+#         })
+#         if os.path.exists(inferenceDataResultsPath):
+#             print({"Timeseries Inference Generation":"Successful"})
+#             return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
+#     # except Exception as e:
+#     #     print("An error occured: ", e)
+#     #     print("Unable to find model from model Collection")
+#     return JSONResponse({"Timeseries Inference Generation":"Failed"})
+
 
 @app.post('/doTimeseriesInference',tags=["Timeseries"])
 def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
@@ -918,8 +969,17 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
             if(not os.path.exists(path)):
                 os.makedirs(path)
         
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        if result_project is not None:
+            configFileLocation=result_project["configFileLocation"]
+        
+        result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        if result_data is not None:
+            indexes=result_data["indexes"]
+            frequency=result_data["frequency"]
         inference=timeseries()
-        inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
+        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_project["rawDataPath"],indexes,frequency)
+        # inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
         
         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
             "inferenceTime": inferenceTime,
@@ -930,12 +990,12 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
             "belongsToModelID": modelID
         })
         if os.path.exists(inferenceDataResultsPath):
-            print({"Metrics Generation":"Successful"})
+            print({"Timeseries Inference Generation":"Successful"})
             return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
     # except Exception as e:
     #     print("An error occured: ", e)
     #     print("Unable to find model from model Collection")
-    return JSONResponse({"Metrics Generation":"Failed"})
+    return JSONResponse({"Timeseries Inference Generation":"Failed"})
 
 
 @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])

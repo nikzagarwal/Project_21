@@ -399,8 +399,11 @@ class timeseries:
 
         new_index=pd.date_range(start=indexes,periods=len(df.index),freq=freq)
         df.index=new_index
-
-        return df
+        
+        inferenceDataFileLocation=os.path.join(pickleFileLocation,os.pardir,'inference.csv')
+        df.to_csv(inferenceDataFileLocation)
+        
+        return df, inferenceDataFileLocation
 
     def timeseriesmanualrf(self,dataconfig):
         with open(dataconfig) as f:
