@@ -11,7 +11,7 @@ class Section4 extends Component {
 
                 </div>
                 <div className="col-50 section4col2">
-                    <h1>Curl brings to you TwentyOne that lets you create excellent machine learning models
+                    <h1>Curl brings to you P21 that lets you create excellent machine learning models
                          for all your business needs with few simple clicks!</h1>
                     <br />
                     <h3>"The best part is that it is Open Source"</h3>

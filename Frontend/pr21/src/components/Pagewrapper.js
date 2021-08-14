@@ -10,7 +10,7 @@ class PageWrapper extends Component {
                     <nav className="navbar navbar-expand-lg ">
                         <div className="container-fluid">
                         <img className="logo"src={logo} alt="logo"/>
-                            <Link className="navbar-brand" id="menuicon" to="/">TwentyOne</Link>
+                            <Link className="navbar-brand" id="menuicon" to="/">P21</Link>
                             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                                 <span className="line"></span>
                                 <span className="line"></span>

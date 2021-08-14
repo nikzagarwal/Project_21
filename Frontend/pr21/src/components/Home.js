@@ -80,7 +80,10 @@ class Home extends Component {
                     header: true
                 })
             },
-                (error) => { console.log(error) });
+                (error) => { 
+                    console.log(error) 
+                    alert("wrong file entered")
+                });
         this.setState({
             train: event.target.files[0]
         })
@@ -431,7 +434,7 @@ class Home extends Component {
                     <div className="createpagebox " id="sec1heading2">
                         <button className="btn btn-primary  sec1startbtn " onClick={this.handleNewProject}  >Start New Project </button>
 
-                        <h1>TwentyOne Results</h1>
+                        <h1>P21 Results</h1>
 
                         {/* <p>" Just fill relevant feeds and select few choices and you are good to go"</p> */}
                     </div>
