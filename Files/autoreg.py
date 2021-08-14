@@ -26,7 +26,7 @@ class AutoReg:
         reg1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train')    
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
-        Y_train= get_config('y_train') 
+        Y_train= get_config('y') 
         Y_train.to_csv(os.path.join(config["location"],'y_data.csv'), index=False)
         clean_data_address = os.path.join(config["location"],"clean_data.csv")
         y_data = os.path.join(config["location"],"y_data.csv")
@@ -89,17 +89,20 @@ class AutoReg:
 
     
 
-    def model_plot_regression(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
+    def model_plot_regression(self,pickleFileLocation,rawdatapath,y_datapath,plotLocation):
         clf=load_model(pickleFileLocation)
         y_actual=pd.read_csv(y_datapath)
-        x=pd.read_csv(cleandatapath)
+        print("yactual",len(y_actual))
+        x=pd.read_csv(rawdatapath)
+        
         y_pred=clf.predict(x)
+        print("y_pred")
         fig = go.Figure()
         ran=random.randint(100,999)
         fig.add_trace(go.Scatter(x=list(x.index),y=y_actual.iloc[:,-1],name="actual"))
         fig.add_trace(go.Scatter(x=list(x.index),y=y_pred,name="predictions"))
-        print(y_pred)
-        plotlocation=os.path.join(plotLocation,"plot.html")
+        print(len(y_pred))
+        plotlocation=os.path.join(plotLocation,"plotreg.html")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
         f.close()

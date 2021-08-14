@@ -25,7 +25,7 @@ class Auto:
         
         clf1 = setup(data = df, target = config["target_col_name"],silent=True)
         X_train = get_config('X_train') 
-        Y_train = get_config('y_train') 
+        Y_train = get_config('y') 
         X_train.to_csv(os.path.join(config["location"],'clean_data.csv'), index=False)
         Y_train.to_csv(os.path.join(config["location"],'y_data.csv'), index=False)
         clean_data_address = os.path.join(config["location"],"clean_data.csv")
@@ -89,10 +89,10 @@ class Auto:
         return location, os.path.join(location,name)
 
 
-    def model_plot_classification(self,pickleFileLocation,cleandatapath,y_datapath,plotLocation):
+    def model_plot_classification(self,pickleFileLocation,rawdatapath,y_datapath,plotLocation):
         clf=load_model(pickleFileLocation)
         y=pd.read_csv(y_datapath)
-        x=pd.read_csv(cleandatapath)
+        x=pd.read_csv(rawdatapath)
         y_pred=clf.predict(x)
         fig = go.Figure()
         ran=random.randint(100,999)
@@ -111,7 +111,7 @@ class Auto:
                     color='Orange',
                     width=12
                 ))))
-        plotlocation=os.path.join(plotLocation,"plot.html")
+        plotlocation=os.path.join(plotLocation,"plotclas.html")
         with open(plotlocation, 'a') as f:
             f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
         f.close()
