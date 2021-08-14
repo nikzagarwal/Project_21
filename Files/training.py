@@ -71,11 +71,11 @@ class training:
         #stores the metrics in the assigned folder
         accuracy=''
         if dataconfigfile["problem_type"]=='classification':
-            metrics=metrics.sort_values(['accuracy_score', 'f1_score'], ascending=[False, False]).reset_index()
-            accuracy=metrics['accuracy_score'][0]*100
+            metrics=metrics.sort_values(['Accuracy', 'F1'], ascending=[False, False]).reset_index()
+            accuracy=metrics['Accuracy'][0]*100
         else:
-            metrics=metrics.sort_values(['r2_score', 'mean_absolute_error'], ascending=[False, False]).reset_index()      
-            accuracy=metrics['r2_score'][0]
+            metrics=metrics.sort_values(['R2', 'MSE'], ascending=[False, False]).reset_index()      
+            accuracy=metrics['R2'][0]
         print(2)
         metrics=metrics.rename(columns={"modelname":"Model"}) 
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
