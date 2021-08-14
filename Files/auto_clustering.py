@@ -78,7 +78,7 @@ class Autoclu:
             # self.model_plot(tunedmodel,config)
             pickleFolderPath, pickleFilePath=self.model_save(model,config)
             clusterPlotLocation=self.model_plot(model,os.path.join(pickleFolderPath,os.pardir))
-            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":resultLocation, "clusterPlotLocation":clusterPlotLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath,"hyperparams":{'numclusters':config["numClusters"]}}
+            return {"Successful": True, "cleanDataPath": cleanDataPath, "metricsLocation":resultLocation, "clusterPlotLocation":clusterPlotLocation, "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath,"hyperparams":{'numclusters':config2["numClusters"]}}
         except Exception as e:
             print("An Error Occured: ",e)
             return {"Successful": False, "Error": e}

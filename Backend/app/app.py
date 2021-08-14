@@ -325,13 +325,13 @@ def get_plots(projectID:int):
                     result_data=serialiseDict(result_data)
                     cleanDataPath=result_data["cleanDataPath"]
                     yDataAddress=result_data["yDataAddress"]
-                
+                    
                 if result["projectType"]=='classification':
                     auto_mode=Auto()
-                    plotFilePath=auto_mode.model_plot_classification(pickleFilePath,cleanDataPath,yDataAddress,result["projectFolderPath"])
+                    plotFilePath=auto_mode.model_plot_classification(pickleFilePath,result['rawDataPath'],yDataAddress,result["projectFolderPath"])
                 elif result["projectType"]=='regression':
                     auto_mode=AutoReg()
-                    plotFilePath=auto_mode.model_plot_regression(pickleFilePath,cleanDataPath,yDataAddress,result["projectFolderPath"])
+                    plotFilePath=auto_mode.model_plot_regression(pickleFilePath,result["rawDataPath"],yDataAddress,result["projectFolderPath"])
                 try:
                     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                         "$set": {

@@ -39,10 +39,10 @@ class training:
         
         
         if dataconfigfile["problem_type"]=='classification':
-            metrics=pd.DataFrame(columns = ['modelname','Accuracy','Recall','Prec.','F1','Kappa'])
+            metrics=pd.DataFrame(columns = ['modelname','Accuracy','Recall','Prec.','F1','Kappa',"AUC"])
 
         elif dataconfigfile["problem_type"]=='regression':
-            metrics=pd.DataFrame(columns=['modelname','MAE','MSE',"RMSE",'R2','RMSLE',"AUC"])
+            metrics=pd.DataFrame(columns=['modelname','MAE','MSE',"RMSE",'R2','RMSLE'])
         #create location of pickle file
         picklelocation=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
         os.makedirs(picklelocation)
@@ -59,9 +59,15 @@ class training:
                 model_str=model["name"] + "(" + ", ".join(hypers) + ")"
 
                 metricsnewrow, hyperparams=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column,hyperparams)
-                print(metricsnewrow)
-                metrics.loc[len(metrics.index)]=metricsnewrow
-                
+                try:
+                    metrics.loc[len(metrics.index)] = metricsnewrow 
+                except Exception as e:
+                    print(metrics)
+                    print(metricsnewrow)
+                    print(" an exception occured :",e)
+                print(metrics)
+        print(1)
+        
         #stores the metrics in the assigned folder
         accuracy=''
         if dataconfigfile["problem_type"]=='classification':
@@ -70,16 +76,27 @@ class training:
         else:
             metrics=metrics.sort_values(['r2_score', 'mean_absolute_error'], ascending=[False, False]).reset_index()      
             accuracy=metrics['r2_score'][0]
-            
+        print(2)
         metrics=metrics.rename(columns={"modelname":"Model"}) 
         metricsLocation=os.path.join(dataconfigfile["location"],"metrics.csv")
         metrics.to_csv(metricsLocation, index=False)
-        
+        print(3)
         # bestmodel
         best_model=metrics['Model'][0]
         best_model_location=os.path.join(picklelocation,(str(best_model) +".pkl"))
-        
+        print(4)
         hyper=hyperparams[best_model]
+
+        print({
+            "Successful":True,
+            "metricsLocation":metricsLocation,
+            "pickleFolderPath": picklelocation,         #Generate a folder where all pickle files are residing
+            "pickleFilePath": best_model_location,             #Best model pickle file path
+            "accuracy":accuracy,                         #Accuracy of best model
+            "cleanDataPath":cleanDataPath,
+            "clusterPlotLocation": "clusterPlotLocation",    #Only if it is clustering
+            "hyperparams":hyper
+        })
         return {
             "Successful":True,
             "metricsLocation":metricsLocation,
