@@ -82,7 +82,7 @@ class Home extends Component {
             },
                 (error) => { 
                     console.log(error) 
-                    alert("wrong file entered")
+                    alert("Wrong File entered. Enter csv,excel or json file")
                 });
         this.setState({
             train: event.target.files[0]

@@ -583,7 +583,10 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
     Operation = trainingObj.train(modelsConfigFileLocation,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
     modelID=generate_random_id()
     print("Hyperparameters: ",Operation["hyperparams"])
+    print("Recieved Opertions: ",Operation)
+    newHyperparams=encodeDictionary(Operation["hyperparams"])
     if Operation["Successful"]:
+        try:
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
                 "modelID": modelID,
                 "modelName": "Default Name",
@@ -593,53 +596,56 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "belongsToUserID": userID,
                 "belongsToProjectID": projectID,
                 "belongsToDataID": dataID,
-                "hyperparms": Operation["hyperparams"]
+                "hyperparms": newHyperparams
             })
-
-            if result_project["projectType"]!='clustering':                
-                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-                    "belongsToUserID": userID,
-                    "belongsToProjectID": projectID,
-                    "belongsToModelID": modelID,
-                    "addressOfMetricsFile": Operation["metricsLocation"],
-                    "accuracy": Operation["accuracy"]
-                })
-            else:
-                Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-                    "belongsToUserID": userID,
-                    "belongsToProjectID": projectID,
-                    "belongsToModelID": modelID,
-                    "addressOfMetricsFile": Operation["metricsLocation"]
-                })
-            if result_project["listOfDataIDs"] is not None:
-                newListOfDataIDs=result_project["listOfDataIDs"]
-                newListOfDataIDs.append(dataID)
-                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                    "$set":{
-                        "listOfDataIDs":newListOfDataIDs,
-                        "modelsConfigFileLocation":modelsConfigFileLocation,
-                        "isAuto": False,
-                        }
-                    })
-            else:
-                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                    "$set":{
-                        "listOfDataIDs":[dataID],
-                        "modelsConfigFileLocation": modelsConfigFileLocation,
-                        "isAuto": False
-                        }
-                    })
-            if (result_project["projectType"]=='clustering'):
-                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                    "$set":{
-                        "clusterPlotLocation":Operation["clusterPlotLocation"]
+        except Exception as e:
+            print(e)
+        print("insertion succesfull")
+        if result_project["projectType"]!='clustering':                
+            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                "belongsToUserID": userID,
+                "belongsToProjectID": projectID,
+                "belongsToModelID": modelID,
+                "addressOfMetricsFile": Operation["metricsLocation"],
+                "accuracy": Operation["accuracy"]
+            })
+        else:
+            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                "belongsToUserID": userID,
+                "belongsToProjectID": projectID,
+                "belongsToModelID": modelID,
+                "addressOfMetricsFile": Operation["metricsLocation"]
+            })
+        if result_project["listOfDataIDs"] is not None:
+            newListOfDataIDs=result_project["listOfDataIDs"]
+            newListOfDataIDs.append(dataID)
+            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                "$set":{
+                    "listOfDataIDs":newListOfDataIDs,
+                    "modelsConfigFileLocation":modelsConfigFileLocation,
+                    "isAuto": False,
                     }
                 })
-    resultsCache.set_training_status(True)
+        else:
+            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                "$set":{
+                    "listOfDataIDs":[dataID],
+                    "modelsConfigFileLocation": modelsConfigFileLocation,
+                    "isAuto": False
+                    }
+                })
+        if (result_project["projectType"]=='clustering'):
+            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                "$set":{
+                    "clusterPlotLocation":Operation["clusterPlotLocation"]
+                }
+            })
+    print("if condtition executed")
     with open("logs.log","a+") as f:
         f.write("\nPROJECT21_TRAINING_ENDED\n")
         f.write("\nPROJECT21_TRAINING_ENDED\n")
-    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": modelID, "hyperparams":Operation["hyperparams"]})
+    resultsCache.set_training_status(True)
+    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": modelID, "hyperparams":newHyperparams})
 
 
 @app.post('/doManualInference',tags=["Manual Mode"])

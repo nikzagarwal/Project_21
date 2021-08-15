@@ -21,6 +21,8 @@ def encodeDictionary(dictionaryToConvert):
     for k,v in dictionaryToConvert.items():
         if isinstance(v,np.int64):
             v=int(v)
+        if isinstance(v,np.int32):
+            v=int(v)
         newDictionary[k]=v
         return newDictionary
 
