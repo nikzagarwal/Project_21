@@ -13,6 +13,7 @@ class Section1 extends Component {
                         <a href='#section3'> <button className=" btn btn-primary section1button section1button2 ">View Demo </button></a>
                     </div>
                 </div>
+               
             </div>
         );
     }

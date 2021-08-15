@@ -197,9 +197,16 @@ class ProjectsSection5 extends Component {
     }
 
     render() {
+        if(this.props.hyperparams[this.props.currentmodel - 1])
+        {    
         var b = String(Object.values(this.props.hyperparams[this.props.currentmodel - 1]));
         var a = Object.keys(this.props.hyperparams[this.props.currentmodel - 1]);
         b = b.split(",")
+        }
+        else{
+            a=["null"];
+            b="null";
+        }
         return (
 
             <div className="section5 " id="projectsection5">
