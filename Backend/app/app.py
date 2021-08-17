@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 from typing import List, Optional
-from pymongo.errors import InvalidDocument
 import yaml
 import numpy as np
 from fastapi import FastAPI, Form, Request, WebSocket, WebSocketDisconnect
@@ -418,7 +417,7 @@ def get_all_project_details(userID:int):
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
                         project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToDataID":dataID})
-                        if project_model["hyperparams"] is not None:
+                        if "hyperparams" in project_model.keys():
                             hyperparams=project_model["hyperparams"]
                             listOfHyperparams.append(hyperparams)
                     projectTemplate={
@@ -441,7 +440,7 @@ def get_all_project_details(userID:int):
                         projectModel=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToDataID":dataID})
                         if projectModel is not None:
                             projectModel=serialiseDict(projectModel)
-                            if projectModel["hyperparams"] is not None:
+                            if "hyperparams" in projectModel.keys():
                                 listOfHyperparams.append(projectModel["hyperparams"])
                         projectMetrics=Project21Database.find_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})
                         if projectMetrics is not None:
