@@ -853,15 +853,6 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     except Exception as e:
         print("Could not insert into Data Collection. An Error Occured: ",e)
     
-    
-    
-    # Operation returns{"Successful": True, 
-    # "cleanDataPath": cleanDataPath, 
-    # "metricsLocation":metricsLocation, 
-    # "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, 
-    # "accuracy":accuracy,
-    # "hyperparams":params,
-    # "y_data":y_data}
     if Operation["Successful"]:
         try:
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
@@ -873,7 +864,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                 "belongsToUserID": timeseriesFormData["userID"],
                 "belongsToProjectID": timeseriesFormData["projectID"],
                 "belongsToDataID": dataID,
-                "hyperparms": Operation["hyperparams"]
+                "hyperparams": encodeDictionary(Operation["hyperparams"])
             })
         except Exception as e:
             print("Could not insert into Model Collection. An Error Occurred: ",e)
@@ -914,12 +905,12 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                             "target": timeseriesFormData["target"]
                             }
                         })
-                if (projectType=='timeseries'):
-                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-                        "$set":{
-                            "plotLocation":Operation["plotLocation"]
-                        }
-                    })
+                # if (projectType=='timeseries'):
+                #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+                #         "$set":{
+                #             "plotLocation":Operation["plotLocation"]
+                #         }
+                #     })
         except Exception as e:
             print("An Error Occured: ",e)
     resultsCache.set_training_status(True)
@@ -994,7 +985,7 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
             indexes=result_data["indexes"]
             frequency=result_data["frequency"]
         inference=timeseries()
-        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_project["rawDataPath"],indexes,frequency)
+        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_data["cleanDataPath"],indexes,frequency,path)
         # inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
         
         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
@@ -1016,16 +1007,22 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
 
 @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
 def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+    rawDataPath='/'
     try:
-        result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
-        result_Data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
-        result_Data=serialiseDict(result_Data)
-        if result is not None:
-            result=serialiseDict(result)
-            inferenceFilePath=result["results"]
-            if (os.path.exists(inferenceFilePath)):
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        result_inference=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
+        result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        result_data=serialiseDict(result_data)
+        if result_project is not None:
+            rawDataPath=result_project["rawDataPath"]
+
+        if result_inference is not None:
+            result_inference=serialiseDict(result_inference)
+            inferenceDataFileLocation=result_inference["results"]
+            
+            if (os.path.exists(inferenceDataFileLocation)):
                 timeseriesObj=timeseries()
-                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"],result_Data["cleanDataPath"],inferenceTime,frequency)
+                plotFilepath=timeseriesObj.plotinferencerf(inferenceDataFileLocation,result_inference["inferenceFolderPath"],inferenceTime,frequency)
                 return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
             else:
                 return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
