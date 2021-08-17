@@ -58,7 +58,7 @@ class hyperparameter:
                             if hyper["type"]=="option":
                                 params[hyper["name"]]=hyper["options"]
         model=eval(model_str)
-        sys.stdout=open("logs.log","a+")
+        # sys.stdout=open("logs.log","a+")
         with open("logs.log","a+") as f:
             f.write(modelname)
     
@@ -79,5 +79,4 @@ class hyperparameter:
         prediction=clf.predict(x_test)
         metricsrow=met.calculate_metrics(modelname,model_type,prediction,y_test)
         print("hyper params are : ",hyperparams[modelname]," for ",modelname)
-        sys.stdout.close()
         return metricsrow, hyperparams
