@@ -716,146 +716,39 @@ def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenc
     #     print("Could not do any of the above")
 
 # Old Timeseries API - working
-@app.post('/timeseries',tags=["Timeseries"])
-def timeseries_training(timeseriesFormData: TimeseriesFormData):
-    print(timeseriesFormData)
-    timeseriesFormData=dict(timeseriesFormData)
-    projectConfigFileLocation, projectFolderPath, dataID, projectType = generate_project_timeseries_config_file(timeseriesFormData["projectID"],currentIDs,timeseriesFormData,Project21Database)
-    with open("logs.log","w") as f:
-        f.write("Time series Initiated\n")
-        f.write("Please wait setting up...\n")
-        f.write("Setting up Completed...\n")
-        f.write("Preprocessing the given data\n")
-        f.write("Preprocessing is done\n")
-        f.close()
-    timeseriesPreprocessObj=TimeseriesPreprocess()
-    cleanDataPath=timeseriesPreprocessObj.preprocess(projectConfigFileLocation,projectFolderPath)
-    try:
-        Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
-            "dataID": dataID,
-            "cleanDataPath": cleanDataPath,
-            "target": timeseriesFormData["target"],
-            "belongsToUserID": timeseriesFormData["userID"],
-            "belongsToProjectID": timeseriesFormData["projectID"]
-        })
-    except Exception as e:
-        print("Could not insert into Data Collection. An Error Occured: ",e)
-    
-    with open("logs.log","a+") as f:
-        f.write("Starting training on different models\n")
-        f.write("Please wait setting up...\n")
-        f.write("Setting up Completed...\n")
-        f.close()
-    resultsCache.set_training_status(False)
-    timeseriesObj=timeseries()
-    Operation=timeseriesObj.createarima(projectConfigFileLocation)
-    
-    if Operation["Successful"]:
-        try:
-            Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
-                "modelID": dataID,
-                "modelName": "Default Name",
-                "modelType": "timeseries",
-                "pickleFolderPath": Operation["pickleFolderPath"],    
-                "pickleFilePath": Operation["pickleFilePath"],       
-                "belongsToUserID": timeseriesFormData["userID"],
-                "belongsToProjectID": timeseriesFormData["projectID"],
-                "belongsToDataID": dataID,
-                "hyperparams": {"hyper":"None"}
-            })
-        except Exception as e:
-            print("Could not insert into Model Collection. An Error Occurred: ",e)
-
-        
-        try:
-            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
-                "belongsToUserID": timeseriesFormData["userID"],
-                "belongsToProjectID": timeseriesFormData["projectID"],
-                "belongsToModelID": dataID,
-                "addressOfMetricsFile": Operation["metricsLocation"],
-                "accuracy":Operation["accuracy"]
-            })
-        except Exception as e:
-            print("Could not insert into Metrics Collection. An Error Occured: ",e)
-
-        try:
-            result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":timeseriesFormData["projectID"]})
-            result=serialiseDict(result)
-            if result is not None:
-                if result["listOfDataIDs"] is not None:
-                    newListOfDataIDs=result["listOfDataIDs"]
-                    newListOfDataIDs.append(dataID)
-                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-                        "$set":{
-                            "listOfDataIDs":newListOfDataIDs,
-                            "configFileLocation": projectConfigFileLocation,
-                            "isAuto": False,
-                            "target": timeseriesFormData["target"]
-                            }
-                        })
-                else:
-                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-                        "$set":{
-                            "listOfDataIDs":[dataID],
-                            "configFileLocation": projectConfigFileLocation,
-                            "isAuto": False,
-                            "target": timeseriesFormData["target"]
-                            }
-                        })
-                if (projectType=='timeseries'):
-                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-                        "$set":{
-                            "plotLocation":Operation["plotLocation"]
-                        }
-                    })
-        except Exception as e:
-            print("An Error Occured: ",e)
-    resultsCache.set_training_status(True)
-    with open("logs.log","a+") as f:
-        f.write("\nPROJECT21_TRAINING_ENDED\n")
-        f.write("\nPROJECT21_TRAINING_ENDED\n")
-    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID})
-
-
 # @app.post('/timeseries',tags=["Timeseries"])
 # def timeseries_training(timeseriesFormData: TimeseriesFormData):
 #     print(timeseriesFormData)
 #     timeseriesFormData=dict(timeseriesFormData)
 #     projectConfigFileLocation, projectFolderPath, dataID, projectType = generate_project_timeseries_config_file(timeseriesFormData["projectID"],currentIDs,timeseriesFormData,Project21Database)
-    
-#     resultsCache.set_training_status(False)
 #     with open("logs.log","w") as f:
 #         f.write("Time series Initiated\n")
 #         f.write("Please wait setting up...\n")
 #         f.write("Setting up Completed...\n")
-#         f.write("Preprocessing and Training...\n")
+#         f.write("Preprocessing the given data\n")
+#         f.write("Preprocessing is done\n")
 #         f.close()
 #     timeseriesPreprocessObj=TimeseriesPreprocess()
 #     cleanDataPath=timeseriesPreprocessObj.preprocess(projectConfigFileLocation,projectFolderPath)
-    
-#     with open(projectConfigFileLocation) as f:
-#             projectConfigFileData= yaml.load(f,Loader=SafeLoader)
-
-    
-#     projectConfigFileData["clean_data_address"]=cleanDataPath
-#     with open(projectConfigFileLocation, 'w') as f:
-#         f.write(yaml.safe_dump(projectConfigFileData))
-    
-#     timeseriesObj=timeseries()
-#     indexes,freq, Operation, newCleanDataPath=timeseriesObj.timeseriesmanualrf(projectConfigFileLocation)
 #     try:
 #         Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
 #             "dataID": dataID,
-#             "cleanDataPath": newCleanDataPath,
-#             "yDataAddress": Operation["y_data"],
-#             "indexes": indexes,
-#             "frequency": freq,
+#             "cleanDataPath": cleanDataPath,
 #             "target": timeseriesFormData["target"],
 #             "belongsToUserID": timeseriesFormData["userID"],
 #             "belongsToProjectID": timeseriesFormData["projectID"]
 #         })
 #     except Exception as e:
 #         print("Could not insert into Data Collection. An Error Occured: ",e)
+    
+#     with open("logs.log","a+") as f:
+#         f.write("Starting training on different models\n")
+#         f.write("Please wait setting up...\n")
+#         f.write("Setting up Completed...\n")
+#         f.close()
+#     resultsCache.set_training_status(False)
+#     timeseriesObj=timeseries()
+#     Operation=timeseriesObj.createarima(projectConfigFileLocation)
     
 #     if Operation["Successful"]:
 #         try:
@@ -868,7 +761,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 #                 "belongsToUserID": timeseriesFormData["userID"],
 #                 "belongsToProjectID": timeseriesFormData["projectID"],
 #                 "belongsToDataID": dataID,
-#                 "hyperparams": encodeDictionary(Operation["hyperparams"])
+#                 "hyperparams": {"hyper":"None"}
 #             })
 #         except Exception as e:
 #             print("Could not insert into Model Collection. An Error Occurred: ",e)
@@ -909,57 +802,164 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 #                             "target": timeseriesFormData["target"]
 #                             }
 #                         })
-#                 # if (projectType=='timeseries'):
-#                 #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-#                 #         "$set":{
-#                 #             "plotLocation":Operation["plotLocation"]
-#                 #         }
-#                 #     })
+#                 if (projectType=='timeseries'):
+#                     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+#                         "$set":{
+#                             "plotLocation":Operation["plotLocation"]
+#                         }
+#                     })
 #         except Exception as e:
 #             print("An Error Occured: ",e)
 #     resultsCache.set_training_status(True)
 #     with open("logs.log","a+") as f:
 #         f.write("\nPROJECT21_TRAINING_ENDED\n")
 #         f.write("\nPROJECT21_TRAINING_ENDED\n")
-#     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":Operation["hyperparams"]})
+#     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID})
+
+
+@app.post('/timeseries',tags=["Timeseries"])
+def timeseries_training(timeseriesFormData: TimeseriesFormData):
+    print(timeseriesFormData)
+    timeseriesFormData=dict(timeseriesFormData)
+    projectConfigFileLocation, projectFolderPath, dataID, projectType = generate_project_timeseries_config_file(timeseriesFormData["projectID"],currentIDs,timeseriesFormData,Project21Database)
+    
+    resultsCache.set_training_status(False)
+    with open("logs.log","w") as f:
+        f.write("Time series Initiated\n")
+        f.write("Please wait setting up...\n")
+        f.write("Setting up Completed...\n")
+        f.write("Preprocessing and Training...\n")
+        f.close()
+    timeseriesPreprocessObj=TimeseriesPreprocess()
+    cleanDataPath=timeseriesPreprocessObj.preprocess(projectConfigFileLocation,projectFolderPath)
+    
+    with open(projectConfigFileLocation) as f:
+            projectConfigFileData= yaml.load(f,Loader=SafeLoader)
+
+    
+    projectConfigFileData["clean_data_address"]=cleanDataPath
+    with open(projectConfigFileLocation, 'w') as f:
+        f.write(yaml.safe_dump(projectConfigFileData))
+    
+    timeseriesObj=timeseries()
+    indexes,freq, Operation, newCleanDataPath=timeseriesObj.timeseriesmanual(settings.CONFIG_TIMESERIES_MANUAL_MODEL_FILE,projectConfigFileLocation,projectConfigFileLocation)
+    try:
+        Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
+            "dataID": dataID,
+            "cleanDataPath": newCleanDataPath,
+            "yDataAddress": None,
+            "indexes": indexes,
+            "frequency": freq,
+            "target": timeseriesFormData["target"],
+            "belongsToUserID": timeseriesFormData["userID"],
+            "belongsToProjectID": timeseriesFormData["projectID"]
+        })
+    except Exception as e:
+        print("Could not insert into Data Collection. An Error Occured: ",e)
+    
+    if Operation["Successful"]:
+        try:
+            Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
+                "modelID": dataID,
+                "modelName": "Default Name",
+                "modelType": "timeseries",
+                "pickleFolderPath": Operation["pickleFolderPath"],    
+                "pickleFilePath": Operation["pickleFilePath"],       
+                "belongsToUserID": timeseriesFormData["userID"],
+                "belongsToProjectID": timeseriesFormData["projectID"],
+                "belongsToDataID": dataID,
+                "hyperparams": encodeDictionary(Operation["hyperparams"])
+            })
+        except Exception as e:
+            print("Could not insert into Model Collection. An Error Occurred: ",e)
+
+        
+        try:
+            Project21Database.insert_one(settings.DB_COLLECTION_METRICS,{
+                "belongsToUserID": timeseriesFormData["userID"],
+                "belongsToProjectID": timeseriesFormData["projectID"],
+                "belongsToModelID": dataID,
+                "addressOfMetricsFile": Operation["metricsLocation"],
+                "accuracy":Operation["accuracy"]
+            })
+        except Exception as e:
+            print("Could not insert into Metrics Collection. An Error Occured: ",e)
+
+        try:
+            result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":timeseriesFormData["projectID"]})
+            result=serialiseDict(result)
+            if result is not None:
+                if result["listOfDataIDs"] is not None:
+                    newListOfDataIDs=result["listOfDataIDs"]
+                    newListOfDataIDs.append(dataID)
+                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+                        "$set":{
+                            "listOfDataIDs":newListOfDataIDs,
+                            "configFileLocation": projectConfigFileLocation,
+                            "isAuto": False,
+                            "target": timeseriesFormData["target"]
+                            }
+                        })
+                else:
+                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+                        "$set":{
+                            "listOfDataIDs":[dataID],
+                            "configFileLocation": projectConfigFileLocation,
+                            "isAuto": False,
+                            "target": timeseriesFormData["target"]
+                            }
+                        })
+                # if (projectType=='timeseries'):
+                #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+                #         "$set":{
+                #             "plotLocation":Operation["plotLocation"]
+                #         }
+                #     })
+        except Exception as e:
+            print("An Error Occured: ",e)
+    resultsCache.set_training_status(True)
+    with open("logs.log","a+") as f:
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
+        f.write("\nPROJECT21_TRAINING_ENDED\n")
+    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":Operation["hyperparams"]})
 
 # Timeseries Inference Old API - Working
-@app.post('/doTimeseriesInference',tags=["Timeseries"])
-def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+# @app.post('/doTimeseriesInference',tags=["Timeseries"])
+# def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     
-    pickleFilePath='/'
-    path='/'
-    inferenceDataResultsPath='/'
-    # try:
-    result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
-    if result is not None:
-        result=serialiseDict(result)
-        if result["pickleFilePath"] is not None:
-            pickleFilePath=result["pickleFilePath"]
-        if result["pickleFolderPath"] is not None:
-            projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
-            path=os.path.join(projectRunPath,"inference_data")
-            if(not os.path.exists(path)):
-                os.makedirs(path)
+#     pickleFilePath='/'
+#     path='/'
+#     inferenceDataResultsPath='/'
+#     # try:
+#     result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
+#     if result is not None:
+#         result=serialiseDict(result)
+#         if result["pickleFilePath"] is not None:
+#             pickleFilePath=result["pickleFilePath"]
+#         if result["pickleFolderPath"] is not None:
+#             projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
+#             path=os.path.join(projectRunPath,"inference_data")
+#             if(not os.path.exists(path)):
+#                 os.makedirs(path)
         
-        inference=timeseries()
-        inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
+#         inference=timeseries()
+#         inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
         
-        Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
-            "inferenceTime": inferenceTime,
-            "results": inferenceDataResultsPath,
-            "inferenceFolderPath": path,
-            "belongsToUserID": currentIDs.get_current_user_id(),
-            "belongsToProjectID": projectID,
-            "belongsToModelID": modelID
-        })
-        if os.path.exists(inferenceDataResultsPath):
-            print({"Timeseries Inference Generation":"Successful"})
-            return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
-    # except Exception as e:
-    #     print("An error occured: ", e)
-    #     print("Unable to find model from model Collection")
-    return JSONResponse({"Timeseries Inference Generation":"Failed"})
+#         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+#             "inferenceTime": inferenceTime,
+#             "results": inferenceDataResultsPath,
+#             "inferenceFolderPath": path,
+#             "belongsToUserID": currentIDs.get_current_user_id(),
+#             "belongsToProjectID": projectID,
+#             "belongsToModelID": modelID
+#         })
+#         if os.path.exists(inferenceDataResultsPath):
+#             print({"Timeseries Inference Generation":"Successful"})
+#             return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
+#     # except Exception as e:
+#     #     print("An error occured: ", e)
+#     #     print("Unable to find model from model Collection")
+#     return JSONResponse({"Timeseries Inference Generation":"Failed"})
 
 
 ### Updated To Original

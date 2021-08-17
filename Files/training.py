@@ -29,9 +29,10 @@ class training:
         models=[]
         ans=[]
         hyperparams={}
-
-        test_ratio=preprocessconfigfile["split_ratio_test"] #input given the the user usually 0.3 by default
-
+        if preprocessconfigfile["split_ratio_test"]:
+            test_ratio=preprocessconfigfile["split_ratio_test"] #input given the the user usually 0.3 by default
+        else:
+            test_ratio=0.2
         # data=dataconfigfile["clean_data"] 
         datapath=cleanDataPath
 
@@ -42,6 +43,8 @@ class training:
             metrics=pd.DataFrame(columns = ['modelname','Accuracy','Recall','Prec.','F1','Kappa',"AUC"])
 
         elif dataconfigfile["problem_type"]=='regression':
+            metrics=pd.DataFrame(columns=['modelname','MAE','MSE',"RMSE",'R2','RMSLE'])
+        elif dataconfigfile["problem_type"]=='timeseries':
             metrics=pd.DataFrame(columns=['modelname','MAE','MSE',"RMSE",'R2','RMSLE'])
         #create location of pickle file
         picklelocation=os.path.join(dataconfigfile["location"],str(dataconfigfile["id"])+"_model")
@@ -58,7 +61,7 @@ class training:
                         hypers.append(feature["name"]+"="+ str(feature["value"]))
                 model_str=model["name"] + "(" + ", ".join(hypers) + ")"
 
-                metricsnewrow, hyperparams=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column,hyperparams)
+                metricsnewrow, hyperparams=hp.optimize(model_str,model["name"],userinputconfig,datapath,dataconfig,target_column,hyperparams,test_ratio)
                 try:
                     metrics.loc[len(metrics.index)] = metricsnewrow 
                 except Exception as e:

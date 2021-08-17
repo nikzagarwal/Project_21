@@ -1,6 +1,6 @@
 
  - name: RandomForestRegressor
-   isSelected: false
+   isSelected: true
    type: Regression
    datatype: Tabular
    complexity: ML
@@ -50,7 +50,7 @@
 
 
  - name: XGBRegressor
-   isSelected: false
+   isSelected: true
    type: Regression
    datatype: Tabular
    complexity: ML
@@ -89,7 +89,7 @@
 
  # Hyperparameter tuning for SupportVector Regressor(SVR)
  - name: SVR
-   isSelected: false
+   isSelected: true
    type: Regression
    data_type: Tabular
    complexity: ML
