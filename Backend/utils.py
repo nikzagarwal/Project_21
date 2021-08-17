@@ -18,13 +18,26 @@ def generate_random_id():
 
 def encodeDictionary(dictionaryToConvert):
     newDictionary={}
+    dictionaryToConvert=dict(dictionaryToConvert)
     for k,v in dictionaryToConvert.items():
-        if isinstance(v,np.int64):
-            v=int(v)
-        if isinstance(v,np.int32):
-            v=int(v)
-        newDictionary[k]=v
-        return newDictionary
+        print("Key: ",k," Type: ",type(k))
+        print("Value: ",v," Type: ",type(v))
+        k=str(k)
+        if v is not None:
+            if isinstance(v,np.int64):
+                v=int(v)
+            elif isinstance(v,np.int32):
+                v=int(v)
+            elif isinstance(v,int):
+                v=int(v)
+            elif isinstance(v,float):
+                v=float(v)
+            elif isinstance(v,bool):
+                v=bool(v)
+            elif isinstance(v, str):
+                v=str(v)
+            newDictionary[k]=v
+    return newDictionary
 
 def convertFile(trainFile):
     tempDataFilePath=settings.DATA_TEMP_FOLDER

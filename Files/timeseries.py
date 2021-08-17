@@ -349,9 +349,9 @@ class timeseries:
 
         return indexes, clean_data_path
         
-    def rfinference(self,days,pickleFileLocation,dataPathLocation,indexes,freq):
+    def rfinference(self,days,pickleFileLocation,newCleanDataPath,indexes,freq,inferenceFolderLocation):
 
-        df=pd.read_csv(dataPathLocation)
+        df=pd.read_csv(newCleanDataPath)
         #df2=df.drop(['y'],inplace=True,axis=1)
         for i in range(days):
             index=len(df)
@@ -380,7 +380,7 @@ class timeseries:
             x=np.array([trend_1, trend_2, period7_seasonality,
             period12_seasonality, period30_seasonality, period52_seasonality,
             period365_seasonality])
-            print('x shape preev',x.shape)
+            print('x shape prev',x.shape)
             model=load_model(pickleFileLocation)
             x=x.reshape(1,7)
             print('x_shape',x.shape)
@@ -400,7 +400,7 @@ class timeseries:
         new_index=pd.date_range(start=indexes,periods=len(df.index),freq=freq)
         df.index=new_index
         
-        inferenceDataFileLocation=os.path.join(pickleFileLocation,os.pardir,'inference.csv')
+        inferenceDataFileLocation=os.path.join(inferenceFolderLocation,'inference.csv')
         df.to_csv(inferenceDataFileLocation)
         
         return df, inferenceDataFileLocation
@@ -432,9 +432,12 @@ class timeseries:
 
         return indexes,freq, Operation, clean_data_path
     
-    def plotinferencerf(self,df,storeLocation,days,freq):
-        data_original=pd.read_csv('timeseries.csv')
-        data=df
+    def plotinferencerf(self,inferenceDataFileLocation,storeLocation,days,freq):
+        data_original=pd.read_csv(inferenceDataFileLocation)
+        # data_original=pd.read_csv('timeseries.csv')
+        # df=pd.read_csv(inferenceDataFileLocation)
+        # data=df
+        df=data_original
         fig = go.Figure()
         index_of_fc = pd.date_range(start =df.index[0], periods = len(data_original),freq=freq)
         ran=random.randint(100,999)

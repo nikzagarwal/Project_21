@@ -79,4 +79,5 @@ class hyperparameter:
         prediction=clf.predict(x_test)
         metricsrow=met.calculate_metrics(modelname,model_type,prediction,y_test)
         print("hyper params are : ",hyperparams[modelname]," for ",modelname)
+        sys.stdout.close()
         return metricsrow, hyperparams

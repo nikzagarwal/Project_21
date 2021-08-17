@@ -168,6 +168,7 @@ class Home extends Component {
         this.setState({
             auto: false
         })
+        
 
         axios.get('http://'+window.address+':8000/getPreprocessParam')
             .then((response) => {
@@ -181,10 +182,22 @@ class Home extends Component {
         $(theFormItself).hide();
         var theFormItself2 = document.getElementById('form4');
         $(theFormItself2).show();
+        
     }
     handleModelForm = (val) => {
         this.setState({
             modelForm: val
+        })
+    }
+    handleProjectState = event =>{
+        this.setState({
+            modeldetail: {
+                "Successful": "False",
+                "dataID": 0,
+                "modelID": 0,
+                "projectID": 0,
+                "userID": 0
+            },
         })
     }
     handleTargetChange = event => {
@@ -652,7 +665,8 @@ class Home extends Component {
                                 mtype={this.state.mtype}
                                 projectdetail={this.state.projectdetail}
                                 handleManualModelDetails={this.handleManualModelDetails}
-                                handleSocketConnection={this.handleSocketConnection} />
+                                handleSocketConnection={this.handleSocketConnection}
+                                handleProjectState={this.handleProjectState} />
                         </div>
                     </div>
                     {/* form6 for time series */}

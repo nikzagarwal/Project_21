@@ -699,6 +699,10 @@ input[type=text],input[type=number],input[type=password] ,select, textarea {
   color: #04080F;
   
 }
+.logbtn{
+  float: none;
+  margin: 4em 31em;
+}
 .spinner-location{
   display: flex;
   align-items: center;
@@ -1442,7 +1446,7 @@ em{
   background-color: #000;
   width:100%;
   height:200px;
-  overflow: auto;
+  overflow: hidden;
   border-radius: 8px;
   color: rgb(12, 241, 12);
   padding:1em;

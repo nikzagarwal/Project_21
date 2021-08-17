@@ -409,18 +409,23 @@ def get_all_project_details(userID:int):
     listOfAccuracies=[]
     listOfHyperparams=[]
     try:   
+        print("project traversal")
         userProjects=Project21Database.find(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
         for project in userProjects:
             project=serialiseDict(project)
+            print("Project: ",project)
             if project["projectType"]=='clustering':
                 listOfDataIDs=project["listOfDataIDs"]
+                print("This project's listOfDataIDs: ",listOfDataIDs)
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
-                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToDataID":dataID})
-                        project_model=serialiseDict(projectModel)
-                        if "hyperparams" in project_model.keys():
+                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToProjectID":project["projectID"],"belongsToDataID":dataID})
+                        project_model=serialiseDict(project_model)
+                        print("project_model: ", project_model)
+                        if project_model["hyperparams"] is not None:
                             hyperparams=project_model["hyperparams"]
                             listOfHyperparams.append(hyperparams)
+                            print("listOfHyperparams",listOfHyperparams)
                     projectTemplate={
                         "projectID": project["projectID"],
                         "projectName": project["projectName"],
@@ -436,18 +441,22 @@ def get_all_project_details(userID:int):
                     listOfHyperparams=[]
             else:
                 listOfDataIDs=project["listOfDataIDs"]
+                print("This project's listOfDataIDs: ",listOfDataIDs)
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
-                        projectModel=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToDataID":dataID})
-                        if projectModel is not None:
-                            projectModel=serialiseDict(projectModel)
-                            if "hyperparams" in projectModel.keys():
-                                listOfHyperparams.append(projectModel["hyperparams"])
+                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToProjectID":project["projectID"],"belongsToDataID":dataID})
+                        if project_model is not None:
+                            project_model=serialiseDict(project_model)
+                            print("project_model: ", project_model)
+                            if project_model["hyperparams"] is not None:
+                                listOfHyperparams.append(project_model["hyperparams"])
+                                print("listOfHyperparams",listOfHyperparams)
                         projectMetrics=Project21Database.find_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})
                         if projectMetrics is not None:
                             projectMetrics=serialiseDict(projectMetrics)
                             if projectMetrics["accuracy"] is not None:
                                 listOfAccuracies.append(projectMetrics["accuracy"])
+                                print("listOfAccuracies",listOfAccuracies)
                     projectTemplate={
                         "projectID": project["projectID"],
                         "projectName": project["projectName"].title(),
@@ -596,7 +605,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "belongsToUserID": userID,
                 "belongsToProjectID": projectID,
                 "belongsToDataID": dataID,
-                "hyperparms": newHyperparams
+                "hyperparams": newHyperparams
             })
         except Exception as e:
             print(e)
@@ -617,15 +626,16 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "addressOfMetricsFile": Operation["metricsLocation"]
             })
         if result_project["listOfDataIDs"] is not None:
-            newListOfDataIDs=result_project["listOfDataIDs"]
-            newListOfDataIDs.append(dataID)
-            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                "$set":{
-                    "listOfDataIDs":newListOfDataIDs,
-                    "modelsConfigFileLocation":modelsConfigFileLocation,
-                    "isAuto": False,
-                    }
-                })
+            if dataID not in result_project["listOfDataIDs"]:
+                newListOfDataIDs=result_project["listOfDataIDs"]
+                newListOfDataIDs.append(dataID)
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "listOfDataIDs":newListOfDataIDs,
+                        "modelsConfigFileLocation":modelsConfigFileLocation,
+                        "isAuto": False,
+                        }
+                    })
         else:
             Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                 "$set":{
@@ -843,15 +853,6 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     except Exception as e:
         print("Could not insert into Data Collection. An Error Occured: ",e)
     
-    
-    
-    # Operation returns{"Successful": True, 
-    # "cleanDataPath": cleanDataPath, 
-    # "metricsLocation":metricsLocation, 
-    # "pickleFolderPath":pickleFolderPath, "pickleFilePath":pickleFilePath, 
-    # "accuracy":accuracy,
-    # "hyperparams":params,
-    # "y_data":y_data}
     if Operation["Successful"]:
         try:
             Project21Database.insert_one(settings.DB_COLLECTION_MODEL,{
@@ -863,7 +864,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                 "belongsToUserID": timeseriesFormData["userID"],
                 "belongsToProjectID": timeseriesFormData["projectID"],
                 "belongsToDataID": dataID,
-                "hyperparms": Operation["hyperparams"]
+                "hyperparams": encodeDictionary(Operation["hyperparams"])
             })
         except Exception as e:
             print("Could not insert into Model Collection. An Error Occurred: ",e)
@@ -904,12 +905,12 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
                             "target": timeseriesFormData["target"]
                             }
                         })
-                if (projectType=='timeseries'):
-                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
-                        "$set":{
-                            "plotLocation":Operation["plotLocation"]
-                        }
-                    })
+                # if (projectType=='timeseries'):
+                #     Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":result["projectID"]},{
+                #         "$set":{
+                #             "plotLocation":Operation["plotLocation"]
+                #         }
+                #     })
         except Exception as e:
             print("An Error Occured: ",e)
     resultsCache.set_training_status(True)
@@ -984,7 +985,7 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
             indexes=result_data["indexes"]
             frequency=result_data["frequency"]
         inference=timeseries()
-        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_project["rawDataPath"],indexes,frequency)
+        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_data["cleanDataPath"],indexes,frequency,path)
         # inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
         
         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
@@ -1006,16 +1007,22 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
 
 @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
 def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+    rawDataPath='/'
     try:
-        result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
-        result_Data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
-        result_Data=serialiseDict(result_Data)
-        if result is not None:
-            result=serialiseDict(result)
-            inferenceFilePath=result["results"]
-            if (os.path.exists(inferenceFilePath)):
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        result_inference=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
+        result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        result_data=serialiseDict(result_data)
+        if result_project is not None:
+            rawDataPath=result_project["rawDataPath"]
+
+        if result_inference is not None:
+            result_inference=serialiseDict(result_inference)
+            inferenceDataFileLocation=result_inference["results"]
+            
+            if (os.path.exists(inferenceDataFileLocation)):
                 timeseriesObj=timeseries()
-                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"],result_Data["cleanDataPath"],inferenceTime,frequency)
+                plotFilepath=timeseriesObj.plotinferencerf(inferenceDataFileLocation,result_inference["inferenceFolderPath"],inferenceTime,frequency)
                 return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
             else:
                 return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
