@@ -409,18 +409,23 @@ def get_all_project_details(userID:int):
     listOfAccuracies=[]
     listOfHyperparams=[]
     try:   
+        print("project traversal")
         userProjects=Project21Database.find(settings.DB_COLLECTION_PROJECT,{"belongsToUserID":userID})
         for project in userProjects:
             project=serialiseDict(project)
+            print("Project: ",project)
             if project["projectType"]=='clustering':
                 listOfDataIDs=project["listOfDataIDs"]
+                print("This project's listOfDataIDs: ",listOfDataIDs)
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
-                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToDataID":dataID})
-                        project_model=serialiseDict(projectModel)
-                        if "hyperparams" in project_model.keys():
+                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToProjectID":project["projectID"],"belongsToDataID":dataID})
+                        project_model=serialiseDict(project_model)
+                        print("project_model: ", project_model)
+                        if project_model["hyperparams"] is not None:
                             hyperparams=project_model["hyperparams"]
                             listOfHyperparams.append(hyperparams)
+                            print("listOfHyperparams",listOfHyperparams)
                     projectTemplate={
                         "projectID": project["projectID"],
                         "projectName": project["projectName"],
@@ -436,18 +441,22 @@ def get_all_project_details(userID:int):
                     listOfHyperparams=[]
             else:
                 listOfDataIDs=project["listOfDataIDs"]
+                print("This project's listOfDataIDs: ",listOfDataIDs)
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
-                        projectModel=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToDataID":dataID})
-                        if projectModel is not None:
-                            projectModel=serialiseDict(projectModel)
-                            if "hyperparams" in projectModel.keys():
-                                listOfHyperparams.append(projectModel["hyperparams"])
+                        project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToProjectID":project["projectID"],"belongsToDataID":dataID})
+                        if project_model is not None:
+                            project_model=serialiseDict(project_model)
+                            print("project_model: ", project_model)
+                            if project_model["hyperparams"] is not None:
+                                listOfHyperparams.append(project_model["hyperparams"])
+                                print("listOfHyperparams",listOfHyperparams)
                         projectMetrics=Project21Database.find_one(settings.DB_COLLECTION_METRICS,{"belongsToModelID":dataID})
                         if projectMetrics is not None:
                             projectMetrics=serialiseDict(projectMetrics)
                             if projectMetrics["accuracy"] is not None:
                                 listOfAccuracies.append(projectMetrics["accuracy"])
+                                print("listOfAccuracies",listOfAccuracies)
                     projectTemplate={
                         "projectID": project["projectID"],
                         "projectName": project["projectName"].title(),
@@ -596,7 +605,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "belongsToUserID": userID,
                 "belongsToProjectID": projectID,
                 "belongsToDataID": dataID,
-                "hyperparms": newHyperparams
+                "hyperparams": newHyperparams
             })
         except Exception as e:
             print(e)
@@ -617,15 +626,16 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "addressOfMetricsFile": Operation["metricsLocation"]
             })
         if result_project["listOfDataIDs"] is not None:
-            newListOfDataIDs=result_project["listOfDataIDs"]
-            newListOfDataIDs.append(dataID)
-            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                "$set":{
-                    "listOfDataIDs":newListOfDataIDs,
-                    "modelsConfigFileLocation":modelsConfigFileLocation,
-                    "isAuto": False,
-                    }
-                })
+            if dataID not in result_project["listOfDataIDs"]:
+                newListOfDataIDs=result_project["listOfDataIDs"]
+                newListOfDataIDs.append(dataID)
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "listOfDataIDs":newListOfDataIDs,
+                        "modelsConfigFileLocation":modelsConfigFileLocation,
+                        "isAuto": False,
+                        }
+                    })
         else:
             Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                 "$set":{
