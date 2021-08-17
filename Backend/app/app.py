@@ -417,6 +417,7 @@ def get_all_project_details(userID:int):
                 if project["target"] is not None:
                     for dataID in listOfDataIDs:
                         project_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToUserID":userID,"belongsToDataID":dataID})
+                        project_model=serialiseDict(projectModel)
                         if "hyperparams" in project_model.keys():
                             hyperparams=project_model["hyperparams"]
                             listOfHyperparams.append(hyperparams)
