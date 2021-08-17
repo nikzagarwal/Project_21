@@ -294,17 +294,33 @@ class timeseries:
     #     return os.path.join(storeLocation,"inference.html")
 
 
-    def timeseriesmanual(self,userinputconfig,dataconfig,preprocessconfig):
+    def timeseriesmanual(self,timeseriesmodelyaml,dataconfig,preprocessconfig):
         with open(dataconfig) as f:
             dataconfigfile= yaml.load(f,Loader=FullLoader)
 
-        location=dataconfigfile["location"]
-        freq=dataconfigfile['frequency']
-        data=pd.read_csv(location)
-        indexes=self.rftimeseriespreprocess(self,dataconfig)
-        train.train(self,userinputconfig,dataconfig,preprocessconfig,'timeseries.csv')
+        datalocation=dataconfigfile['clean_data_address']
 
-        return indexes,freq
+        freq=dataconfigfile['frequency']
+        data=pd.read_csv(datalocation)
+        print(data)
+        indexes, clean_data_path=self.rftimeseriespreprocess(data)
+        print(indexes)
+        # dataconfigfile['raw_data_address']='timeseries.csv'
+        dataconfigfile['indexes']=indexes
+        print('updating yaml file')
+
+        # newpath=os.path.join(dataconfigfile['location'],"newconfig.yaml")
+        # newpath=os.path.join(dataconfig)
+        # print(newpath)
+        with open(dataconfig, 'w') as f:
+            f.write(yaml.safe_dump(dataconfigfile))
+
+        print('starting training')
+        trainObj=train(timeseriesmodelyaml,dataconfig,preprocessconfig,clean_data_path)
+        Operation=trainObj.train(dataconfig)
+
+        return indexes,freq, Operation, clean_data_path
+
 
     def rftimeseriespreprocess(self,data):  
         length=len(data)
@@ -381,7 +397,7 @@ class timeseries:
             period12_seasonality, period30_seasonality, period52_seasonality,
             period365_seasonality])
             print('x shape prev',x.shape)
-            model=load_model(pickleFileLocation)
+            model=pickle.load(open(pickleFileLocation,'rb'))
             x=x.reshape(1,7)
             print('x_shape',x.shape)
             
@@ -432,12 +448,12 @@ class timeseries:
 
         return indexes,freq, Operation, clean_data_path
     
-    def plotinferencerf(self,inferenceDataFileLocation,storeLocation,days,freq):
-        data_original=pd.read_csv(inferenceDataFileLocation)
+    def plotinferencerf(self,inferenceDataFileLocation,originaldatapath,storeLocation,days,freq):
+        data_original=pd.read_csv(originaldatapath)
         # data_original=pd.read_csv('timeseries.csv')
         # df=pd.read_csv(inferenceDataFileLocation)
         # data=df
-        df=data_original
+        df=pd.read_csv(inferenceDataFileLocation)
         fig = go.Figure()
         index_of_fc = pd.date_range(start =df.index[0], periods = len(data_original),freq=freq)
         ran=random.randint(100,999)

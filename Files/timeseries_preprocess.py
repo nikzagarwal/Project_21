@@ -25,7 +25,7 @@ class TimeseriesPreprocess:
         df.index=df.index.tz_convert(None)
         df=df.resample(config_data['frequency']).ffill()
         df.dropna(how='any', axis=0, inplace=True)
-        df['ds']=df.index
+        # df['ds']=df.index
         # df = df['Cases'].resample(config_data['frequency']).sum()
 
 
@@ -63,7 +63,8 @@ class TimeseriesPreprocess:
         clean_data_address = os.path.abspath(os.path.join(folderLocation,"clean_data.csv"))
         config_data['clean_data_address'] = clean_data_address
     
-    
+        #Doing this for testing
+        shutil.copy(clean_data_address,os.path.join(folderLocation,"clean_data_timeseries.csv"))
     
         with open(config, 'w') as yaml_file:
             yaml_file.write( yaml.dump(config_data, default_flow_style=False))

@@ -108,20 +108,59 @@ class training:
             "hyperparams":hyper
         }
 
-    def model_plot(self,pickleFileLocation,cleandatapath,target_column,plotLocation):
-        clf=pickle.load(open(pickleFileLocation,"rb"))
-        data=pd.read_csv(cleandatapath)
-        y=data[target_column]
-        data.drop([target_column],inplace=True,axis=1)
-        x=data
-        y_pred=clf.predict(x)
-        fig = go.Figure()
-        ran=random.randint(100,999)
-        fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
-        fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
-        
-        plotlocation=os.path.join(plotLocation,"plot.html")
-        with open(plotlocation, 'a') as f:
-            f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-        f.close()
-        return plotlocation
+    def model_plot(self,pickleFileLocation,cleandatapath,target_column,plotLocation,modeltype):
+        print("reached here,",modeltype)
+        if modeltype=="regression":
+            print("Model Type expected: regression received: ",modeltype)
+            clf=pickle.load(open(pickleFileLocation,"rb"))
+            data=pd.read_csv(cleandatapath)
+            y=data[target_column]
+            data.drop([target_column],inplace=True,axis=1)
+            x=data
+            y_pred=clf.predict(x)
+            fig = go.Figure()
+            ran=random.randint(100,999)
+            fig.add_trace(go.Scatter(x=x.index,y=y,name="actual"))
+            fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
+            
+            plotlocation=os.path.join(plotLocation,"plot.html")
+            print("about to save plot")
+            fig.write_html(plotlocation)
+            print("done, plotlocation",plotlocation)
+            return plotlocation
+        else:
+            print("Model Type expected: classification received: ",modeltype)
+            clf=pickle.load(open(pickleFileLocation,"rb"))
+            data=pd.read_csv(cleandatapath)
+            print(1)
+            y=data[[target_column]]
+            print(2)
+            data.drop([target_column],inplace=True,axis=1)
+            
+            x=data
+            print(3)
+            y_pred=clf.predict(x)
+            print(4)
+            fig = go.Figure()
+            ran=random.randint(100,999)
+            
+            fig.add_trace(go.Scatter(x=list(x.index),y=y.iloc[:,-1],name="actual",mode='markers',marker=dict(
+                    color='LightSkyBlue',
+                    size=20,
+                    line=dict(
+                        color='MediumPurple',
+                        width=12
+                    ))))
+            fig.add_trace(go.Scatter(x=list(x.index),y=y_pred,name="predictions",mode='markers',marker=dict(
+                    color='Orange',
+                    size=5,
+                    line=dict(
+                        color='Orange',
+                        width=12
+                    ))))
+            plotlocation=os.path.join(plotLocation,"plotclas.html")
+            print("about to save plot")
+
+            fig.write_html(plotlocation)
+            print("done, plotlocation",plotlocation)
+            return plotlocation
