@@ -125,19 +125,22 @@ class training:
             
             plotlocation=os.path.join(plotLocation,"plot.html")
             print("about to save plot")
-            with open(plotlocation) as f:
-                f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-                f.close()
+            fig.write_html(plotlocation)
             print("done, plotlocation",plotlocation)
             return plotlocation
         else:
             print("Model Type expected: classification received: ",modeltype)
             clf=pickle.load(open(pickleFileLocation,"rb"))
             data=pd.read_csv(cleandatapath)
-            y=data[target_column]
+            print(1)
+            y=data[[target_column]]
+            print(2)
             data.drop([target_column],inplace=True,axis=1)
+            
             x=data
+            print(3)
             y_pred=clf.predict(x)
+            print(4)
             fig = go.Figure()
             ran=random.randint(100,999)
             
@@ -157,8 +160,7 @@ class training:
                     ))))
             plotlocation=os.path.join(plotLocation,"plotclas.html")
             print("about to save plot")
-            with open(plotlocation) as f:
-                f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-                f.close()
+
+            fig.write_html(plotlocation)
             print("done, plotlocation",plotlocation)
             return plotlocation
