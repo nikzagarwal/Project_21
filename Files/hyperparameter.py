@@ -58,7 +58,7 @@ class hyperparameter:
                             if hyper["type"]=="option":
                                 params[hyper["name"]]=hyper["options"]
         model=eval(model_str)
-        # sys.stdout=open("logs.log","a+")
+        sys.stdout=open("logs.log","a+")
         with open("logs.log","a+") as f:
             f.write(modelname)
     

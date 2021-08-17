@@ -294,7 +294,7 @@ class timeseries:
     #     return os.path.join(storeLocation,"inference.html")
 
 
-    def timeseriesmanual(self,timeseriesmodelyaml,dataconfig,preprocessconfig):
+    def timeseriesmanual(self,timeseriesmodelyaml,dataconfig,preprocessconfig,storeLocation):
         with open(dataconfig) as f:
             dataconfigfile= yaml.load(f,Loader=FullLoader)
 
@@ -303,7 +303,7 @@ class timeseries:
         freq=dataconfigfile['frequency']
         data=pd.read_csv(datalocation)
         print(data)
-        indexes, clean_data_path=self.rftimeseriespreprocess(data)
+        indexes, clean_data_path=self.rftimeseriespreprocess(data,storeLocation)
         print(indexes)
         # dataconfigfile['raw_data_address']='timeseries.csv'
         dataconfigfile['indexes']=indexes
@@ -312,17 +312,18 @@ class timeseries:
         # newpath=os.path.join(dataconfigfile['location'],"newconfig.yaml")
         # newpath=os.path.join(dataconfig)
         # print(newpath)
+        dataconfigfile['target_column_name']='y'
         with open(dataconfig, 'w') as f:
             f.write(yaml.safe_dump(dataconfigfile))
 
         print('starting training')
+        
         trainObj=train()
         Operation=trainObj.train(timeseriesmodelyaml,dataconfig,preprocessconfig,clean_data_path)
 
         return indexes,freq, Operation, clean_data_path
-
-
-    def rftimeseriespreprocess(self,data):  
+        
+    def rftimeseriespreprocess(self,data,storeLocation):  
         length=len(data)
         y=data['y']
         trend_1=[0]*length
@@ -360,7 +361,7 @@ class timeseries:
         except:
             pass
         print(data)
-        clean_data_path=os.path.abspath(os.path.join(os.getcwd(),'timeseries.csv'))
+        clean_data_path=os.path.abspath(os.path.join(storeLocation,'timeseries.csv'))
         data.to_csv(clean_data_path,index=0)
 
         return indexes, clean_data_path
@@ -456,10 +457,12 @@ class timeseries:
         df=pd.read_csv(inferenceDataFileLocation)
         fig = go.Figure()
         index_of_fc = pd.date_range(start =df.index[0], periods = len(data_original),freq=freq)
+        index_of_inf = pd.date_range(start =df.index[0], periods = len(data_original)+days,freq=freq)
+
         ran=random.randint(100,999)
-        fig.add_trace(go.Scatter(x=df.index,y=df.y,name="predictions"))
+        fig.add_trace(go.Scatter(x=index_of_inf,y=df.y,name="predictions"))
         fig.add_trace(go.Scatter(x=index_of_fc,y=data_original.y,name="actual"))
-        
+    
         # fig=go.Figure(data=go.Scatter(x=predictions.index,y=predictions.predictions))
         fig.write_html(os.path.join(storeLocation,"inference.html"))
 

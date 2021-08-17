@@ -322,7 +322,31 @@ def get_plots(projectID:int):
             if (result["projectType"]=='clustering'):
                     return FileResponse(result["clusterPlotLocation"],media_type="text/html",filename="plot.html")
             if (result["projectType"]=='timeseries'):
-                return FileResponse(result["plotLocation"],media_type="text/html",filename="plot.html")
+                result_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToProjectID":projectID})
+                if result_model is not None:
+                    result_model=serialiseDict(result_model)
+                    pickleFilePath=result_model["pickleFilePath"]
+
+                result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID})
+                if result_data is not None:
+                    result_data=serialiseDict(result_data)
+                    cleanDataPath=result_data["cleanDataPath"]
+
+                print(result["target"],result["projectFolderPath"],result["projectType"])
+                manual_mode=training()
+                plotFilePath=manual_mode.model_plot(pickleFilePath,cleanDataPath,"y",result["projectFolderPath"],"regression")
+                print(plotFilePath)
+                try:
+                    Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                        "$set": {
+                            "plotsPath": plotFilePath
+                        }
+                    })
+                    return FileResponse(plotFilePath,media_type="text/html",filename="plot.html")
+                except Exception as e:
+                    print("An Error occured while storing the plot path into the project collection")
+                return FileResponse(plotFilePath,media_type='text/html',filename='plot.html')
+                # return FileResponse(result["plotLocation"],media_type="text/html",filename="plot.html")
             
             if result["isAuto"]:
                 result_model=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"belongsToProjectID":projectID})
@@ -840,9 +864,8 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     projectConfigFileData["clean_data_address"]=cleanDataPath
     with open(projectConfigFileLocation, 'w') as f:
         f.write(yaml.safe_dump(projectConfigFileData))
-    
     timeseriesObj=timeseries()
-    indexes,freq, Operation, newCleanDataPath=timeseriesObj.timeseriesmanual(settings.CONFIG_TIMESERIES_MANUAL_MODEL_FILE,projectConfigFileLocation,projectConfigFileLocation)
+    indexes,freq, Operation, newCleanDataPath=timeseriesObj.timeseriesmanual(settings.CONFIG_TIMESERIES_MANUAL_MODEL_FILE,projectConfigFileLocation,projectConfigFileLocation,projectFolderPath)
     try:
         Project21Database.insert_one(settings.DB_COLLECTION_DATA,{
             "dataID": dataID,
@@ -921,7 +944,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     with open("logs.log","a+") as f:
         f.write("\nPROJECT21_TRAINING_ENDED\n")
         f.write("\nPROJECT21_TRAINING_ENDED\n")
-    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":Operation["hyperparams"]})
+    return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":encodeDictionary(Operation["hyperparams"])})
 
 # Timeseries Inference Old API - Working
 # @app.post('/doTimeseriesInference',tags=["Timeseries"])
@@ -964,108 +987,100 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 
 ### Updated To Original
 
-@app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
-def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
-    try:
-        result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
-        result_Data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
-        result_Data=serialiseDict(result_Data)
-        if result is not None:
-            result=serialiseDict(result)
-            inferenceFilePath=result["results"]
-            if (os.path.exists(inferenceFilePath)):
-                timeseriesObj=timeseries()
-                plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"],result_Data["cleanDataPath"],inferenceTime,frequency)
-                return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
-            else:
-                return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
-    except Exception as e:
-        print("An Error Occured: ",e)
-        return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @app.post('/doTimeseriesInference',tags=["Timeseries"])
-# def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
-    
-#     pickleFilePath='/'
-#     path='/'
-#     inferenceDataResultsPath='/'
-#     # try:
-#     result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
-#     if result is not None:
-#         result=serialiseDict(result)
-#         if result["pickleFilePath"] is not None:
-#             pickleFilePath=result["pickleFilePath"]
-#         if result["pickleFolderPath"] is not None:
-#             projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
-#             path=os.path.join(projectRunPath,"inference_data")
-#             if(not os.path.exists(path)):
-#                 os.makedirs(path)
-        
-#         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
-#         if result_project is not None:
-#             configFileLocation=result_project["configFileLocation"]
-        
-#         result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
-#         if result_data is not None:
-#             indexes=result_data["indexes"]
-#             frequency=result_data["frequency"]
-#         inference=timeseries()
-#         _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_data["cleanDataPath"],indexes,frequency,path)
-#         # inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
-        
-#         Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
-#             "inferenceTime": inferenceTime,
-#             "results": inferenceDataResultsPath,
-#             "inferenceFolderPath": path,
-#             "belongsToUserID": currentIDs.get_current_user_id(),
-#             "belongsToProjectID": projectID,
-#             "belongsToModelID": modelID
-#         })
-#         if os.path.exists(inferenceDataResultsPath):
-#             print({"Timeseries Inference Generation":"Successful"})
-#             return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
-#     # except Exception as e:
-#     #     print("An error occured: ", e)
-#     #     print("Unable to find model from model Collection")
-#     return JSONResponse({"Timeseries Inference Generation":"Failed"})
-
-
 # @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
 # def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
-#     rawDataPath='/'
 #     try:
-#         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
-#         result_inference=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
-#         result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
-#         result_data=serialiseDict(result_data)
-#         if result_project is not None:
-#             rawDataPath=result_project["rawDataPath"]
-
-#         if result_inference is not None:
-#             result_inference=serialiseDict(result_inference)
-#             inferenceDataFileLocation=result_inference["results"]
-            
-#             if (os.path.exists(inferenceDataFileLocation)):
+#         result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
+#         result_Data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+#         result_Data=serialiseDict(result_Data)
+#         if result is not None:
+#             result=serialiseDict(result)
+#             inferenceFilePath=result["results"]
+#             if (os.path.exists(inferenceFilePath)):
 #                 timeseriesObj=timeseries()
-#                 plotFilepath=timeseriesObj.plotinferencerf(inferenceDataFileLocation,result_inference["inferenceFolderPath"],inferenceTime,frequency)
+#                 plotFilepath=timeseriesObj.plotinference(inferenceFilePath,result["inferenceFolderPath"],result_Data["cleanDataPath"],inferenceTime,frequency)
 #                 return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
 #             else:
 #                 return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
 #     except Exception as e:
 #         print("An Error Occured: ",e)
 #         return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
+
+
+
+
+
+@app.post('/doTimeseriesInference',tags=["Timeseries"])
+def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+    
+    pickleFilePath='/'
+    path='/'
+    inferenceDataResultsPath='/'
+    # try:
+    result=Project21Database.find_one(settings.DB_COLLECTION_MODEL,{"modelID":modelID,"belongsToProjectID":projectID})
+    if result is not None:
+        result=serialiseDict(result)
+        if result["pickleFilePath"] is not None:
+            pickleFilePath=result["pickleFilePath"]
+        if result["pickleFolderPath"] is not None:
+            projectRunPath=os.path.join(result["pickleFolderPath"],os.pardir)
+            path=os.path.join(projectRunPath,"inference_data")
+            if(not os.path.exists(path)):
+                os.makedirs(path)
+        
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        if result_project is not None:
+            configFileLocation=result_project["configFileLocation"]
+        
+        result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        if result_data is not None:
+            indexes=result_data["indexes"]
+            frequency=result_data["frequency"]
+        inference=timeseries()
+        _, inferenceDataResultsPath=inference.rfinference(inferenceTime,pickleFilePath,result_data["cleanDataPath"],indexes,frequency,path)
+        # inferenceDataResultsPath=inference.arimainference(pickleFilePath,path,inferenceTime)
+        
+        Project21Database.insert_one(settings.DB_COLLECTION_INFERENCE,{
+            "inferenceTime": inferenceTime,
+            "results": inferenceDataResultsPath,
+            "inferenceFolderPath": path,
+            "belongsToUserID": currentIDs.get_current_user_id(),
+            "belongsToProjectID": projectID,
+            "belongsToModelID": modelID
+        })
+        if os.path.exists(inferenceDataResultsPath):
+            print({"Timeseries Inference Generation":"Successful"})
+            return FileResponse(inferenceDataResultsPath,media_type="text/csv",filename="inference.csv")
+    # except Exception as e:
+    #     print("An error occured: ", e)
+    #     print("Unable to find model from model Collection")
+    return JSONResponse({"Timeseries Inference Generation":"Failed"})
+
+
+@app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
+def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
+    rawDataPath='/'
+    try:
+        result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
+        result_inference=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
+        result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":projectID,"dataID":modelID})
+        result_data=serialiseDict(result_data)
+        if result_project is not None:
+            rawDataPath=result_project["rawDataPath"]
+
+        if result_inference is not None:
+            result_inference=serialiseDict(result_inference)
+            inferenceDataFileLocation=result_inference["results"]
+            cleanDataPath=result_data["cleanDataPath"]
+            if (os.path.exists(inferenceDataFileLocation)):
+                timeseriesObj=timeseries()
+                plotFilepath=timeseriesObj.plotinferencerf(inferenceDataFileLocation,cleanDataPath,result_inference["inferenceFolderPath"],inferenceTime,frequency)
+                return FileResponse(plotFilepath,media_type="text/html",filename="inference.html")
+            else:
+                return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
+    except Exception as e:
+        print("An Error Occured: ",e)
+        return JSONResponse({"Success":"False","Inference Plot":"Not Generated"})
 
 
 
