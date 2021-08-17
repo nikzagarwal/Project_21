@@ -1,3 +1,4 @@
+from Backend.app.schemas import User
 from datetime import time
 import os, stat
 import random
@@ -206,7 +207,7 @@ def generate_project_timeseries_config_file(projectID,currentIDs,timeseriesFormD
     user_yaml["date_index"]=timeseriesFormData["dateColumn"]
     user_yaml["frequency"]=timeseriesFormData["frequency"]
     user_yaml["n"]=1
-    
+    user_yaml["test_ratio"]=0.2
     
     try:
         result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
@@ -214,9 +215,11 @@ def generate_project_timeseries_config_file(projectID,currentIDs,timeseriesFormD
         if result_project is not None:
             user_yaml["location"]=os.path.join(result_project["projectFolderPath"],'run'+str(random_id))
             user_yaml["experimentname"]=result_project["projectName"]
+            user_yaml["problem_type"]=result_project["projectType"]
         else:
             user_yaml["location"]='/'
             user_yaml["experimentname"]='default'
+            user_yaml["problem_type"]=''
     except Exception as e:
         print("Unable to Update User's Project's Config File. An Error Occured: ",e)
     

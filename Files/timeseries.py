@@ -316,8 +316,8 @@ class timeseries:
             f.write(yaml.safe_dump(dataconfigfile))
 
         print('starting training')
-        trainObj=train(timeseriesmodelyaml,dataconfig,preprocessconfig,clean_data_path)
-        Operation=trainObj.train(dataconfig)
+        trainObj=train()
+        Operation=trainObj.train(timeseriesmodelyaml,dataconfig,preprocessconfig,clean_data_path)
 
         return indexes,freq, Operation, clean_data_path
 

@@ -10,7 +10,7 @@ from .libraries import *
 import sys
 from Files.metrics import Metrics as met
 class hyperparameter:
-    def optimize(model_str,modelname,userinputconfig,datapath,dataconfig,target_column,hyperparams):
+    def optimize(model_str,modelname,userinputconfig,datapath,dataconfig,target_column,hyperparams,test_ratio):
         """
         This function in takes the string consisting of the name and the hyperparameters of the model and uses eval function to create the model.
         Keylist is the dictionary consisting of the infomation about the user input ('subject to further changes')
@@ -64,7 +64,7 @@ class hyperparameter:
     
         clf=RandomizedSearchCV(model, params,verbose=51,n_jobs=-1)
         
-        x_train,x_test,y_train,y_test=train_test_split(xdata,ydata,test_size=0.2)
+        x_train,x_test,y_train,y_test=train_test_split(xdata,ydata,test_size=test_ratio)
         print("working on "+ modelname)
         clf.fit(x_train,y_train)
         hyperparams[modelname]=clf.best_params_
