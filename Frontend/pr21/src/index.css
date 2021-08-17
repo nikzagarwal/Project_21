@@ -701,7 +701,10 @@ input[type=text],input[type=number],input[type=password] ,select, textarea {
 }
 .logbtn{
   float: none;
-  margin: 4em 31em;
+  /* margin: 4em 31em; */
+}
+#logbtn{
+  text-align: center;
 }
 .spinner-location{
   display: flex;
