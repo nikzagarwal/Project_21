@@ -122,6 +122,7 @@ class ManualModel extends Component {
         $(theFormItself2).hide();
         var theFormItself3 = document.getElementById('sec1heading2');
         $(theFormItself3).show();
+        this.props.handleProjectState()
         var theFormItself4 = document.getElementById('loader');
         $(theFormItself4).show();
 
