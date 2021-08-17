@@ -456,7 +456,7 @@ def get_all_project_details(userID:int):
                             projectMetrics=serialiseDict(projectMetrics)
                             if projectMetrics["accuracy"] is not None:
                                 listOfAccuracies.append(projectMetrics["accuracy"])
-                                print("listOfHyperparams",listOfAccuracies)
+                                print("listOfAccuracies",listOfAccuracies)
                     projectTemplate={
                         "projectID": project["projectID"],
                         "projectName": project["projectName"].title(),
@@ -626,15 +626,16 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
                 "addressOfMetricsFile": Operation["metricsLocation"]
             })
         if result_project["listOfDataIDs"] is not None:
-            newListOfDataIDs=result_project["listOfDataIDs"]
-            newListOfDataIDs.append(dataID)
-            Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
-                "$set":{
-                    "listOfDataIDs":newListOfDataIDs,
-                    "modelsConfigFileLocation":modelsConfigFileLocation,
-                    "isAuto": False,
-                    }
-                })
+            if dataID not in result_project["listOfDataIDs"]:
+                newListOfDataIDs=result_project["listOfDataIDs"]
+                newListOfDataIDs.append(dataID)
+                Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
+                    "$set":{
+                        "listOfDataIDs":newListOfDataIDs,
+                        "modelsConfigFileLocation":modelsConfigFileLocation,
+                        "isAuto": False,
+                        }
+                    })
         else:
             Project21Database.update_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID},{
                 "$set":{
