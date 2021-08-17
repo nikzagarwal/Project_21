@@ -1,42 +1,3 @@
- - name: KNeighborsRegressor
-   isSelected: false
-   type: Regression
-   datatype: Tabular
-   complexity: ML
-   hyper:
-    - name: n_neighbors
-      value: 5
-      type: int
-      vary: true
-      ischanged: false
-      options: null
-      range:
-         type: linear
-         min: 3
-         max: 50
-         num_samp: 10
-    - name: leaf_size
-      value: 30
-      type: int
-      vary: true
-      ischanged: false
-      options: null
-      range:
-          type: linear
-          min: 10
-          max: 300
-          num_samp: 10
-    - name: algorithm
-      value: auto
-      ischanged: false
-      type: option
-      vary: false
-      options:
-        - ball_tree
-        - auto
-        - kd_tree
-        - brute
-      range: null
 
  - name: RandomForestRegressor
    isSelected: false
@@ -87,45 +48,6 @@
         max: 100
         num_samp: 10
 
- - name: DecisionTreeRegressor
-   isSelected: false
-   type: Regression
-   datatype: Tabular
-   complexity: ML
-   hyper:
-    - name: criterion
-      value: mse
-      ischanged: false
-      vary: false
-      type: option
-      options:
-        - friedman mse
-        - poisson
-        - mse
-        - mae
-      range: null
-    - name: max_depth
-      value: null
-      ischanged: false
-      type: int # either option bool or number
-      options: null
-      vary: true
-      range:
-        min: 10
-        max: 100
-        num_samp: 10
-        type: linear
-    - name: min_samples_split
-      value: 2
-      ischanged: false
-      type: int # either int or float
-      options: null
-      vary: true
-      range:
-        min: 0
-        max: 300
-        num_samp: 10 
-        type: linear
 
  - name: XGBRegressor
    isSelected: false
@@ -164,19 +86,7 @@
         - coord_descent
       range: null
 
- - name: LinearRegression
-   isSelected: false
-   type: Regression
-   data_type: Tabular
-   complexity: ML
-   hyper:
-    - name: fit_intercept
-      vary: true
-      value: true
-      ischanged: false
-      type: bool # either option, bool or number
-      options: null
-      range: null
+
  # Hyperparameter tuning for SupportVector Regressor(SVR)
  - name: SVR
    isSelected: false
@@ -192,7 +102,7 @@
       options: null
       range: 
          min: 1.0e-3
-         max: 1.0e+1
+         max: 1.0e+3
          num_samp: 5
          type: log # can be log or linear
     - name: kernel
