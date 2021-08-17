@@ -109,7 +109,9 @@ class training:
         }
 
     def model_plot(self,pickleFileLocation,cleandatapath,target_column,plotLocation,modeltype):
-        if modeltype=="classification":
+        print("reached here,",modeltype)
+        if modeltype=="regression":
+            print("Model Type expected: regression received: ",modeltype)
             clf=pickle.load(open(pickleFileLocation,"rb"))
             data=pd.read_csv(cleandatapath)
             y=data[target_column]
@@ -122,11 +124,14 @@ class training:
             fig.add_trace(go.Scatter(x=x.index,y=y_pred,name="predictions"))
             
             plotlocation=os.path.join(plotLocation,"plot.html")
-            with open(plotlocation, 'a') as f:
+            print("about to save plot")
+            with open(plotlocation) as f:
                 f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-            f.close()
+                f.close()
+            print("done, plotlocation",plotlocation)
             return plotlocation
         else:
+            print("Model Type expected: classification received: ",modeltype)
             clf=pickle.load(open(pickleFileLocation,"rb"))
             data=pd.read_csv(cleandatapath)
             y=data[target_column]
@@ -151,8 +156,9 @@ class training:
                         width=12
                     ))))
             plotlocation=os.path.join(plotLocation,"plotclas.html")
-            with open(plotlocation, 'a') as f:
+            print("about to save plot")
+            with open(plotlocation) as f:
                 f.write(fig.to_html(include_plotlyjs='cdn',full_html=False))
-            f.close()
-
+                f.close()
+            print("done, plotlocation",plotlocation)
             return plotlocation
