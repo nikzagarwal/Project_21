@@ -25,7 +25,7 @@ class TimeseriesPreprocess:
         df.index=df.index.tz_convert(None)
         df=df.resample(config_data['frequency']).ffill()
         df.dropna(how='any', axis=0, inplace=True)
-        df['ds']=df.index
+        
         # df = df['Cases'].resample(config_data['frequency']).sum()
 
 
@@ -38,7 +38,8 @@ class TimeseriesPreprocess:
     
         df.rename(columns = {config_data['target_col_name']:'y'}, inplace = True)
         df.drop([] ,axis=1, inplace=True)
-        # df2 = pd.DataFrame(df['y'])
+        df = pd.DataFrame(df['y'])
+        df['ds']=df.index
         print(df)
         # df['Date'] = df.index
 
