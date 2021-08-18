@@ -21,9 +21,9 @@ class ServerSettings(BaseSettings):
     HOST: str = "0.0.0.0"        #Backend server running on host
     PORT: int = 8000
     CORS_ORIGIN=[
-    "http://"+FRONTEND_CONTAINER_NAME+":3000",        #For Cross Origin Requests to be allowed as React runs on port 3000
+    "https://"+FRONTEND_CONTAINER_NAME+":3000",        #For Cross Origin Requests to be allowed as React runs on port 3000
     "https://"+FRONTEND_CONTAINER_NAME+":3000",
-    "http://"+FRONTEND_CONTAINER_NAME+":5000",
+    "https://"+FRONTEND_CONTAINER_NAME+":5000",
     "https://"+FRONTEND_CONTAINER_NAME+":5000"
     ]
 
