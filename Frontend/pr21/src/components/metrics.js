@@ -43,7 +43,7 @@ class Metrics extends React.Component {
                                         </thead>
                                         <tbody>
                                             {metricdata.map((data, i) => (
-                                                i < 3 ? (
+                                                (i < 3 && i< Object.keys(metricdata).length-1) ? (
 
 
                                                     <tr>
