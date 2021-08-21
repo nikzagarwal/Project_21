@@ -66,6 +66,10 @@ currentIDs.set_current_user_id(101)
 def home(): 
     return JSONResponse({"Hello": "World","serverStatus":"Working"})
 
+@app.get('/api')
+def home(): 
+    return JSONResponse({"Hello": "World","serverStatus":"Working","endpoint":"/api"})
+
 @app.on_event("startup")
 def startup_mongodb_client():
     Project21Database.initialise(settings.DB_NAME)
@@ -90,12 +94,12 @@ def shutdown_mongodb_client():
     Project21Database.close()
 
 
-@app.post('/convertFile')
+@app.post('/api/convertFile')
 def converting_uploaded_file(train:UploadFile=File(...)):
     convertedFilePath, originalFilePath=convertFile(train)
     return FileResponse(convertedFilePath,media_type="text/csv", filename="convertedFile.csv")
 
-@app.post('/create',tags=["Auto Mode"])
+@app.post('/api/create',tags=["Auto Mode"])
 def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFile=File(...)):
     inserted_projectID=0
     Operation=generate_project_folder(projectName,train)
@@ -150,7 +154,7 @@ def create_project(projectName:str=Form(...),mtype:str=Form(...),train: UploadFi
     else:
         return JSONResponse(Operation["Error"])
 
-@app.post('/auto',tags=["Auto Mode"])
+@app.post('/api/auto',tags=["Auto Mode"])
 def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
     autoFormData=dict(autoFormData)
     projectAutoConfigFileLocation, dataID, problem_type = generate_project_auto_config_file(autoFormData["projectID"],currentIDs,autoFormData,Project21Database)
@@ -286,7 +290,7 @@ def start_auto_preprocessing_and_training(autoFormData:AutoFormData):
         return JSONResponse({"Successful":"False"})
 
 
-@app.get('/getMetrics/{projectID}/{modelID}',tags=["Auto Mode"])
+@app.get('/api/getMetrics/{projectID}/{modelID}',tags=["Auto Mode"])
 def get_auto_generated_metrics(projectID:int,modelID:int):
     metricsFilePath=get_metrics(projectID,modelID,Project21Database)
     if (os.path.exists(metricsFilePath)):
@@ -294,7 +298,7 @@ def get_auto_generated_metrics(projectID:int,modelID:int):
     return {"Error": "Metrics File not found at path"}
 
 
-@app.get('/downloadClean/{dataID}',tags=["Auto Mode"])
+@app.get('/api/downloadClean/{dataID}',tags=["Auto Mode"])
 def download_clean_data(dataID:int):
     path=get_clean_data_path(dataID,Project21Database)       #Have to put dataID here
     if(os.path.exists(path)):
@@ -302,7 +306,7 @@ def download_clean_data(dataID:int):
     return {"Error":"Clean Data File not found at path"}
 
 
-@app.get('/downloadPickle/{modelID}',tags=["Auto Mode"])
+@app.get('/api/downloadPickle/{modelID}',tags=["Auto Mode"])
 def download_pickle_file(modelID:int):
     path=get_pickle_file_path(modelID,Project21Database)       #Have to put modelID here
     if(os.path.exists(path+'.pkl')):
@@ -313,7 +317,7 @@ def download_pickle_file(modelID:int):
 #     return StreamingResponse(myfile,media_type="text/csv")    #for streaming files instead of uploading them
 
 
-@app.get('/getPlots/{projectID}',tags=["Auto Mode"])
+@app.get('/api/getPlots/{projectID}',tags=["Auto Mode"])
 def get_plots(projectID:int):
     try:
         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
@@ -404,7 +408,7 @@ def get_plots(projectID:int):
         print("An Error Occured: ",e)
         return JSONResponse({"Plots": "Not generated"})
 
-@app.get('/getEDAPlot/{projectID}')
+@app.get('/api/getEDAPlot/{projectID}')
 def get_EDA_plot(projectID:int):
     try:
         result=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID})
@@ -428,7 +432,7 @@ def get_EDA_plot(projectID:int):
         return JSONResponse({"Plots": "Not generated"})
 
 
-@app.get('/getAllProjects',tags=["Auto Mode"])
+@app.get('/api/getAllProjects',tags=["Auto Mode"])
 def get_all_project_details(userID:int):
     listOfProjects=[]
     listOfAccuracies=[]
@@ -502,7 +506,7 @@ def get_all_project_details(userID:int):
     return listOfProjects
 
 
-@app.post('/doInference',tags=["Auto Mode"])
+@app.post('/api/doInference',tags=["Auto Mode"])
 def get_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceDataFile: UploadFile=File(...)):
     newDataPath='/'
     pickleFilePath='/'
@@ -551,12 +555,12 @@ def get_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenc
         return JSONResponse({"Metrics Generation":"Failed"})
     
 
-@app.get('/getPreprocessParam',tags=["Manual Mode"])
+@app.get('/api/getPreprocessParam',tags=["Manual Mode"])
 def get_preprocessing_parameters():
     yaml_json=yaml.load(open(settings.CONFIG_PREPROCESS_YAML_FILE),Loader=SafeLoader)
     return JSONResponse(yaml_json)
 
-@app.post('/getHyperparams/{userID}/{projectID}',tags=["Manual Mode"])
+@app.post('/api/getHyperparams/{userID}/{projectID}',tags=["Manual Mode"])
 def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int):
     preprocessJSONFormData=dict(preprocessJSONFormData)
     print(preprocessJSONFormData)
@@ -591,7 +595,7 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
         yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
         return yaml_json
 
-@app.post('/manual/{userID}/{projectID}',tags=["Manual Mode"])
+@app.post('/api/manual/{userID}/{projectID}',tags=["Manual Mode"])
 def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
     print(configModelJSONData)
     with open("logs.log","w") as f:
@@ -683,7 +687,7 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": projectID, "dataID":dataID, "modelID": modelID, "hyperparams":newHyperparams})
 
 
-@app.post('/doManualInference',tags=["Manual Mode"])
+@app.post('/api/doManualInference',tags=["Manual Mode"])
 def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenceDataFile:UploadFile=File(...)):
     preprocessConfigFileLocation='/'
     isAuto=False
@@ -841,7 +845,7 @@ def do_manual_inference(projectID:int=Form(...), modelID:int=Form(...), inferenc
 #     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID})
 
 
-@app.post('/timeseries',tags=["Timeseries"])
+@app.post('/api/timeseries',tags=["Timeseries"])
 def timeseries_training(timeseriesFormData: TimeseriesFormData):
     print(timeseriesFormData)
     timeseriesFormData=dict(timeseriesFormData)
@@ -947,7 +951,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
     return JSONResponse({"Successful":"True", "userID": currentIDs.get_current_user_id(), "projectID": timeseriesFormData["projectID"], "dataID":dataID, "modelID": dataID, "hyperparams":encodeDictionary(Operation["hyperparams"])})
 
 # Timeseries Inference Old API - Working
-# @app.post('/doTimeseriesInference',tags=["Timeseries"])
+# @app.post('/api/doTimeseriesInference',tags=["Timeseries"])
 # def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     
 #     pickleFilePath='/'
@@ -987,7 +991,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 
 ### Updated To Original
 
-# @app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
+# @app.post('/api/doTimeseriesInferencePlot',tags=["Timeseries"])
 # def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
 #     try:
 #         result=Project21Database.find_one(settings.DB_COLLECTION_INFERENCE,{"belongsToProjectID":projectID,"belongsToModelID":modelID})
@@ -1010,7 +1014,7 @@ def timeseries_training(timeseriesFormData: TimeseriesFormData):
 
 
 
-@app.post('/doTimeseriesInference',tags=["Timeseries"])
+@app.post('/api/doTimeseriesInference',tags=["Timeseries"])
 def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     
     pickleFilePath='/'
@@ -1057,7 +1061,7 @@ def get_timeseries_inference_results(projectID:int=Form(...),modelID:int=Form(..
     return JSONResponse({"Timeseries Inference Generation":"Failed"})
 
 
-@app.post('/doTimeseriesInferencePlot',tags=["Timeseries"])
+@app.post('/api/doTimeseriesInferencePlot',tags=["Timeseries"])
 def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),inferenceTime:int=Form(...),frequency:str=Form(...)):
     rawDataPath='/'
     try:
@@ -1084,7 +1088,7 @@ def get_timeseries_inference_plot(projectID:int=Form(...),modelID:int=Form(...),
 
 
 
-@app.websocket("/websocketStream")
+@app.websocket("/api/websocketStream")
 async def training_status(websocket: WebSocket):
     def generatorLineLogs(file):
         """ Yield each line from a file as they are written. """
@@ -1116,7 +1120,7 @@ async def training_status(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Websocket connection has been disconnected...")
 
-@app.delete('/deleteThisProject/{userID}/{projectID}')
+@app.delete('/api/deleteThisProject/{userID}/{projectID}')
 def delete_entire_project(userID:int,projectID:int):
     result_user=Project21Database.find_one(settings.DB_COLLECTION_USER,{"userID":userID})
     if result_user is not None:
@@ -1161,7 +1165,7 @@ def delete_entire_project(userID:int,projectID:int):
     return JSONResponse({"Success":True,"DB Deletion":"Successful","Directory Deletion":"Successful"})
 
 
-@app.delete('/deleteThisRun/{userID}/{projectID}/{dataID}')
+@app.delete('/api/deleteThisRun/{userID}/{projectID}/{dataID}')
 def delete_run_data(userID:int,projectID:int,dataID:int):
     result_project=Project21Database.find_one(settings.DB_COLLECTION_PROJECT,{"projectID":projectID,"belongsToUserID":userID})
     if result_project is not None:
@@ -1189,7 +1193,7 @@ def delete_run_data(userID:int,projectID:int,dataID:int):
         return(JSONResponse({"Success":False,"Run Deleted":"Unsuccessfully","Error":"No such project exists in the DB"}))
 
     
-# @app.get('/sampleDatas')
+# @app.get('/api/sampleDatas')
 # def get_sample_data():
 #     def getListOfTestDataFiles(dirName):
 #         listOfFiles = os.listdir(dirName)
@@ -1212,7 +1216,7 @@ def delete_run_data(userID:int,projectID:int,dataID:int):
 
 #     return sampleDatas
 
-@app.get('/sampleData')
+@app.get('/api/sampleData')
 def get_sample_data_file(filename:str):
     switcher = {
         'Iris': settings.SAMPLE_DATASET_CLASSIFICATION,
