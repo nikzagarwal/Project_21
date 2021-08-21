@@ -57,7 +57,7 @@ class Section5 extends Component {
         const projectid = this.props.projectdetails["projectID"];
         const modelid = this.props.projectdetails["modelID"];
         const FileDownload = require('js-file-download');
-        axios.get('http://'+window.address+':8000/getMetrics/' + projectid + "/" + modelid)
+        axios.get('https://'+window.address+'/api/getMetrics/' + projectid + "/" + modelid)
             .then((response) => {
                 console.log(response)
                 console.log(response.data);
@@ -77,7 +77,7 @@ class Section5 extends Component {
         const FileDownload = require('js-file-download');
         const projectid = this.props.projectdetails["projectID"];
         if (this.state.countplot === 0) {
-            axios.get('http://'+window.address+':8000/getPlots/' + projectid)
+            axios.get('https://'+window.address+'/api/getPlots/' + projectid)
                 .then((response) => {
                     // console.log(response);
                     this.setState({ plot: response.data });
@@ -95,7 +95,7 @@ class Section5 extends Component {
     handleEdaPlot = event => {
         const FileDownload = require('js-file-download');
         const projectid = this.props.projectdetails["projectID"];
-        axios.get('http://'+window.address+':8000/getEDAPlot/' + projectid)
+        axios.get('https://'+window.address+'/api/getEDAPlot/' + projectid)
             .then((response) => {
                 this.setState({ plot2: response.data });
                 var answer = window.confirm("Plots are ready and displayed. Want to Download in a file?");
@@ -146,7 +146,7 @@ class Section5 extends Component {
         const FileDownload = require('js-file-download');
         console.log(this.props.isauto)
         if (this.props.isauto === true)
-            axios.post('http://'+window.address+':8000/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            axios.post('https://'+window.address+'/api/doInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
                     console.log("Successful", res)
                     FileDownload(res.data, 'prediction.csv');
@@ -154,7 +154,7 @@ class Section5 extends Component {
                 },
                     (error) => { console.log(error) });
         else
-            axios.post('http://'+window.address+':8000/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+            axios.post('https://'+window.address+'/api/doManualInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
                     console.log("Successful Manual Inference", res)
                     FileDownload(res.data, 'prediction.csv');
@@ -187,12 +187,12 @@ class Section5 extends Component {
         );
         console.log(this.state.inferenceTime)
         const FileDownload = require('js-file-download');
-        axios.post('http://'+window.address+':8000/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post('https://'+window.address+'/api/doTimeseriesInference', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful", res)
                 FileDownload(res.data, 'prediction.csv');
                 alert("Prediction is Ready and Downloaded");
-                axios.post('http://'+window.address+':8000/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+                axios.post('https://'+window.address+'/api/doTimeseriesInferencePlot', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
                     .then((res) => {
                         console.log("Successful", res)
                         FileDownload(res.data, 'predictionplot.html');

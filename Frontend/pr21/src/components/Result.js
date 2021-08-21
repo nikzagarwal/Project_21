@@ -18,7 +18,7 @@ class Result extends Component {
             $(theFormItself).hide();
             var theFormItself2 = document.getElementById('log');
             $(theFormItself2).show();
-        const ws = new WebSocket("ws://localhost:8000/websocketStream")
+        const ws = new WebSocket("ws://"+window.address+"/api/websocketStream")
             ws.onopen = () => {
                 console.log("open")
             }
