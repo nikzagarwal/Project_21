@@ -17,5 +17,6 @@ go build -ldflags "-X main.Version=$(git describe --tags)"
 ./mkcert -cert-file cert.pem -key-file key.pem 0.0.0.0 localhost 127.0.0.1 ::1
 
 #Moving the cert.pem and key.pem file to suitable location
+mkdir -p ../Backend/cert/
 mv cert.pem ../Backend/cert/
 mv key.pem ../Backend/cert/
