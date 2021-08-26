@@ -1,6 +1,7 @@
 from Backend.app.schemas import User
 from datetime import time
 import os, stat
+import math
 import random
 import numpy as np
 import shutil
@@ -37,6 +38,10 @@ def encodeDictionary(dictionaryToConvert):
                 v=bool(v)
             elif isinstance(v, str):
                 v=str(v)
+            elif isinstance(v,np.nan):
+                v="null"
+            elif math.isnan(v):
+                v="null"
             newDictionary[k]=v
     return newDictionary
 

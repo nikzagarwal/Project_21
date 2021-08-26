@@ -5,6 +5,11 @@ class CommonSettings(BaseSettings):
     APP_NAME: str = "Project 21"
     DEBUG_MODE: bool= False           #Debug Mode
 
+    RUN_ON_HTTPS: bool = True
+
+    BACKEND_SSL_KEY_FILE: str = os.path.abspath(os.path.join(os.getcwd(),"Backend","cert","key.pem"))
+    BACKEND_SSL_CRT_FILE: str = os.path.abspath(os.path.join(os.getcwd(),"Backend","cert","cert.pem"))
+
 class ServerSettings(BaseSettings):
     if 'FRONTEND_CONTAINER_NAME' in os.environ:         #FRONTEND_CONTAINER_NAME is set in the environment section of the docker-compose file
         FRONTEND_CONTAINER_NAME=os.getenv('FRONTEND_CONTAINER_NAME')

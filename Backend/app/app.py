@@ -463,7 +463,7 @@ def get_all_project_details(userID:int):
                         "listOfDataIDs": project["listOfDataIDs"],
                         "isAuto": project["isAuto"],
                         "accuracies":listOfAccuracies,
-                        "listofHyperparams":listOfHyperparams
+                        "listOfHyperparams":listOfHyperparams
                     }
                     listOfProjects.append(projectTemplate)
                     listOfAccuracies=[]
