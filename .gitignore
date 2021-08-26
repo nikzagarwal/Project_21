@@ -17,3 +17,6 @@ logs.log
 #Testing files generated
 clean_data.csv
 metrics.csv
+
+#SSL certificate folder
+cert/
