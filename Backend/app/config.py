@@ -5,7 +5,7 @@ class CommonSettings(BaseSettings):
     APP_NAME: str = "Project 21"
     DEBUG_MODE: bool= False           #Debug Mode
 
-    RUN_ON_HTTPS: bool = True
+    RUN_ON_HTTPS: bool = False
 
     BACKEND_SSL_KEY_FILE: str = os.path.abspath(os.path.join(os.getcwd(),"Backend","cert","key.pem"))
     BACKEND_SSL_CRT_FILE: str = os.path.abspath(os.path.join(os.getcwd(),"Backend","cert","cert.pem"))

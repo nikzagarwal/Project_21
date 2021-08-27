@@ -26,7 +26,11 @@ def encodeDictionary(dictionaryToConvert):
         print("Value: ",v," Type: ",type(v))
         k=str(k)
         if v is not None:
-            if isinstance(v,np.int64):
+            if isinstance(v,np.nan):
+                v="null"
+            elif math.isnan(v):
+                v="null"
+            elif isinstance(v,np.int64):
                 v=int(v)
             elif isinstance(v,np.int32):
                 v=int(v)
@@ -38,10 +42,8 @@ def encodeDictionary(dictionaryToConvert):
                 v=bool(v)
             elif isinstance(v, str):
                 v=str(v)
-            elif isinstance(v,np.nan):
-                v="null"
-            elif math.isnan(v):
-                v="null"
+            else:
+                v=str(v)            
             newDictionary[k]=v
     return newDictionary
 

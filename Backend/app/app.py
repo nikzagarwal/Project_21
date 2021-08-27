@@ -19,6 +19,7 @@ from Backend.app.routers.data import data_router
 from Backend.app.routers.model import model_router
 from Backend.app.routers.metrics import metrics_router
 from Backend.app.routers.inference import inference_router
+from Backend.app.routers.login import login_router
 from Backend.app.helpers.allhelpers import CurrentIDs, ResultsCache, serialiseDict, serialiseList
 from Backend.app.helpers.project_helper import create_project_id
 from Backend.app.helpers.data_helper import get_clean_data_path
@@ -47,6 +48,7 @@ app.include_router(data_router, tags=["Data Collection CRUD Operations"])
 app.include_router(model_router,tags=["Model Collection CRUD Operations"])
 app.include_router(metrics_router,tags=["Metrics Collection CRUD Operations"])
 app.include_router(inference_router,tags=["Inference Collection CRUD Operations"])
+app.include_router(login_router,tags=["Login Operations"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -77,10 +79,11 @@ def startup_mongodb_client():
         currentIDs.set_current_user_id(101)
         Project21Database.insert_one(settings.DB_COLLECTION_USER,{
                 "userID":101,
-                "name": "John Doe",
+                "name": "JohnDoe",
                 "email": "johndoe@email.com",
-                "username": "TheJohnDoe",
-                "password": "password@Super@Secure",
+                "username": "curladmin",
+                # "password": "password@Super@Secure",
+                "password": "$2b$12$lfwOqpARxt7ssPu5GIzbaudlSf7cdQZzg44unVUnngE0R0/jtJi42",
                 "listOfProjects": []
             })
         resultsCache.set_training_status(False)
