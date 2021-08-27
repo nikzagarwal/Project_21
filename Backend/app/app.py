@@ -596,10 +596,11 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
             print("Could not Update the Project Collection")
 
         yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
+        yaml_json["dataID"]=dataID
         return yaml_json
 
-@app.post('/api/manual/{userID}/{projectID}',tags=["Manual Mode"])
-def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[List]):
+@app.post('/api/manual/{userID}/{projectID}/{dataID}',tags=["Manual Mode"])
+def start_manual_training(userID:int,projectID:int,dataID:int,configModelJSONData:Optional[List]):
     print(configModelJSONData)
     with open("logs.log","w") as f:
         f.close()
@@ -615,10 +616,10 @@ def start_manual_training(userID:int,projectID:int,configModelJSONData:Optional[
         yaml.dump(configModelJSONData,f)
         f.close()
 
-    result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"belongsToProjectID":result_project["projectID"]})
+    result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"dataID":dataID,"belongsToProjectID":result_project["projectID"]})
     if result_data is not None:
         cleanDataPath=result_data["cleanDataPath"]
-        dataID=result_data["dataID"]
+        # dataID=result_data["dataID"]
 
     trainingObj=training()
     Operation = trainingObj.train(modelsConfigFileLocation,configFileLocation,preprocessConfigFileLocation,cleanDataPath) 
