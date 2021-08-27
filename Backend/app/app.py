@@ -596,8 +596,8 @@ def get_hyper_parameters(preprocessJSONFormData:dict, userID:int, projectID:int)
             print("Could not Update the Project Collection")
 
         yaml_json=yaml.load(open(settings.CONFIG_MODEL_YAML_FILE),Loader=SafeLoader)
-        yaml_json["dataID"]=dataID
-        return yaml_json
+        json_data={"modelyaml":yaml_json,"dataID":dataID}
+        return json_data
 
 @app.post('/api/manual/{userID}/{projectID}/{dataID}',tags=["Manual Mode"])
 def start_manual_training(userID:int,projectID:int,dataID:int,configModelJSONData:Optional[List]):
@@ -616,7 +616,7 @@ def start_manual_training(userID:int,projectID:int,dataID:int,configModelJSONDat
         yaml.dump(configModelJSONData,f)
         f.close()
 
-    result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"dataID":dataID,"belongsToProjectID":result_project["projectID"]})
+    result_data=Project21Database.find_one(settings.DB_COLLECTION_DATA,{"dataID":dataID,"belongsToUserID":userID,"belongsToProjectID":projectID})
     if result_data is not None:
         cleanDataPath=result_data["cleanDataPath"]
         # dataID=result_data["dataID"]
