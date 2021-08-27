@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from Backend.app.dbclass import Database
 from Backend.app.config import settings
+from Backend.app.schemas import LoginFormData
 # from Backend.app.schemas import User, UpdateUser, LoginUser
 
 # from datetime import datetime, timedelta
@@ -28,18 +29,19 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-@login_router.post('/logincheck')
+@login_router.post('/api/logincheck')
 def check_server_status():
     return JSONResponse({"login_router":"working"})
 
-@login_router.post('/login')
-def login_user(username:str,password:str):
+@login_router.post('/api/login')
+def login_user(loginFormData:LoginFormData):
+    loginFormData=dict(loginFormData)
     try:
         #make necessary changes to the below method in case of multiple users with the same username
         #replace find_one with find and accordingly traverse and find
-        user=Project21Database.find_one(settings.DB_COLLECTION_USER,{"username":username})
+        user=Project21Database.find_one(settings.DB_COLLECTION_USER,{"username":loginFormData["username"]})
         if user is not None:
-            if verify_password(password,user["password"]):
+            if verify_password(loginFormData["password"],user["password"]):
                 return JSONResponse({"Success":True,"userID":user["userID"],"username":user["username"]})
             else:
                 print({"Success":False,"Error":"Incorrect Password"})
