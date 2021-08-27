@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Modal } from 'react-bootstrap';
-import { Button } from 'react-bootstrap';
 
 import axios from 'axios';
 
@@ -23,31 +22,35 @@ class LoginModal extends Component {
         })
     }
     handleSubmit = event => {
-        let user = this.state.Username
-        let pass = this.state.Password
-        let data = { user, pass }
-        axios.post('http://' + window.address + ':8000/login', JSON.stringify(data))
+        event.preventDefault();
+        let username = this.state.Username
+        let password = this.state.Password
+        let data = { username, password }
+        axios.post(window.address+'/api/login', JSON.stringify(data))
             .then((res) => {
                 console.log("Successful1", res);
-                if (res.success = true)
+                if (res.data.Success === true)
                     this.props.onHide()
                 else {
-                    window.reload();
-                    alert("Wrong credentials trye again");
+                    alert("Wrong credentials try again");
+                    // alert(res.data);
+                    window.location.reload();
+                    
                 }
             },
                 (error) => { console.log(error) });
     }
 
     render() {
-        const plotdata = this.props.plot
-        return (
+       return (
             <div>
                 <Modal
                     {...this.props}
                     size="lg"
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
+                    backdrop="static"
+                    keyboard={false}
                 >
                     <Modal.Header >
                         <Modal.Title id="contained-modal-title-vcenter">

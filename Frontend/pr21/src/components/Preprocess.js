@@ -67,7 +67,7 @@ class Preprocess extends React.Component {
         let userID = this.props.projectdetail.userID
         console.log(JSON.stringify(this.state.preprocessForm))
 
-        axios.post('https://'+window.address+'/api/getHyperparams/' + userID + '/' + projectID, JSON.stringify(this.state.preprocessForm))
+        axios.post(window.address+'/api/getHyperparams/' + userID + '/' + projectID, JSON.stringify(this.state.preprocessForm))
             .then(res => {
                 console.log("Successful2", res)
                 this.props.handleModelForm(res.data)

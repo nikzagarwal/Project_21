@@ -7,9 +7,9 @@ import reportWebVitals from './reportWebVitals';
 
 
 if (process.env.REACT_APP_BACKEND_CONTAINER_NAME)
-  window.address = process.env.REACT_APP_BACKEND_CONTAINER_NAME
+  window.address = "https://"+process.env.REACT_APP_BACKEND_CONTAINER_NAME
 else
-  window.address = "localhost:8000" //To test locally
+  window.address = "http://localhost:8000" //To test locally
 ReactDOM.render(
   <React.StrictMode>
     <App />

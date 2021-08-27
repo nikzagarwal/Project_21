@@ -34,7 +34,7 @@ class Section7 extends Component {
     }
 
     componentDidMount() {
-        axios.get('https://'+window.address+'/api/getAllProjects?userID=101')
+        axios.get(window.address+'/api/getAllProjects?userID=101')
             .then((response) => {
                 // console.log(response.data)
                 if (response.data.length !== 0) {
@@ -48,7 +48,7 @@ class Section7 extends Component {
 
     }
     handleRefreshProject = event => {
-        axios.get('https://'+window.address+'/api/getAllProjects?userID=101')
+        axios.get(window.address+'/api/getAllProjects?userID=101')
             .then((response) => {
                 console.log(response.data)
                 if (response.data.length !== 0) {
@@ -107,7 +107,7 @@ class Section7 extends Component {
         let userID=101
         var answer = window.confirm("Confirm Delete Project?");
         if (answer) {
-            axios.delete('https://'+window.address+'/api/deleteThisProject/' +userID+'/'+ projectID)
+            axios.delete(window.address+'/api/deleteThisProject/' +userID+'/'+ projectID)
             .then((response) => {
                 this.handleRefreshProject()
             })

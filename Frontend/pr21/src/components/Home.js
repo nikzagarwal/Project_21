@@ -53,7 +53,7 @@ class Home extends Component {
             numClusters: 4,
             modalShow: false,
             modalShow2: false,
-            modalShow3:false,
+            modalShow3:true,
             openWebSocketConnection: false,
             plot: "",
             address:"",
@@ -72,7 +72,7 @@ class Home extends Component {
             "train",
             event.target.files[0]
         );
-        axios.post('https://'+window.address+'/api/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post(window.address+'/api/convertFile', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((response) => {
                 console.log("Successful1", response);
                 Papa.parse(response.data, {
@@ -145,7 +145,7 @@ class Home extends Component {
 
         // console.log(this.state.traindata)
 
-        axios.post('https://'+window.address+'/api/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
+        axios.post(window.address+'/api/create', formdata, { headers: { 'Accept': 'multipart/form-data', 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 console.log("Successful1", res);
                 this.setState({
@@ -170,7 +170,7 @@ class Home extends Component {
         })
         
 
-        axios.get('https://'+window.address+'/api/getPreprocessParam')
+        axios.get(window.address+'/api/getPreprocessParam')
             .then((response) => {
                 console.log(response);
                 this.setState({
@@ -277,7 +277,7 @@ class Home extends Component {
             let data = { userID, projectID, isauto, target, modelnumber, nulltype, clusteringType, numClusters }
             console.log(JSON.stringify(data))
 
-            axios.post('https://'+window.address+'/api/auto', JSON.stringify(data))
+            axios.post(window.address+'/api/auto', JSON.stringify(data))
                 .then(res => {
                     console.log("Successful2", res)
                     this.setState({
@@ -342,7 +342,7 @@ class Home extends Component {
             let data = { userID, projectID, target, dateColumn, frequency }
             console.log(JSON.stringify(data))
 
-            axios.post('https://'+window.address+'/api/timeseries', JSON.stringify(data))
+            axios.post(window.address+'/api/timeseries', JSON.stringify(data))
                 .then(res => {
                     console.log("SuccessfulTime", res)
                     this.setState({
@@ -396,7 +396,7 @@ class Home extends Component {
         var projectid = this.state.projectdetail.projectID
         console.log(projectid)
         const FileDownload = require('js-file-download');
-        axios.get('https://'+window.address+'/api/getEDAPlot/' + projectid)
+        axios.get(window.address+'/api/getEDAPlot/' + projectid)
             .then((response) => {
                 console.log(response)
                 this.setState({ plot: response.data });

@@ -32,10 +32,10 @@ class Metrics extends React.Component {
                                                 {Object.keys(data).map((key, i) =>
                                                     i < 7 ? (
                                                         <th>{key}
-                                                            {this.props.mtype === "regression" ?
-                                                                <span className="ibtn"> i <span id="idesc">{dicReg[i]}</span></span>
-                                                                : 
+                                                            {this.props.mtype === "classification" ?
                                                                 <span className="ibtn"> i <span id="idesc">{dicClassi[i]}</span></span>
+                                                                : 
+                                                                <span className="ibtn"> i <span id="idesc">{dicReg[i]}</span></span>
                                                             }
                                                         </th>) : null
                                                 )}
