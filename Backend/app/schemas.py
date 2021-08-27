@@ -3,6 +3,10 @@ from pydantic.fields import Field
 from pydantic.networks import EmailStr
 from typing import List, Optional
 
+class LoginFormData(BaseModel):
+    username: str = Field(...)
+    password: str = Field(...)
+
 class User(BaseModel):
     userID: int=Field(...)
     name: Optional[str]
